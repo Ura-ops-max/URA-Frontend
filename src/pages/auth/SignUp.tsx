@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRegister } from '@/hooks/api/use-auth-mutations';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useUsernameCheck } from '@/hooks/api/use-username-check';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';

@@ -9,7 +9,7 @@ import type {
 } from '@/types/api.types';
 import API from './axios-client';
 import { uploadImageToCloudinary, uploadMediaToCloudinary } from "@/services/cloudinary.service";
-import type { UnifiedPost, SocialPostType, ProductPostType } from '@/types/feed.types';
+import type { UnifiedPost, ProductPostType } from '@/types/feed.types';
 
 
 export const checkUsernameAvailability = async (username: string): Promise<UsernameCheckResponse> => {
@@ -94,7 +94,7 @@ export const updateProfileMutationFn = async (data: {
 export const updateBusinessMutationFn = async (data: any) => {
   const payload = { ...data };
 
-  const handleImage = async (field: string, value: any) => {
+  const handleImage = async (_field: string, value: any) => {
     if (value instanceof File) {
       // User uploaded a new file
       return await uploadImageToCloudinary(value);

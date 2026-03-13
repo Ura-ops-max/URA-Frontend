@@ -77,6 +77,7 @@ export function NavMain() {
     },
     { title: 'My Orders', url: '/dashboard/my-orders', icon: ShoppingBag },
     { title: 'Deals', url: '/dashboard/deal-offer', icon: Tag },
+    {title: 'Payments', url: '/dashboard/payments/setup', icon: Wallet },
     // { title: 'Events', url: '/dashboard/events', icon: Calendar },
   ];
 

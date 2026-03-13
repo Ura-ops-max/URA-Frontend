@@ -26,6 +26,7 @@ import BookmarkPage from '@/pages/dashboard/BookmarkPage';
 import PasswordSecurity from '@/components/settings/pages/Password&Security';
 import NotificationsPage from '@/components/settings/pages/NotificationLog';
 import AboutPage from '@/pages/public/About';
+import PaylukSetupPage from "@/pages/dashboard/PaylukSetupPage.tsx";
 
 // --- Auth Routes ---
 export const authenticationRoutePaths = [
@@ -67,6 +68,7 @@ export const protectedRoutePaths = [
     ]
   },
   { path: PROTECTED_ROUTES.USER_PROFILE, element: <ProfilePage /> },
+  {path: PROTECTED_ROUTES.PAYLUK_SETUPPAGE, element: <PaylukSetupPage />},
   { path: PROTECTED_ROUTES.BUSINESS_PROFILE, element: <ProfilePage /> },
   { path: PROTECTED_ROUTES.MENU, element: <MenuPage /> },
   { path: PROTECTED_ROUTES.PRODUCT_DETAIL, element: <ProductDetailsPage /> },

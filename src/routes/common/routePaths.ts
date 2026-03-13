@@ -23,6 +23,7 @@ export const PROTECTED_ROUTES = {
   CART: '/dashboard/product/cart',
   CHECKOUT: '/dashboard/checkout',
   ORDER: '/dashboard/my-orders',
+  PAYLUK_SETUPPAGE: '/dashboard/payments/setup',
   CHAT_CONVERSATION: '/dashboard/chat/:conversationId',
   PRODUCT_DETAIL: '/dashboard/product/:productId',
 };

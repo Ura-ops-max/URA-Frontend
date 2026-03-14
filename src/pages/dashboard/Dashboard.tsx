@@ -1,9 +1,8 @@
 import { Navigate } from 'react-router-dom';
 import { useAuthContext } from '@/context/auth-provider';
 import { useIsDesktop } from '@/hooks/use-is-desktop';
-import { useChats } from '@/hooks/api/use-chat';
 import { useActivity } from '@/hooks/api/use-activity';
-import { useBookmarkedItems, useBookmarks } from '@/hooks/api/use-bookmark';
+import { useBookmarkedItems } from '@/hooks/api/use-bookmark';
 
 import DashboardContainer from '@/layout/DashboardContainer';
 import { DashboardSkeleton } from '@/components/skeleton/DashboardSkeleton';

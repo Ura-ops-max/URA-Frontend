@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Home, Info, Search, Image as ImageIcon, Bell, ShoppingCart } from 'lucide-react';
+import { Home, Search, Image as ImageIcon, Bell, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Logo from '../shared/Logo';
 import { DashboardAvatar } from '../dashboard/DashboardAvatar';
@@ -46,7 +46,7 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
     { name: 'Home', to: '/dashboard', icon: Home },
     // { name: 'About', to: '/about', icon: Info },
     { name: 'Search', onClick: onSearchClick, icon: Search },
-    { name: 'Image Search', to: '/search/image', icon: ImageIcon },
+    { name: 'Image Search', to: '/dashboard/search/image', icon: ImageIcon },
     { name: 'Cart', to: '/dashboard/product/cart', icon: ShoppingCart },
   ];
 

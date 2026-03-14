@@ -26,6 +26,7 @@ export const PROTECTED_ROUTES = {
   PAYLUK_SETUPPAGE: '/dashboard/payments/setup',
   CHAT_CONVERSATION: '/dashboard/chat/:conversationId',
   PRODUCT_DETAIL: '/dashboard/product/:productId',
+    IMAGE_SEARCH: '/dashboard/search/image',
 };
 
 export const BASE_ROUTE = {

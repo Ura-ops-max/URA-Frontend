@@ -27,6 +27,7 @@ import PasswordSecurity from '@/components/settings/pages/Password&Security';
 import NotificationsPage from '@/components/settings/pages/NotificationLog';
 import AboutPage from '@/pages/public/About';
 import PaylukSetupPage from "@/pages/dashboard/PaylukSetupPage.tsx";
+import { ImageSearch } from "@/pages/dashboard/ImageSearch";
 
 // --- Auth Routes ---
 export const authenticationRoutePaths = [
@@ -79,6 +80,7 @@ export const protectedRoutePaths = [
   { path: PROTECTED_ROUTES.CART, element: <CartPage /> },
   { path: PROTECTED_ROUTES.CHECKOUT, element: <CheckoutPage /> },
   { path: PROTECTED_ROUTES.ORDER, element: <OrdersPage /> },
+  {path: PROTECTED_ROUTES.IMAGE_SEARCH, element: <ImageSearch /> },
 ];
 
 // --- Public/Base Routes ---

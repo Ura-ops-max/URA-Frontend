@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
     },
 
     server: {
-      host: true, // allows 0.0.0.0
+      host: true,
       port: Number(env.PORT) || 5173,
       strictPort: false,
       allowedHosts: ['ura-v2-dnbs.onrender.com'],

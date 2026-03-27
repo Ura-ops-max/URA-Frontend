@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+
 import { ArrowLeft, Search as SearchIcon, SlidersHorizontal, X } from 'lucide-react';
 import { BusinessItem, UserItem, ProductItem, PostItem } from './SearchItems';
 import { SearchFilters } from './SearchFilter';
@@ -34,7 +34,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     );
 
 
-
+console.log(results)
     return (
         <div className="w-full min-h-screen bg-white flex flex-col relative">
 

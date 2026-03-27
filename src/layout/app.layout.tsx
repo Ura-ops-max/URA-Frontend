@@ -1,15 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { AuthProvider, useAuthContext } from '@/context/auth-provider'; // Import hook
+import { AuthProvider } from '@/context/auth-provider'; // Import hook
 import SearchContainer from '@/components/search/SearchContainer';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import AppSideBar from '@/components/shared/AppSideBar';
 import Header from '@/components/Headers/Header';
 import MobileBottomNav from '@/components/nav/MobileBottomNav';
 import VerificationBanner from '@/components/nav/VerificationBanner';
-import { socketService } from '@/services/socket.service';
-import { toast } from 'sonner';
 import { CartProvider } from '@/context/cart-provider';
 import { NotificationProvider } from '@/context/notification-provider';
 import { SocketSync } from '@/context/socket-sync';

@@ -2,19 +2,20 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Search, X, MapPin, Loader2, AlertCircle,
-    Building2, Package, Clock, TrendingUp, ArrowRight, Sparkles
+    Building2, Package, Clock, TrendingUp, ArrowRight,
+    Sparkles, Star, CheckCircle, Bug,
 } from 'lucide-react';
-import { aiSearchService, flattenResults } from '@/lib/ai-search.service';
+import { aiSearchService, flattenResults, unwrap } from '@/lib/ai-search.service';
 import type { AISearchResult } from '@/lib/ai-search.service';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface SearchContainerProps {
     isSearchOpen: boolean;
     onClose: () => void;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const IS_DEV = import.meta.env.DEV;
+
+// ─── Local storage ────────────────────────────────────────────────────────────
 
 const RECENT_KEY = 'ura_recent_searches';
 const MAX_RECENT = 6;
@@ -23,80 +24,165 @@ const getRecentSearches = (): string[] => {
     try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); }
     catch { return []; }
 };
-
 const saveRecentSearch = (q: string) => {
     const prev = getRecentSearches().filter((s) => s !== q);
     localStorage.setItem(RECENT_KEY, JSON.stringify([q, ...prev].slice(0, MAX_RECENT)));
 };
-
 const removeRecentSearch = (q: string) => {
-    const updated = getRecentSearches().filter((s) => s !== q);
-    localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+    localStorage.setItem(RECENT_KEY, JSON.stringify(getRecentSearches().filter((s) => s !== q)));
 };
 
 const TRENDING = ['Fresh groceries', 'Electronics', 'Hair salon', 'Restaurants near me', 'Clothing'];
 
+// ─── Dev Debug Overlay ────────────────────────────────────────────────────────
+// Only renders in development. Shows real API field names so you can identify
+// which key holds the product name, image, price, etc.
+
+const DebugOverlay = ({ raw }: { raw: Record<string, unknown> }) => {
+    const [open, setOpen] = useState(false);
+    const unwrapped = unwrap(raw);
+
+    // Only show string/number/boolean leaf values — skip nested objects/arrays
+    const leafEntries = Object.entries(unwrapped).filter(([, v]) =>
+        typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
+    );
+    const arrayEntries = Object.entries(unwrapped).filter(([, v]) =>
+        Array.isArray(v) && (v as unknown[]).length > 0 && typeof (v as unknown[])[0] === 'string'
+    );
+
+    return (
+        <div className="mt-1" onClick={(e) => e.stopPropagation()}>
+            <button
+                onClick={() => setOpen((o) => !o)}
+                className="flex items-center gap-1 text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-mono hover:bg-amber-100 transition-colors"
+            >
+                <Bug className="w-3 h-3" />
+                {open ? 'hide raw fields' : 'show raw fields'}
+            </button>
+
+            {open && (
+                <div className="mt-1 p-2 bg-gray-950 rounded-lg text-[10px] font-mono max-h-40 overflow-y-auto space-y-0.5">
+                    {leafEntries.map(([k, v]) => (
+                        <div key={k} className="flex gap-2">
+                            <span className="text-cyan-400 flex-shrink-0">{k}:</span>
+                            <span className="text-green-300 truncate">{String(v)}</span>
+                        </div>
+                    ))}
+                    {arrayEntries.map(([k, v]) => (
+                        <div key={k} className="flex gap-2">
+                            <span className="text-cyan-400 flex-shrink-0">{k}[0]:</span>
+                            <span className="text-yellow-300 truncate">{String((v as string[])[0])}</span>
+                        </div>
+                    ))}
+                    {leafEntries.length === 0 && arrayEntries.length === 0 && (
+                        <span className="text-gray-500">No primitive fields found. Check console for full object.</span>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
 // ─── Result Card ──────────────────────────────────────────────────────────────
+
 
 const ResultCard = ({
                         result,
                         onSelect,
-                        index,
                     }: {
     result: AISearchResult;
     onSelect: (r: AISearchResult) => void;
-    index: number;
 }) => {
     const isBusiness = result.type === 'business';
 
+    console.log(result)
+
     return (
-        <button
-            onClick={() => onSelect(result)}
-            className="group w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-150 text-left"
-            style={{ animationDelay: `${index * 40}ms` }}
-        >
-            {/* Thumbnail */}
-            <div className="flex-shrink-0 w-10 h-10 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                {result.image ? (
-                    <img src={result.image} alt={result.name} className="w-full h-full object-cover" />
-                ) : isBusiness ? (
-                    <Building2 className="w-5 h-5 text-gray-400" />
-                ) : (
-                    <Package className="w-5 h-5 text-gray-400" />
-                )}
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-900 truncate group-hover:text-black">
-            {result.name}
-          </span>
-                    <span className={`flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-md uppercase tracking-wide ${
-                        isBusiness ? 'bg-violet-100 text-violet-600' : 'bg-emerald-100 text-emerald-600'
-                    }`}>
-            {isBusiness ? 'Biz' : 'Product'}
-          </span>
-                </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                    {result.description && (
-                        <span className="text-xs text-gray-400 truncate">{result.description}</span>
-                    )}
-                    {result.price !== undefined && (
-                        <span className="flex-shrink-0 text-xs font-medium text-gray-600">
-              ₦{result.price.toLocaleString()}
-            </span>
+        <div className="border-b border-gray-50 last:border-0">
+            <button
+                onClick={() => onSelect(result)}
+                className="group w-full flex items-center gap-3 px-4 py-3 hover:bg-orange-50/60 transition-colors duration-150 text-left"
+            >
+                {/* Thumbnail */}
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-100 flex items-center justify-center">
+                    {result.image ? (
+                        <img
+                            src={result.image}
+                            alt={result.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                                const t = e.target as HTMLImageElement;
+                                t.style.display = 'none';
+                            }}
+                        />
+                    ) : isBusiness ? (
+                        <Building2 className="w-5 h-5 text-gray-300" />
+                    ) : (
+                        <Package className="w-5 h-5 text-gray-300" />
                     )}
                 </div>
-            </div>
 
-            {/* Arrow */}
-            <ArrowRight className="flex-shrink-0 w-4 h-4 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all" />
-        </button>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors">
+                            {result.name}
+                        </span>
+                        <span className={`flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wide ${
+                            isBusiness ? 'bg-violet-100 text-violet-600' : 'bg-emerald-100 text-emerald-600'
+                        }`}>
+                            {isBusiness ? 'Business' : 'Product'}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                        {result.subtitle && (
+                            <span className="text-xs text-gray-400 truncate max-w-[160px]">
+                                {isBusiness ? result.subtitle : `by ${result.subtitle}`}
+                            </span>
+                        )}
+                        {result.price !== null && (
+                            <span className="text-xs font-semibold text-orange-500">
+                                ₦{result.price.toLocaleString()}
+                            </span>
+                        )}
+                        {result.rating !== null && result.rating > 0 && (
+                            <span className="flex items-center gap-0.5 text-xs font-medium text-amber-500">
+                                <Star className="w-3 h-3 fill-amber-400 stroke-amber-400" />
+                                {result.rating.toFixed(1)}
+                            </span>
+                        )}
+                        {result.location && (
+                            <span className="flex items-center gap-0.5 text-xs text-gray-400 truncate max-w-[120px]">
+                                <MapPin className="w-3 h-3 flex-shrink-0" />
+                                {result.location}
+                            </span>
+                        )}
+                        {result.inStock !== null && (
+                            <span className={`flex items-center gap-0.5 text-[10px] font-semibold ${
+                                result.inStock ? 'text-green-500' : 'text-red-400'
+                            }`}>
+                                <CheckCircle className="w-3 h-3" />
+                                {result.inStock ? 'In stock' : 'Out of stock'}
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                <ArrowRight className="flex-shrink-0 w-4 h-4 text-gray-200 group-hover:text-orange-400 group-hover:translate-x-0.5 transition-all" />
+            </button>
+
+            {/* ── DEV ONLY: raw field inspector ─────────────────────── */}
+            {IS_DEV && (
+                <div className="px-4 pb-2">
+                    <DebugOverlay raw={result.raw} />
+                </div>
+            )}
+        </div>
     );
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function SearchContainer({ isSearchOpen, onClose }: SearchContainerProps) {
     const navigate = useNavigate();
@@ -108,13 +194,11 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
     const [results, setResults] = useState<AISearchResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [total, setTotal] = useState(0);
     const [hasSearched, setHasSearched] = useState(false);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
     const [useGeo, setUseGeo] = useState(false);
     const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-    // Load recent on open
     useEffect(() => {
         if (isSearchOpen) {
             setRecentSearches(getRecentSearches());
@@ -122,23 +206,19 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
         }
     }, [isSearchOpen]);
 
-    // ESC to close
     useEffect(() => {
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
         if (isSearchOpen) document.addEventListener('keydown', handler);
         return () => document.removeEventListener('keydown', handler);
     }, [isSearchOpen]);
 
-    // Lock body scroll
     useEffect(() => {
-        if (isSearchOpen) document.body.style.overflow = 'hidden';
-        else document.body.style.overflow = '';
+        document.body.style.overflow = isSearchOpen ? 'hidden' : '';
         return () => { document.body.style.overflow = ''; };
     }, [isSearchOpen]);
 
     const handleClose = () => {
         onClose();
-        // Reset after close animation
         setTimeout(() => {
             setQuery('');
             setResults([]);
@@ -147,15 +227,10 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
         }, 200);
     };
 
-    // ─── Geo ───────────────────────────────────────────────────────────────────
-
     const toggleGeo = () => {
         if (!useGeo) {
             navigator.geolocation?.getCurrentPosition(
-                (pos) => {
-                    setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-                    setUseGeo(true);
-                },
+                (pos) => { setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setUseGeo(true); },
                 () => setUseGeo(false)
             );
         } else {
@@ -164,38 +239,24 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
         }
     };
 
-    // ─── Search ────────────────────────────────────────────────────────────────
-
-    const runSearch = useCallback(
-        async (q: string) => {
-            if (!q.trim()) {
-                setResults([]);
-                setHasSearched(false);
-                setTotal(0);
-                return;
-            }
-
-            setIsLoading(true);
-            setError(null);
-
-            try {
-                const res = await aiSearchService.textSearch({
-                    q,
-                    ...(useGeo && userCoords ? { lat: userCoords.lat, lng: userCoords.lng, radius_km: 10 } : {}),
-                });
-
-                setResults(flattenResults(res.results));
-                setTotal(res.total);
-                setHasSearched(true);
-            } catch {
-                setError('Search failed. Please try again.');
-                setHasSearched(true);
-            } finally {
-                setIsLoading(false);
-            }
-        },
-        [useGeo, userCoords]
-    );
+    const runSearch = useCallback(async (q: string) => {
+        if (!q.trim()) { setResults([]); setHasSearched(false); return; }
+        setIsLoading(true);
+        setError(null);
+        try {
+            const res = await aiSearchService.textSearch({
+                q,
+                ...(useGeo && userCoords ? { lat: userCoords.lat, lng: userCoords.lng, radius_km: 10 } : {}),
+            });
+            setResults(flattenResults(res.results));
+            setHasSearched(true);
+        } catch {
+            setError('Search failed. Please try again.');
+            setHasSearched(true);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [useGeo, userCoords]);
 
     const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
@@ -222,13 +283,12 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
     };
 
     const handleResultSelect = (result: AISearchResult) => {
-        saveRecentSearch(query.trim());
+        if (query.trim()) saveRecentSearch(query.trim());
         handleClose();
-        if (result.type === 'business') {
-            navigate(`/dashboard/profile/business/${result.id}`);
-        } else {
-            navigate(`/dashboard/deal-offer/${result.id}`);
-        }
+        navigate(result.type === 'business'
+            ? `/dashboard/profile/business/${result.id}`
+            : `/dashboard/deal-offer/${result.id}`
+        );
     };
 
     const clearQuery = () => {
@@ -245,39 +305,29 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
         setRecentSearches(getRecentSearches());
     };
 
-    // ─── Render ────────────────────────────────────────────────────────────────
-
     if (!isSearchOpen) return null;
 
     const showSuggestions = !hasSearched && !isLoading;
 
     return (
-        /* Overlay */
         <div
             ref={overlayRef}
             className="fixed inset-0 z-50 flex flex-col items-center pt-[72px] px-4 pb-4"
             style={{ backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
             onMouseDown={(e) => { if (e.target === overlayRef.current) handleClose(); }}
         >
-            {/* Modal shell */}
             <div
                 className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
                 style={{ maxHeight: 'calc(100vh - 100px)' }}
             >
-                {/* ── Search bar ────────────────────────────────────────────────── */}
-                <form
-                    onSubmit={handleSubmit}
-                    className="flex items-center gap-2 px-4 py-3 border-b border-gray-100"
-                >
-                    {/* Icon */}
+                {/* ── Search bar ─────────────────────────────────────── */}
+                <form onSubmit={handleSubmit} className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
                     <div className="flex-shrink-0">
                         {isLoading
                             ? <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
                             : <Search className="w-5 h-5 text-gray-400" />
                         }
                     </div>
-
-                    {/* Input */}
                     <input
                         ref={inputRef}
                         type="text"
@@ -288,46 +338,27 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
                         autoComplete="off"
                         spellCheck={false}
                     />
-
-                    {/* Actions */}
                     <div className="flex items-center gap-1">
-                        {/* Geo */}
-                        <button
-                            type="button"
-                            onClick={toggleGeo}
-                            title={useGeo ? 'Disable location' : 'Filter by location'}
-                            className={`p-2 rounded-lg transition-colors ${
-                                useGeo
-                                    ? 'bg-blue-100 text-blue-600'
-                                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                            }`}
+                        <button type="button" onClick={toggleGeo}
+                                className={`p-2 rounded-lg transition-colors ${useGeo ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
                         >
                             <MapPin className="w-4 h-4" />
                         </button>
-
-                        {/* Clear */}
                         {query && (
-                            <button
-                                type="button"
-                                onClick={clearQuery}
-                                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                            <button type="button" onClick={clearQuery}
+                                    className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
                             >
                                 <X className="w-4 h-4" />
                             </button>
                         )}
-
-                        {/* Close */}
-                        <button
-                            type="button"
-                            onClick={handleClose}
-                            className="ml-1 p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                        <button type="button" onClick={handleClose}
+                                className="ml-1 p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors"
                         >
                             <X className="w-4 h-4" />
                         </button>
                     </div>
                 </form>
 
-                {/* Geo badge */}
                 {useGeo && userCoords && (
                     <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-100">
                         <MapPin className="w-3.5 h-3.5 text-blue-500" />
@@ -335,10 +366,18 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
                     </div>
                 )}
 
-                {/* ── Scrollable body ────────────────────────────────────────────── */}
-                <div className="flex-1 overflow-y-auto overscroll-contain">
+                {/* DEV banner */}
+                {IS_DEV && (
+                    <div className="flex items-center gap-2 px-4 py-1.5 bg-amber-50 border-b border-amber-100">
+                        <Bug className="w-3 h-3 text-amber-500" />
+                        <span className="text-[11px] text-amber-700 font-mono">
+                            DEV MODE — click "show raw fields" on any result to inspect API field names
+                        </span>
+                    </div>
+                )}
 
-                    {/* Error */}
+                {/* ── Body ─────────────────────────────────────────────── */}
+                <div className="flex-1 overflow-y-auto overscroll-contain">
                     {error && (
                         <div className="flex items-center gap-2.5 mx-4 my-3 px-4 py-3 bg-red-50 rounded-xl text-sm text-red-600">
                             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -346,58 +385,39 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
                         </div>
                     )}
 
-                    {/* ── Default / Suggestions ─────────────────────────────────── */}
                     {showSuggestions && (
                         <div className="py-2">
-
-                            {/* Recent Searches */}
                             {recentSearches.length > 0 && (
                                 <div className="mb-1">
                                     <div className="flex items-center justify-between px-4 pt-3 pb-1.5">
                                         <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Recent</span>
-                                        <button
-                                            onClick={() => {
-                                                localStorage.removeItem(RECENT_KEY);
-                                                setRecentSearches([]);
-                                            }}
-                                            className="text-[11px] text-gray-400 hover:text-gray-700 transition-colors"
-                                        >
-                                            Clear all
-                                        </button>
+                                        <button onClick={() => { localStorage.removeItem(RECENT_KEY); setRecentSearches([]); }}
+                                                className="text-[11px] text-gray-400 hover:text-gray-700 transition-colors"
+                                        >Clear all</button>
                                     </div>
                                     {recentSearches.map((q) => (
-                                        <button
-                                            key={q}
-                                            onClick={() => handleSuggestionClick(q)}
-                                            className="group w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                                        <button key={q} onClick={() => handleSuggestionClick(q)}
+                                                className="group w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
                                         >
                                             <Clock className="w-4 h-4 text-gray-300 flex-shrink-0" />
                                             <span className="flex-1 text-sm text-gray-600 text-left truncate">{q}</span>
-                                            <span
-                                                role="button"
-                                                tabIndex={0}
-                                                onClick={(e) => handleRemoveRecent(e as unknown as React.MouseEvent, q)}
-                                                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-200 transition-all"
+                                            <span role="button" tabIndex={0}
+                                                  onClick={(e) => handleRemoveRecent(e, q)}
+                                                  className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-200 transition-all"
                                             >
-                        <X className="w-3 h-3 text-gray-400" />
-                      </span>
+                                                <X className="w-3 h-3 text-gray-400" />
+                                            </span>
                                         </button>
                                     ))}
                                 </div>
                             )}
-
-                            {/* Trending */}
                             <div>
                                 <div className="px-4 pt-3 pb-1.5">
-                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                    Trending
-                  </span>
+                                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Trending</span>
                                 </div>
                                 {TRENDING.map((q) => (
-                                    <button
-                                        key={q}
-                                        onClick={() => handleSuggestionClick(q)}
-                                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                                    <button key={q} onClick={() => handleSuggestionClick(q)}
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
                                     >
                                         <TrendingUp className="w-4 h-4 text-orange-400 flex-shrink-0" />
                                         <span className="text-sm text-gray-600">{q}</span>
@@ -407,41 +427,36 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
                         </div>
                     )}
 
-                    {/* ── Loading skeleton ──────────────────────────────────────── */}
                     {isLoading && (
                         <div className="py-3 px-4 space-y-3">
                             {[1, 2, 3, 4].map((i) => (
                                 <div key={i} className="flex gap-3 animate-pulse">
-                                    <div className="w-10 h-10 rounded-xl bg-gray-100 flex-shrink-0" />
+                                    <div className="w-12 h-12 rounded-xl bg-gray-100 flex-shrink-0" />
                                     <div className="flex-1 space-y-2 py-1">
                                         <div className="h-3 bg-gray-100 rounded w-2/3" />
-                                        <div className="h-2.5 bg-gray-100 rounded w-1/2" />
+                                        <div className="h-2.5 bg-gray-100 rounded w-1/3" />
                                     </div>
                                 </div>
                             ))}
                         </div>
                     )}
 
-                    {/* ── Results ───────────────────────────────────────────────── */}
                     {!isLoading && hasSearched && results.length > 0 && (
                         <div className="py-2">
-                            {/* Header */}
                             <div className="flex items-center gap-2 px-4 pt-2 pb-2">
                                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                  {total} AI Results
-                </span>
+                                    {results.length} AI Result{results.length !== 1 ? 's' : ''}
+                                </span>
                             </div>
-                            {/* Cards */}
-                            <div className="divide-y divide-gray-50">
-                                {results.map((result, i) => (
-                                    <ResultCard key={result.id} result={result} onSelect={handleResultSelect} index={i} />
+                            <div>
+                                {results.map((result) => (
+                                    <ResultCard key={result.id} result={result} onSelect={handleResultSelect} />
                                 ))}
                             </div>
                         </div>
                     )}
 
-                    {/* ── No results ────────────────────────────────────────────── */}
                     {!isLoading && hasSearched && results.length === 0 && !error && (
                         <div className="flex flex-col items-center justify-center py-14 text-center px-6">
                             <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
@@ -453,18 +468,18 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
                     )}
                 </div>
 
-                {/* ── Footer hint ────────────────────────────────────────────────── */}
+                {/* ── Footer ──────────────────────────────────────────── */}
                 <div className="border-t border-gray-100 px-4 py-2.5 flex items-center gap-4">
-          <span className="text-[11px] text-gray-400">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-gray-100 font-mono text-gray-500 text-[10px]">Enter</kbd> to search
-          </span>
                     <span className="text-[11px] text-gray-400">
-            <kbd className="px-1.5 py-0.5 rounded bg-gray-100 font-mono text-gray-500 text-[10px]">Esc</kbd> to close
-          </span>
+                        Press <kbd className="px-1.5 py-0.5 rounded bg-gray-100 font-mono text-gray-500 text-[10px]">Enter</kbd> to search
+                    </span>
+                    <span className="text-[11px] text-gray-400">
+                        <kbd className="px-1.5 py-0.5 rounded bg-gray-100 font-mono text-gray-500 text-[10px]">Esc</kbd> to close
+                    </span>
                     <span className="ml-auto flex items-center gap-1 text-[11px] text-gray-300">
-            <Sparkles className="w-3 h-3 text-amber-300" />
-            Powered by AI
-          </span>
+                        <Sparkles className="w-3 h-3 text-amber-300" />
+                        Powered by AI
+                    </span>
                 </div>
             </div>
         </div>

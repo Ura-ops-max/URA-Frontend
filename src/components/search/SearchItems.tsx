@@ -1,6 +1,5 @@
-import React from 'react';
-import { Star, MapPin, Package, Calendar, CheckCircle, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+
+import { Star, MapPin, Package, CheckCircle, Clock } from 'lucide-react';
 import { generateAvatarUrl } from '@/utils/avatar-generator';
 
 

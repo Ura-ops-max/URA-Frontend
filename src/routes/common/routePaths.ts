@@ -33,4 +33,5 @@ export const BASE_ROUTE = {
   HOME: '/',
   ABOUT: '/about',
   INVITE_URL: '/invite/workspace/:inviteCode/join',
+  PAYLUK_PAYMENT_COMPLETE: '/payments/complete',
 } as const;

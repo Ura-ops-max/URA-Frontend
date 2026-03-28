@@ -28,6 +28,7 @@ import NotificationsPage from '@/components/settings/pages/NotificationLog';
 import AboutPage from '@/pages/public/About';
 import PaylukSetupPage from "@/pages/dashboard/PaylukSetupPage.tsx";
 import { ImageSearch } from "@/pages/dashboard/ImageSearch";
+import PaymentCompletePage from "@/pages/dashboard/PaymentCompletePage.tsx";
 
 // --- Auth Routes ---
 export const authenticationRoutePaths = [
@@ -87,6 +88,7 @@ export const protectedRoutePaths = [
 export const baseRoutePaths = [
   { path: BASE_ROUTE.HOME, element: <Home /> },
   { path: BASE_ROUTE.ABOUT, element: <AboutPage /> },
+  { path: BASE_ROUTE.PAYLUK_PAYMENT_COMPLETE, element: <PaymentCompletePage /> },
 ];
 
 // --- Utility ---

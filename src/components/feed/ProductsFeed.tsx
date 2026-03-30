@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Loader2, RefreshCcw, PackageOpen, ArrowUp } from "lucide-react";
-import { usePostsFeed, useProductsFeed } from "@/hooks/api/use-feed"; // Reusing your specific author feed hook
+import {  useProductsFeed } from "@/hooks/api/use-feed"; // Reusing your specific author feed hook
 import { useAuthContext } from "@/context/auth-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ProductCard } from "./ProductCard";
 import { ProductDetailsModal } from "./ProductDetailsModal";
-import type { Product } from "@/types/product";
-import type { ProductPostType, ProductType } from "@/types/feed.types";
-import { toast } from "sonner";
+import type {  ProductType } from "@/types/feed.types";
 import { useCartContext } from "@/context/cart-provider"; // Import the context hook
 
 
@@ -24,8 +22,8 @@ interface ProductsFeedProps {
 
 export default function ProductsFeed({ targetId, onRequireAuth, type = "feed", category }: ProductsFeedProps) {
 
-  const { user: currentUser, isAuthenticated } = useAuthContext();
-  const { addItem, isUpdating } = useCartContext(); // Pull the cart methods
+  const {isAuthenticated } = useAuthContext();
+  const { addItem } = useCartContext(); // Pull the cart methods
 
   const isPostType = type === 'post'
 

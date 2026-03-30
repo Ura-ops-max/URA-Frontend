@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from "react";
-import {
-  MapPin, Phone, Globe, Pencil, UserPlus,
+import  { useEffect, useState } from "react";
+import { Pencil, UserPlus,
   MessageCircle, Briefcase, Share2, Bookmark,
   UserCheck, PlusCircle, User,
   Settings,
   BarChart3,
   Star,
-  Loader2
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { UserType, BusinessType } from "@/types/api.types";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useBookmark, useProfileActions } from "@/hooks/api/use-user-profile";
+import { useProfileActions } from "@/hooks/api/use-user-profile";
 import { UnfollowDialog } from "./UnfollowDialog";
 import { useToggleBookmark } from "@/hooks/api/use-feed";
 import { BusinessContactInfo } from "./BusinessContactInfo";
@@ -34,7 +32,7 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
   const isBusinessRoute = location.pathname.includes("/business/");
   const [showUnfollowDialog, setShowUnfollowDialog] = useState(false);
   const isSaved = related?.isBookmarked;
-  const isFollowing = related?.isFollowing;
+  // const isFollowing = related?.isFollowing;
   const displayName = (isBusinessRoute ? business?.businessName : user?.firstName) || "User";
   const targetId = isBusinessRoute ? business?._id : user._id;
 
@@ -42,7 +40,7 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
 
   const [localFollowerCount, setLocalFollowerCount] = useState(related?.counts?.followers || 0);
   const [localIsFollowing, setLocalIsFollowing] = useState(related?.isFollowing);
-  const { follow, isFollowingLoading } = useProfileActions(targetId!, isBusinessRoute);
+  // const { follow } = useProfileActions(targetId!, isBusinessRoute);
 
   // 2. Sync local state if the 'related' prop updates (e.g., after a fresh fetch)
   useEffect(() => {
@@ -51,7 +49,7 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
     setLocalFollowerCount(related?.counts?.followers || 0);
   }, [related]);
 
-  const profileKey = ["profile", isBusinessRoute ? business?._id : user.username];
+  // const profileKey = ["profile", isBusinessRoute ? business?._id : user.username];
 
   // 3. Handle Bookmark Toggle
   const { mutate: toggleBookmarkRequest } = useToggleBookmark(targetId!, 'Business');
@@ -125,16 +123,16 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
 
 
 
-  const handleFollow = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isFollowing) {
-      // If already following, show confirmation before unfollowing
-      setShowUnfollowDialog(true);
-    } else {
-      // If not following, just follow immediately
-      follow();
-    }
-  };
+  // const handleFollow = (e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   if (isFollowing) {
+  //     // If already following, show confirmation before unfollowing
+  //     setShowUnfollowDialog(true);
+  //   } else {
+  //     // If not following, just follow immediately
+  //     follow();
+  //   }
+  // };
   // Button Styles
   const btnBase = "flex items-center justify-center transition-all duration-200";
   const btnAction = "flex-col py-4 px-1 h-auto text-[11px] gap-2 rounded-[22px] font-bold border";
@@ -350,15 +348,15 @@ const StatBlock = ({ label, value }: { label: string; value: number }) => (
   </div>
 );
 
-const InfoRow = ({ icon, text, link }: { icon: React.ReactNode; text: string; link?: string }) => (
-  <div className="flex items-center gap-3 text-[13px] text-gray-600 group">
-    <div className="text-orange-500 shrink-0 bg-orange-50 p-1.5 rounded-lg">{icon}</div>
-    {link ? (
-      <a href={link} target="_blank" rel="noreferrer" className="hover:text-orange-600 font-medium truncate underline decoration-orange-200 underline-offset-4 decoration-2">{text}</a>
-    ) : (
-      <span className="font-medium line-clamp-1">{text}</span>
-    )}
-  </div>
-);
+// const InfoRow = ({ icon, text, link }: { icon: React.ReactNode; text: string; link?: string }) => (
+//   <div className="flex items-center gap-3 text-[13px] text-gray-600 group">
+//     <div className="text-orange-500 shrink-0 bg-orange-50 p-1.5 rounded-lg">{icon}</div>
+//     {link ? (
+//       <a href={link} target="_blank" rel="noreferrer" className="hover:text-orange-600 font-medium truncate underline decoration-orange-200 underline-offset-4 decoration-2">{text}</a>
+//     ) : (
+//       <span className="font-medium line-clamp-1">{text}</span>
+//     )}
+//   </div>
+// );
 
 export default ProfileInfo;

@@ -3,20 +3,19 @@ import { Heart, ShoppingCart, Info, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useToggleLike } from "@/hooks/api/use-feed";
-import { toast } from "sonner";
-import type { ProductPostType, ProductType } from "@/types/feed.types";
+import type { ProductType } from "@/types/feed.types";
 
 
-interface Product {
-  _id: string;
-  name: string;
-  price: number;
-  description: string;
-  media: string[];
-  category: string;
-  stock: number;
-  isLiked?: boolean;
-}
+// interface Product {
+//   _id: string;
+//   name: string;
+//   price: number;
+//   description: string;
+//   media: string[];
+//   category: string;
+//   stock: number;
+//   isLiked?: boolean;
+// }
 
 interface ProductCardProps {
   product: ProductType;

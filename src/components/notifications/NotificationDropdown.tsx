@@ -1,5 +1,5 @@
-import React from 'react';
-import { Bell, Check, ExternalLink, MessageCircle, Heart, Star, ShoppingBag } from 'lucide-react';
+
+import { Bell, MessageCircle, Heart, Star, ShoppingBag } from 'lucide-react';
 import { useNotificationContext } from '@/context/notification-provider';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';

@@ -1,5 +1,5 @@
 // src/components/feed/VideoPlayer.tsx
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Play, Pause, Volume2, VolumeX, FastForward, Rewind } from "lucide-react";
 
 export const VideoPlayer = ({ url, className }: { url: string; className: string }) => {
@@ -17,6 +17,8 @@ export const VideoPlayer = ({ url, className }: { url: string; className: string
       setProgress(percentage);
     }
   };
+
+  console.log(isPlaying);
 
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     const now = Date.now();

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Users, ShoppingBag, TrendingUp, ShieldCheck } from 'lucide-react';

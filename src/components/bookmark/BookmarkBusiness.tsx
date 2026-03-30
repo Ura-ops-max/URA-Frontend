@@ -1,12 +1,6 @@
-// components/bookmarks/BookmarkedBusinesses.tsx
-import { Link } from "react-router-dom";
-import { CheckCircle2, MapPin, ExternalLink, Star } from "lucide-react";
+
 import { useBookmarkedItems } from "@/hooks/api/use-bookmark";
 import { Loader2, Store } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { generateAvatarUrl } from "@/utils/avatar-generator";
-import { Bookmark } from "lucide-react";
-import { useToggleBookmark } from "@/hooks/api/use-feed"; // Assuming you have this mutation
 import { BookmarkBusinessCard } from "./BookmarkBusinessCard";
 
 

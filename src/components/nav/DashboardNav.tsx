@@ -16,7 +16,7 @@ const DashboardNav: React.FC<DashboardNavProps> = ({ onSearchClick }) => {
     const location = useLocation(); // Use hook for location access
 
     // We'll filter the menuItems to find the Search item and give it special treatment
-    const searchItem = menuItems.find(item => item.name === 'Search');
+    // const searchItem = menuItems.find(item => item.name === 'Search');
     const visibleMenuItems = menuItems.filter(item => item.name !== 'Search' && item.name !== 'Picture Search');
 
     return (

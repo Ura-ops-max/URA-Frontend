@@ -1,18 +1,9 @@
-// src/pages/dashboard/SettingsPage.tsx
-import { useState } from 'react';
-import { useSearchParams, useNavigate, useLocation, NavLink, Outlet } from 'react-router-dom';
-import { 
-  User, Lock, Bell, ShieldCheck, History, 
-  CreditCard, ChevronLeft, ChevronRight, Activity, 
-  Smartphone, Trash2, Globe, 
-  Settings
+
+import {useNavigate, useLocation, NavLink, Outlet } from 'react-router-dom';
+import { ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ActivityLog } from '@/components/settings/pages/ActivityLog'
-import PersonalInfoForm from '@/components/settings/form/PersonalInfoForm';
-import BusinessInfoForm from '@/components/settings/form/BusinessInfoForm';
 import { cn } from '@/lib/utils';
-import { useAuthContext } from '@/context/auth-provider';
 import { settingsGroups } from '@/components/settings/settings.config';
 
 const SettingsPage = () => {

@@ -4,12 +4,10 @@ import {
   LayoutDashboard,
   Bell,
   MessageCircle,
-  Calendar,
   Tag,
   Wallet,
   ShoppingBag,
   Store,
-  BadgePercent,
   ShoppingCart,
   Bookmark, // 🚨 Added Bookmark icon
   type LucideIcon,

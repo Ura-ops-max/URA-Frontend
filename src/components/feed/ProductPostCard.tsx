@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bookmark, ShoppingBag, CheckCircle2, Star, Info, MoreHorizontal } from "lucide-react";
+import { ShoppingBag, CheckCircle2, Star, Info } from "lucide-react";
 import useAuth from "@/hooks/api/use-auth";
 import type { CardProps, ProductPostType } from "@/types/feed.types";
 import { MediaCarousel } from "./MediaCarousel";
@@ -11,7 +11,7 @@ import { ProductDetailsModal } from "./ProductDetailsModal";
 import { cn } from "@/lib/utils";
 import { AuthPromptModal } from "../shared/AuthPromptModel";
 import { PostMenu } from "./PostMenu"; // Import your menu component
-import { Flag, UserPlus, Link2, AlertTriangle } from "lucide-react";
+import { Flag, UserPlus, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatTimeAgo } from "@/utils/date-format";
 

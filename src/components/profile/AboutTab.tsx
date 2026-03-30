@@ -1,6 +1,6 @@
-import React from "react";
+
 import { 
-  MapPin, Phone, Globe, Clock, Info, 
+  MapPin, Phone, Globe, Clock,
   Calendar, Mail, User, Store, ArrowRight,
   ChevronRight, ExternalLink
 } from "lucide-react";

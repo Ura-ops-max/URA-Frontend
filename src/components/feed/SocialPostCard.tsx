@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, MoreHorizontal, Flag, UserMinus, Trash2, BellOff, Link2, UserPlus } from "lucide-react";
+import { CheckCircle2, Flag, Trash2, BellOff, Link2, UserPlus } from "lucide-react";
 import type { CardProps, SocialPostType } from "@/types/feed.types";
 import { MediaCarousel } from "./MediaCarousel";
 import { PostActions } from "./PostAction";
@@ -10,7 +10,6 @@ import { PostMenu } from "./PostMenu";
 import { toast } from "sonner";
 import { useAuthContext } from "@/context/auth-provider";
 import { AuthPromptModal } from "../shared/AuthPromptModel";
-import { cn } from "@/lib/utils";
 
 export default function SocialPostCard({ post, onRequireAuth }: CardProps<SocialPostType>) {
   const { user, isAuthenticated } = useAuthContext();

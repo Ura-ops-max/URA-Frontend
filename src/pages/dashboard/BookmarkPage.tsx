@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Bookmark, LayoutGrid, Store, Heart, ChevronRight } from 'lucide-react';
+import { LayoutGrid, Store, Heart, ChevronRight } from 'lucide-react';
 import DashboardContainer from '@/layout/DashboardContainer';
 import ProfileCard from '@/components/dashboard/ProfileCard';
 import SidebarWidget from '@/components/dashboard/SidebarWidget';
 import ChatList from '@/components/dashboard/ChatList';
 import { useAuthContext } from '@/context/auth-provider';
 import { useIsDesktop } from '@/hooks/use-is-desktop';
-import { useChats } from '@/hooks/api/use-chat';
 import { cn } from '@/lib/utils';
 import { Navigate } from 'react-router-dom';
 
@@ -24,7 +23,6 @@ const BookmarkPage = () => {
   const activeProfileId = user?._id;
   const {
     conversations,
-    isLoading: isChatsLoading,
     isError: chatError // This maps the hook's isError to the name chatError
   } = useChat(activeProfileId!);
 

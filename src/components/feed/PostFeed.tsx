@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Loader2, RefreshCcw, FileText, ArrowUp } from "lucide-react";
-import { useInfiniteFeed, usePostsFeed } from "@/hooks/api/use-feed";
+import { usePostsFeed } from "@/hooks/api/use-feed";
 import { useAuthContext } from "@/context/auth-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,6 @@ export default function PostsFeed({ targetId, onRequireAuth, type="feed" }: Post
     isFetchingNextPage,
     status,
     refetch,
-    isRefetching,
   } = usePostsFeed(effectiveUserId, isPostType);
 
   const [showScrollTop, setShowScrollTop] = useState(false);

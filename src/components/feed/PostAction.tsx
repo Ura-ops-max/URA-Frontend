@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
 import { CommentDrawer } from "./CommentDrawer";
 import { useToggleLike, useToggleBookmark } from "@/hooks/api/use-feed";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { AuthPromptModal } from "@/components/shared/AuthPromptModel"; // Import the modal
 
@@ -24,7 +24,6 @@ export const PostActions = ({
   initialComments = 0,
   isLiked = false,
   isBookmarked = false,
-  onRequireAuth,
   isAuthenticated
 }: PostActionsProps) => {
   const [localIsLiked, setLocalIsLiked] = useState(isLiked);

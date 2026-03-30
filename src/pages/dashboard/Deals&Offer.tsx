@@ -44,7 +44,7 @@ const DealsAndOffers = () => {
           </SidebarWidget>
         </div>
       }
-    // --- NO RIGHT COLUMN (Makes main feed lg:col-span-3) ---
+
     >
       {/* HEADER SECTION */}
       <div className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm mb-2">

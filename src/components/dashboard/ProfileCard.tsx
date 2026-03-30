@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { generateAvatarUrl } from '@/utils/avatar-generator';
 import type { UserType, RelatedData } from '@/types/api.types';
-import { cn } from "@/lib/utils";
 
 interface ProfileCardProps {
   user: UserType;

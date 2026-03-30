@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useOutletContext, Link } from 'react-router-dom';
 import { ChevronLeft, Send, Plus, Smile, Check, CheckCheck, Clock, X } from 'lucide-react';
 import { chatAPI } from '@/lib/chat-api';
 import { socketService } from '@/services/socket.service';
 import { format, formatDistanceToNow } from 'date-fns';
-import { useAuthContext } from '@/context/auth-provider';
 import { uploadMediaToCloudinary } from '@/services/cloudinary.service';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { generateAvatarUrl } from '@/utils/avatar-generator';
@@ -12,7 +11,6 @@ import { generateAvatarUrl } from '@/utils/avatar-generator';
 const MessageWindow = () => {
   const { conversationId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuthContext();
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -22,7 +20,7 @@ const MessageWindow = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [partnerLastSeen, setPartnerLastSeen] = useState<string | null>(null);
+  const [partnerLastSeen, _setPartnerLastSeen] = useState<string | null>(null);
 
 
   const [pendingFile, setPendingFile] = useState<{ file: File; preview: string; type: 'image' | 'video' } | null>(null);

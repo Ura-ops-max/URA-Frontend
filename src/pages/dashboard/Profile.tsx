@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Navigate, useParams, useLocation } from "react-router-dom";
+import {  useParams } from "react-router-dom";
 import { useAuthContext } from "@/context/auth-provider";
 import { useUserProfile } from "@/hooks/api/use-user-profile";
 
@@ -11,7 +11,6 @@ import ProfileInfo from "@/components/profile/ProfileInfo";
 import ReviewsSection from "@/components/profile/ReviewSection";
 import PostsFeed from "@/components/feed/PostFeed";
 import ProductsFeed from "@/components/feed/ProductsFeed";
-import { DashboardSkeleton } from "@/components/skeleton/DashboardSkeleton";
 
 // Types - Use the central ProfileResponse to avoid assignment conflicts
 import type { ProfileResponse } from "@/types/api.types";
@@ -51,7 +50,7 @@ const ProfilePage: React.FC = () => {
   }, [currentUser, targetId, isBusinessProfile]);
   // Inside ProfilePage.tsx
 
-  const { data: profile, isLoading, isError, error } = useUserProfile(
+  const { data: profile, isLoading} = useUserProfile(
     targetId,
     isBusinessProfile
   );

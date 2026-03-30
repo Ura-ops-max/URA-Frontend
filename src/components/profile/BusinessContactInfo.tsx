@@ -12,7 +12,7 @@ export const BusinessContactInfo = ({ business }: { business: any }) => {
 
   // Google Map URL Generation (using the text address)
   const encodedAddress = encodeURIComponent(business.address?.fullAddress || "");
-  const mapUrl = `https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${encodedAddress}`;
+  // const mapUrl = `https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${encodedAddress}`;
   // NOTE: If you don't have an API key yet, use the "search" link version:
   const simpleMapUrl = `https://maps.google.com/maps?q=${encodedAddress}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 

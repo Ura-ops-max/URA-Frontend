@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { X, ShoppingCart, Heart, Star, ShieldCheck, Truck, Store, Package, Ruler, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, ShoppingCart, Heart, Star, ShieldCheck, Truck, Package, Ruler, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useToggleLike } from "@/hooks/api/use-feed";

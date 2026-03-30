@@ -1,7 +1,6 @@
 // src/common/settings.config.ts
 import { 
-  User, Lock, Bell, Activity, History, 
-  CreditCard, ShieldCheck, Globe, Smartphone 
+  User, Lock, Activity, History
 } from 'lucide-react';
 
 export const settingsGroups = [

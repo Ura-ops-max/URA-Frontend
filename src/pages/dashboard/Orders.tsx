@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useOrders } from '@/hooks/api/use-orders';
 import { Package, ChevronRight, Clock, CheckCircle2, Truck, XCircle, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -13,7 +13,7 @@ const STATUS_FILTERS = [
 ];
 
 const OrdersPage = () => {
-  const { orders, isLoading, refreshOrders } = useOrders();
+  const { orders, isLoading, } = useOrders();
   const [activeTab, setActiveTab] = useState('all');
 
   const formattedPrice = (price: number) => 

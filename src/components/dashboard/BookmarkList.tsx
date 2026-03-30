@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { 
   Bookmark as BookmarkIcon, 
   ArrowRight, 
@@ -7,7 +7,6 @@ import {
   Star,
   Loader2 
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { generateAvatarUrl } from '@/utils/avatar-generator';
 import { Link } from 'react-router-dom';
 

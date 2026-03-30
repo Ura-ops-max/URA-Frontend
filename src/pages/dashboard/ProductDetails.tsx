@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ShoppingCart, Heart, ShieldCheck, Truck, Package, Ruler, CheckCircle2, ArrowLeft, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";

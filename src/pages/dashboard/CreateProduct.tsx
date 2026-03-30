@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { useAuthContext } from '@/context/auth-provider';
 import UploadProductForm from '@/components/product/UploadProductForm';
@@ -8,7 +8,6 @@ import SidebarWidget from '@/components/dashboard/SidebarWidget';
 import DashboardContainer from '@/layout/DashboardContainer'; // Import your container
 import { PackagePlus, Megaphone, Info, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useChats } from '@/hooks/api/use-chat';
 import { useIsDesktop } from '@/hooks/use-is-desktop';
 import ChatList from '@/components/dashboard/ChatList';
 import { DashboardSkeleton } from '@/components/skeleton/DashboardSkeleton';

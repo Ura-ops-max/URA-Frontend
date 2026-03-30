@@ -1,11 +1,10 @@
 // src/pages/dashboard/MenuPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CreditCard, Calendar, Tag, BadgePercent, HelpCircle,
+import {Tag,
   Settings, LogOut, ChevronRight, Bookmark, Bell,
-  MessageCircle, ShoppingCart, ShoppingBag, Store,
-  PlusCircle, Wallet
+  ShoppingCart, ShoppingBag, Store,
+  PlusCircle
 } from 'lucide-react';
 import { useAuthContext } from '@/context/auth-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

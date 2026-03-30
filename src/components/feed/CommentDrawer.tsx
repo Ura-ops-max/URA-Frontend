@@ -1,13 +1,13 @@
 // src/components/feed/CommentDrawer.tsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Drawer } from 'vaul';
-import { X, Heart, Send, Smile, AtSign, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Heart, Send, Smile } from 'lucide-react';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { formatDistanceToNow } from 'date-fns'; // Added for dates
+import { formatDistanceToNow } from 'date-fns';
 import API from '@/lib/axios-client';
 import type { CommentData } from '@/types/api.types';
-import { generateAvatarUrl } from '@/utils/avatar-generator'; // Ensure this path is correct
+import { generateAvatarUrl } from '@/utils/avatar-generator';
 
 export const CommentDrawer = ({ postId, user_image, isOpen, onClose }: any) => {
   const [commentText, setCommentText] = useState('');

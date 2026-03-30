@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { X, Search, User, Briefcase, MessageCircle } from 'lucide-react';
 import { chatAPI } from '@/lib/chat-api';

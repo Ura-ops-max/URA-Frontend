@@ -66,13 +66,14 @@ const ResultCard = ({ result }: { result: AISearchResult }) => {
                 )}
 
                 <div className="flex items-center gap-3 mt-1.5">
-                    {result.price !== undefined && (
+                    {/* Fix: price is number | null, not number | undefined */}
+                    {result.price !== null && (
                         <span className="text-xs font-medium text-gray-700">
               ₦{result.price.toLocaleString()}
             </span>
                     )}
-                    {result.category && (
-                        <span className="text-xs text-gray-400">{result.category}</span>
+                    {result.subtitle && (
+                        <span className="text-xs text-gray-400">{result.subtitle}</span>
                     )}
                     {result.location && (
                         <span className="flex items-center gap-0.5 text-xs text-gray-400">

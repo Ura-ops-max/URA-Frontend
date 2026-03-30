@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Outlet, useParams, useLocation } from 'react-router-dom';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import { useChat } from '@/hooks/use-chat';

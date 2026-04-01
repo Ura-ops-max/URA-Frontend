@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Mail, Lock, AlertCircle, Loader2, CheckCircle2, Edit3, X } from "lucide-react";
+import { Mail, Lock, AlertCircle, Loader2, CheckCircle2, Edit3 } from "lucide-react";
 import { useAuthContext } from "@/context/auth-provider";
 import { useUserSettings } from "@/hooks/api/use-user-settings";
 import { Button } from "@/components/ui/button";

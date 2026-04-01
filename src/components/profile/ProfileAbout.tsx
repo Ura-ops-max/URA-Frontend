@@ -1,5 +1,5 @@
-import React from "react";
-import { MapPin, Phone, Globe, Clock, Info, User, Store, ChevronRight } from "lucide-react";
+
+import { MapPin, Phone, Globe, Clock, User, Store, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 

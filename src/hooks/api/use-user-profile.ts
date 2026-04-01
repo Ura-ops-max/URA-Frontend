@@ -34,8 +34,8 @@ export const useUpdateProfile = () => {
       // Optional: This fires the MOMENT the button is clicked
       // toast.loading("Uploading images and saving..."); 
     },
-    onSuccess: (data) => {
-      toast.success("Profile updated successfully!"); // Ensure this is imported from 'sonner'
+    onSuccess: (_data) => {
+      toast.success("Profile updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
     },
     onError: (error: any) => {

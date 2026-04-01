@@ -1,6 +1,6 @@
-import React from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Lock, ArrowRight, UserPlus, LogIn } from "lucide-react";
+import { X, Lock, UserPlus, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface AuthPromptModalProps {

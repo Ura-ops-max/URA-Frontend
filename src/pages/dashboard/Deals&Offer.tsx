@@ -9,7 +9,7 @@ import { DashboardSkeleton } from '@/components/skeleton/DashboardSkeleton';
 import SidebarWidget from '@/components/dashboard/SidebarWidget';
 import ProfileCard from '@/components/dashboard/ProfileCard';
 import ChatList from '@/components/dashboard/ChatList';
-import ProductsFeed from '@/components/feed/ProductsFeed'; // Reusing your existing component
+import ProductsFeed from '@/components/feed/ProductsFeed';
 import { CategoryPills } from '@/components/feed/CategoryPills';
 import { Tag } from 'lucide-react';
 
@@ -17,6 +17,8 @@ const DealsAndOffers = () => {
   const { user, related, isLoading: isContextLoading } = useAuthContext();
   const isDesktop = useIsDesktop();
   const [activeCategory, setActiveCategory] = useState("All");
+
+  const activeProfileId = related?.business_id ?? user?._id ?? '';
 
   const { chats, isLoading: isChatsLoading, isError: chatError } =
     useChats(isDesktop ? { enabled: true } : { enabled: false });
@@ -40,7 +42,7 @@ const DealsAndOffers = () => {
             isError={chatError}
             errorTitle="Recent Chats"
           >
-            <ChatList chatList={chats} isError={chatError} />
+            <ChatList chatList={chats} isError={chatError} activeProfileId={activeProfileId}  />
           </SidebarWidget>
         </div>
       }

@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
     Search, X, MapPin, Loader2, AlertCircle,
     Building2, Package, Clock, TrendingUp, ArrowRight,
-    Sparkles, Star, CheckCircle, Bug,
+    Sparkles, Star, CheckCircle
 } from 'lucide-react';
-import { aiSearchService, flattenResults, unwrap } from '@/lib/ai-search.service';
+import { aiSearchService, flattenResults } from '@/lib/ai-search.service';
 import type { AISearchResult } from '@/lib/ai-search.service';
 
 interface SearchContainerProps {
@@ -13,7 +13,6 @@ interface SearchContainerProps {
     onClose: () => void;
 }
 
-const IS_DEV = import.meta.env.DEV;
 
 // ─── Local storage ────────────────────────────────────────────────────────────
 
@@ -33,58 +32,6 @@ const removeRecentSearch = (q: string) => {
 };
 
 const TRENDING = ['Fresh groceries', 'Electronics', 'Hair salon', 'Restaurants near me', 'Clothing'];
-
-// ─── Dev Debug Overlay ────────────────────────────────────────────────────────
-// Only renders in development. Shows real API field names so you can identify
-// which key holds the product name, image, price, etc.
-
-const DebugOverlay = ({ raw }: { raw: Record<string, unknown> }) => {
-    const [open, setOpen] = useState(false);
-    const unwrapped = unwrap(raw);
-
-    // Only show string/number/boolean leaf values — skip nested objects/arrays
-    const leafEntries = Object.entries(unwrapped).filter(([, v]) =>
-        typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
-    );
-    const arrayEntries = Object.entries(unwrapped).filter(([, v]) =>
-        Array.isArray(v) && (v as unknown[]).length > 0 && typeof (v as unknown[])[0] === 'string'
-    );
-
-    return (
-        <div className="mt-1" onClick={(e) => e.stopPropagation()}>
-            <button
-                onClick={() => setOpen((o) => !o)}
-                className="flex items-center gap-1 text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-mono hover:bg-amber-100 transition-colors"
-            >
-                <Bug className="w-3 h-3" />
-                {open ? 'hide raw fields' : 'show raw fields'}
-            </button>
-
-            {open && (
-                <div className="mt-1 p-2 bg-gray-950 rounded-lg text-[10px] font-mono max-h-40 overflow-y-auto space-y-0.5">
-                    {leafEntries.map(([k, v]) => (
-                        <div key={k} className="flex gap-2">
-                            <span className="text-cyan-400 flex-shrink-0">{k}:</span>
-                            <span className="text-green-300 truncate">{String(v)}</span>
-                        </div>
-                    ))}
-                    {arrayEntries.map(([k, v]) => (
-                        <div key={k} className="flex gap-2">
-                            <span className="text-cyan-400 flex-shrink-0">{k}[0]:</span>
-                            <span className="text-yellow-300 truncate">{String((v as string[])[0])}</span>
-                        </div>
-                    ))}
-                    {leafEntries.length === 0 && arrayEntries.length === 0 && (
-                        <span className="text-gray-500">No primitive fields found. Check console for full object.</span>
-                    )}
-                </div>
-            )}
-        </div>
-    );
-};
-
-// ─── Result Card ──────────────────────────────────────────────────────────────
-
 
 const ResultCard = ({
                         result,
@@ -172,12 +119,7 @@ const ResultCard = ({
                 <ArrowRight className="flex-shrink-0 w-4 h-4 text-gray-200 group-hover:text-orange-400 group-hover:translate-x-0.5 transition-all" />
             </button>
 
-            {/* ── DEV ONLY: raw field inspector ─────────────────────── */}
-            {IS_DEV && (
-                <div className="px-4 pb-2">
-                    <DebugOverlay raw={result.raw} />
-                </div>
-            )}
+
         </div>
     );
 };
@@ -366,15 +308,7 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
                     </div>
                 )}
 
-                {/* DEV banner */}
-                {IS_DEV && (
-                    <div className="flex items-center gap-2 px-4 py-1.5 bg-amber-50 border-b border-amber-100">
-                        <Bug className="w-3 h-3 text-amber-500" />
-                        <span className="text-[11px] text-amber-700 font-mono">
-                            DEV MODE — click "show raw fields" on any result to inspect API field names
-                        </span>
-                    </div>
-                )}
+
 
                 {/* ── Body ─────────────────────────────────────────────── */}
                 <div className="flex-1 overflow-y-auto overscroll-contain">

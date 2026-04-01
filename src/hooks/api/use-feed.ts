@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from '@tanstack/react-query';
 import { fetchPostFeedQueryFn, createPostMutationFn, postService, toggleLikeApi, toggleWishlist, toggleBookmarkApi } from '@/lib/api';
-import { uploadImageToCloudinary } from '@/services/cloudinary.service';
 import { toast } from 'sonner';
 import type { UnifiedPost } from '@/types/feed.types';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -107,7 +106,7 @@ export const useToggleWishlist = (productId: string) => {
     },
 
     // 2. Error Handling (Rollback)
-    onError: (err, newItem, context) => {
+    onError: (_err, _newItem, context) => {
       queryClient.setQueryData(["products-feed"], context?.previousData);
       toast.error("Failed to update wishlist. Please try again.");
     },
@@ -176,7 +175,7 @@ export const useToggleLike = (targetId: string, targetType: 'post' | 'product', 
       return { previousData };
     },
 
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       // If the API fails, roll back to the state before the click
       queryClient.setQueryData(queryKey, context?.previousData);
       toast.error("Failed to update like");
@@ -263,7 +262,7 @@ export const useToggleBookmark = (
       return { previousListData, previousProfileData };
     },
 
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       // Rollback on error
       queryClient.setQueryData(listKey, context?.previousListData);
       if (profileKey) queryClient.setQueryData(profileKey, context?.previousProfileData);

@@ -66,7 +66,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             }
             
             // Recalculate count from updated local state
-            setUnreadCount(prev => Math.max(0, notifications.filter(n => !n.isRead).length));
+            setUnreadCount(_prev => Math.max(0, notifications.filter(n => !n.isRead).length));
         } catch (err) {
             console.error("Error marking read", err);
             fetchNotifications(); // Rollback on error

@@ -76,10 +76,10 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
 
 
   const handleBuy = () => {
-    if (ensureAuth('buy')) {
-      cart?.addItem( post._id, 1);
-    }
-  };
+  if (ensureAuth('buy') && product?._id) {
+    cart?.addItem(product._id, 1);   // ✅ use product._id
+  }
+};
 
   const handleMenuIntercept = (e: React.MouseEvent) => {
     if (!isAuthenticated) {

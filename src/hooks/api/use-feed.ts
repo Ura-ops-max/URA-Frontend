@@ -300,3 +300,57 @@ export const useCreatePost = () => {
     },
   });
 };
+export const useEditPost = (postId: string, postType: 'social' | 'product') => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (updatedData: { caption?: string; tags?: string[]; media?: string[] }) =>
+      postService.updatePost(postId, updatedData),
+
+    onSuccess: () => {
+      toast.success('Post updated successfully');
+      // Invalidate ALL queries that start with 'posts-feed' (including those with params)
+      queryClient.invalidateQueries({ queryKey: ['posts-feed'], exact: false });
+      // Also invalidate products feed if needed (for product posts)
+      if (postType === 'product') {
+        queryClient.invalidateQueries({ queryKey: ['products-feed'], exact: false });
+      }
+    },
+
+    onError: () => {
+      toast.error('Failed to update post. Please try again.');
+    },
+  });
+};
+
+export const useEditProduct = (productId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (updatedData: any) => postService.updateProduct(productId, updatedData),
+    onSuccess: () => {
+      toast.success('Product updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['products-feed'] });
+      queryClient.invalidateQueries({ queryKey: ['posts-feed'] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to update product');
+    },
+  });
+};
+
+export const useDeletePost = (postId: string, postType: 'social' | 'product') => {
+  const queryClient = useQueryClient();
+  const type = postType === 'social' ? 'post' : 'product';
+  return useMutation({
+    mutationFn: () => postService.deletePost(postId, type),
+    onSuccess: () => {
+      toast.success(`${postType === 'social' ? 'Post' : 'Product'} deleted successfully!`);
+      queryClient.invalidateQueries({ queryKey: ["posts-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["products-feed"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Something went wrong");
+    },
+  });
+};

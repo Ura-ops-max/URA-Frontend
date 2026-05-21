@@ -175,8 +175,23 @@ export const postService = {
       params: { businessId: targetId, restrict, page, limit: 15 }
     });
     return data.posts;
-  }
+  },
+
+  updatePost: async (postId: string, data: { caption?: string; tags?: string[]; media?: string[] }) => {
+    const response = await API.patch(`/post/${postId}?type=post`, data);
+    return response.data.data;
+  },
+
+  updateProduct: async (productId: string, data: any) => {
+    const response = await API.patch(`/post/${productId}?type=product`, data);
+    return response.data.data;
+  },
+
+  deletePost: async (postId: string, type: 'post' | 'product' = 'post') => {
+  await API.delete(`/post/${postId}?type=${type}`);
+},
 };
+
 
 
 export const createPostMutationFn = async ({ data, files }: { data: any; files: File[] }) => {

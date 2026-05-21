@@ -68,7 +68,7 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
         {/* LEFT SECTION: Breadcrumbs & Trigger */}
         <div className="flex items-center gap-4">
           <div className="lg:hidden">
-            <Logo url="/dashboard" />
+            <Logo  url="/dashboard" />
           </div>
 
           <div className="hidden lg:flex items-center gap-4">

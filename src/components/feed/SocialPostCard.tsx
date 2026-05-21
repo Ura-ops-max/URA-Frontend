@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, Flag, Trash2, BellOff, Link2, UserPlus } from "lucide-react";
+import { CheckCircle2, Flag, Trash2, BellOff, Link2, UserPlus, Loader2, Edit2 } from "lucide-react";
 import type { CardProps, SocialPostType } from "@/types/feed.types";
 import { MediaCarousel } from "./MediaCarousel";
 import { PostActions } from "./PostAction";
@@ -10,11 +10,27 @@ import { PostMenu } from "./PostMenu";
 import { toast } from "sonner";
 import { useAuthContext } from "@/context/auth-provider";
 import { AuthPromptModal } from "../shared/AuthPromptModel";
+import { useDeletePost } from "@/hooks/api/use-feed";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { EditItemModal } from "./EditItemModal";
 
 export default function SocialPostCard({ post, onRequireAuth }: CardProps<SocialPostType>) {
   const { user, isAuthenticated } = useAuthContext();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const isOwner = post.authorId === user?._id;
+  const deletePostMutation = useDeletePost(post._id, 'social');
+    const [showEditModal, setShowEditModal] = useState(false);
+
 
   // 1. AUTH MODAL STATE (Matches ProductPostCard)
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -31,6 +47,19 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
     setAuthConfig(configs[type]);
     setShowAuthModal(true);
     return false;
+  };
+
+  const handleDelete = () => {
+    if (deletePostMutation.isPending) return;
+    deletePostMutation.mutate(undefined, {
+      onSuccess: () => {
+        setShowDeleteConfirm(false);
+      },
+      onError: () => {
+        // Error is already handled by the mutation hook (toast)
+        setShowDeleteConfirm(false);
+      }
+    });
   };
 
   const menuActions = [
@@ -56,12 +85,21 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
       show: !isOwner,
       onClick: () => console.log("Reported"),
     },
+     {
+    label: "Edit Post",
+    icon: Edit2, // import { Edit2 } from "lucide-react"
+    show: isOwner,
+    onClick: () => setShowEditModal(true),
+  },
     {
       label: "Delete Post",
       icon: Trash2,
       variant: 'danger' as const,
       show: isOwner,
-      onClick: () => console.log("Deleted"),
+      onClick: () => {
+        if (!isOwner) return;
+        setShowDeleteConfirm(true);
+      },
     }
   ];
 
@@ -161,6 +199,54 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
         isLiked={post.isLiked}
         isBookmarked={post.isBookmarked}
       />
+
+ {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Post</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={deletePostMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deletePostMutation.isPending}
+            >
+              {deletePostMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <EditItemModal
+      key={post._id + (post.media?.join(',') || '')} 
+  open={showEditModal}
+  onClose={() => setShowEditModal(false)}
+  item={{
+    _id: post._id,
+    type: "POST",
+    caption: post.caption,
+    tags: post.tags || [],
+    media: post.media || [],
+  }}
+/>
 
       {/* AUTH MODAL INSTANCE */}
       <AuthPromptModal

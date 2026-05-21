@@ -1,4 +1,3 @@
-// src/types/post.ts
 
 export type PostType = 'POST' | 'PRODUCT';
 export type AuthorType = 'User' | 'Business';
@@ -49,12 +48,12 @@ interface BasePost {
 // 2. Shape for a Social Post
 export interface SocialPostType extends BasePost {
   type: 'POST';
+  product?: never; 
 }
 
 // 3. Shape for a Product Post
 export interface ProductPostType extends BasePost {
   type: 'PRODUCT';
-  // Note: Your JSON shows a nested 'product' object
   product?: {
     _id: string;
     name: string;
@@ -64,6 +63,11 @@ export interface ProductPostType extends BasePost {
     description: string;
     size?: string;
     media: string[];
+    business: string; 
+    likes: [];
+    image_embedding?: number[]; 
+    embedding?: number[];
+    averageRating?: number;
   };
   productName?: string; 
   category?: string;
@@ -95,44 +99,9 @@ export type FeedResponse = {
   success: boolean;
   posts: UnifiedPost[];
 };
-// Props shared by both card components
+
 export interface CardProps<T> {
     post: T;
     onRequireAuth?: () => void;
 }
 
-
-// src/types/post.ts
-
-
-// export interface UnifiedPost {
-//   _id: string;
-//   type: PostContentType;
-//   content: string;
-//   media: string[];
-//   createdAt: string;
-//   updatedAt: string;
-//   authorType: AuthorType;
-  
-//   // Author & Routing
-//   authorId: string; 
-//   displayName: string;
-//   displayAvatar: string | null;
-//   username: string | null; // null if Business
-//   isVerified: boolean;
-
-//   // Product Data (Optional)
-//   productName?: string | null;
-//   price?: number | null;
-//   category?: string | null;
-
-//   // Engagement
-//   likesCount: number;
-//   commentsCount: number;
-//   isLiked: boolean;
-//   isBookmarked: boolean;
-
-//   // Business Only
-//   rating?: number | null;
-//   reviewCount?: number | null;
-// }

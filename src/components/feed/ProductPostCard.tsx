@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ShoppingBag, CheckCircle2, Star, Info } from "lucide-react";
+import { ShoppingBag, CheckCircle2, Star, Info, Trash2, Edit2, Loader2 } from "lucide-react";
 import useAuth from "@/hooks/api/use-auth";
 import type { CardProps, ProductPostType } from "@/types/feed.types";
 import { MediaCarousel } from "./MediaCarousel";
@@ -10,14 +10,20 @@ import { useCartContext } from "@/context/cart-provider";
 import { ProductDetailsModal } from "./ProductDetailsModal";
 import { cn } from "@/lib/utils";
 import { AuthPromptModal } from "../shared/AuthPromptModel";
-import { PostMenu } from "./PostMenu"; // Import your menu component
+import { PostMenu } from "./PostMenu";
 import { Flag, UserPlus, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatTimeAgo } from "@/utils/date-format";
+import { useDeletePost } from "@/hooks/api/use-feed";
+import { Dialog, DialogFooter, DialogHeader, DialogDescription, DialogTitle, DialogContent, } from "../ui/dialog";
+import { Button } from "../ui/button";
+import { EditItemModal } from "./EditItemModal";
 
 
 export default function ProductPostCard({ post, onRequireAuth }: CardProps<ProductPostType>) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const [showEditModal, setShowEditModal] = useState(false);
+const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const cart = useCartContext();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showDetails, setShowDetails] = useState(false); // Modal state
@@ -31,6 +37,22 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
 
   const location = useLocation();
   const isPublicPath = location.pathname === '/';
+
+ 
+  console.log("Rendering ProductPostCard with product:", product);
+  console.log("Post data:", post);
+  console.log("User data:", user);
+
+const isOwner = user?._id === post.authorId || user?._id === post.product?.business;
+
+const deleteMutation = useDeletePost(post._id, 'product');
+
+const handleDelete = () => {
+  deleteMutation.mutate(undefined, {
+    onSuccess: () => setShowDeleteConfirm(false),
+    onError: () => setShowDeleteConfirm(false),
+  });
+};
 
   // 2. CENTRALIZED AUTH CHECKER
   const ensureAuth = (type: 'buy' | 'like' | 'comment' | 'bookmark' | 'menu') => {
@@ -72,12 +94,27 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
       show: true,
       onClick: () => console.log("Report logic"),
     },
+    ...(isOwner ? [
+    {
+      label: "Edit Product",
+      icon: Edit2,
+      show: true,
+      onClick: () => setShowEditModal(true),
+    },
+    {
+      label: "Delete Product",
+      icon: Trash2,
+      variant: 'danger' as const,
+      show: true,
+      onClick: () => setShowDeleteConfirm(true),
+    },
+  ] : []),
   ];
 
 
   const handleBuy = () => {
   if (ensureAuth('buy') && product?._id) {
-    cart?.addItem(product._id, 1);   // ✅ use product._id
+    cart?.addItem(product._id, 1);
   }
 };
 
@@ -258,6 +295,44 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
           setShowDetails(false);
         }}
       />
+
+      <EditItemModal
+  open={showEditModal}
+  onClose={() => setShowEditModal(false)}
+  item={{
+    _id: post._id,
+    type: "PRODUCT",
+    caption: post.caption,
+    tags: post.tags || [],
+     productDetails: {
+  _id: post.product!._id,
+  name: post.product!.name,
+  price: post.product!.price,
+  description: post.product!.description,
+  category: post.product!.category,
+  stock: post.product!.stock,
+  media: post.product!.media || [],
+}
+  }}
+/>
+
+<Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+  <DialogContent className="sm:max-w-md">
+    <DialogHeader>
+      <DialogTitle>Delete Product</DialogTitle>
+      <DialogDescription>
+        This will permanently delete the product and any associated posts. This action cannot be undone.
+      </DialogDescription>
+    </DialogHeader>
+    <DialogFooter className="gap-2">
+      <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} disabled={deleteMutation.isPending}>Cancel</Button>
+      <Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
+        {deleteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+        Delete
+      </Button>
+    </DialogFooter>
+  </ DialogContent>
+</Dialog>
 
       {/* THE ONLY AUTH MODAL INSTANCE */}
       <AuthPromptModal

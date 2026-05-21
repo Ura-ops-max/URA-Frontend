@@ -22,7 +22,7 @@ function Home() {
 
               <div className="mt-12 flex flex-col items-center justify-center gap-2 sm:flex-row lg:justify-start">
                 <Button asChild size="lg" variant="brand" className="px-8 text-base">
-                  <Link to="#link">
+                  <Link to="/auth/login">
                     <span className="text-nowrap">Explore Business</span>
                   </Link>
                 </Button>
@@ -33,7 +33,7 @@ function Home() {
                   variant="brandSecondary"
                   className="px-14 text-base"
                 >
-                  <Link to="#link">
+                  <Link to="/auth/register">
                     <span className="text-nowrap">Join Now</span>
                   </Link>
                 </Button>

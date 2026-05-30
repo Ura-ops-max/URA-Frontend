@@ -5,6 +5,7 @@ import {
     Building2, Package, Clock, TrendingUp, ArrowRight,
     Sparkles, Star, CheckCircle
 } from 'lucide-react';
+import type { AxiosError } from 'axios';
 import { aiSearchService, flattenResults } from '@/lib/ai-search.service';
 import type { AISearchResult } from '@/lib/ai-search.service';
 
@@ -192,8 +193,15 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
             });
             setResults(flattenResults(res.results));
             setHasSearched(true);
-        } catch {
-            setError('Search failed. Please try again.');
+        } catch (err) {
+            console.error('AI search request failed:', err);
+            const axiosErr = err as AxiosError;
+            if (!axiosErr.response) {
+                // No HTTP response: network error, CORS block, or unreachable service
+                setError('Cannot reach the search service. Please check your connection and try again.');
+            } else {
+                setError('Search failed. Please try again.');
+            }
             setHasSearched(true);
         } finally {
             setIsLoading(false);

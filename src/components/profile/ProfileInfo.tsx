@@ -103,8 +103,7 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
     }
   };
   const handleStartChat = async () => {
-    if (!targetId) return;
-
+    if (!targetId || !Me?._id) return;
     // Prepare the payload to match your backend's req.body
     const payload = {
       senderId: Me?._id!,

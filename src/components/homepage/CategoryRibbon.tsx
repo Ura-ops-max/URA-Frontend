@@ -35,7 +35,7 @@ export default function CategoryRibbon({ activeCategory, onSelect }: {
             All
           </button>
 
-          {categories.map((cat) => (
+          {categories?.map((cat) => (
             <button
               key={cat}
               onClick={() => onSelect(cat)}

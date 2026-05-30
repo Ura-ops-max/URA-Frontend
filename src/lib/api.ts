@@ -8,7 +8,7 @@ import type {
 
 } from '@/types/api.types';
 import API from './axios-client';
-import { uploadImageToCloudinary, uploadMediaToCloudinary } from "@/services/cloudinary.service";
+import { uploadImageToS3, uploadMediaToS3 } from "@/services/s3.service";
 import type { UnifiedPost, ProductPostType } from '@/types/feed.types';
 
 
@@ -74,12 +74,12 @@ export const updateProfileMutationFn = async (data: {
 
   // 1. Upload Profile Picture if it's a new File
   if (data.profilePicture instanceof File) {
-    payload.profilePicture = await uploadImageToCloudinary(data.profilePicture);
+    payload.profilePicture = await uploadImageToS3(data.profilePicture);
   }
 
   // 2. Upload Cover Photo if it's a new File
   if (data.coverPicture instanceof File) {
-    payload.coverPicture = await uploadImageToCloudinary(data.coverPicture);
+    payload.coverPicture = await uploadImageToS3(data.coverPicture);
   }
 
   // 3. Send clean JSON to your backend
@@ -97,7 +97,7 @@ export const updateBusinessMutationFn = async (data: any) => {
   const handleImage = async (_field: string, value: any) => {
     if (value instanceof File) {
       // User uploaded a new file
-      return await uploadImageToCloudinary(value);
+      return await uploadImageToS3(value);
     } else if (value === "DELETE_IMAGE") {
       // User explicitly wants to remove the photo
       return null;
@@ -199,7 +199,7 @@ export const createPostMutationFn = async ({ data, files }: { data: any; files: 
   let mediaUrls: string[] = [];
   if (files && files.length > 0) {
     mediaUrls = await Promise.all(
-      files.map((file) => uploadMediaToCloudinary(file))
+      files.map((file) => uploadMediaToS3(file))
     );
   }
 

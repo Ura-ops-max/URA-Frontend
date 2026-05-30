@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useEditPost, useEditProduct } from "@/hooks/api/use-feed";
-import { uploadMediaToCloudinary } from "@/services/cloudinary.service";
+import { uploadMediaToS3 } from "@/services/s3.service";
 
 interface EditItemModalProps {
   open: boolean;
@@ -97,7 +97,7 @@ export const EditItemModal = ({ open, onClose, item }: EditItemModalProps) => {
     try {
       let uploadedMedia: string[] = [...existingMedia];
       if (newMediaFiles.length) {
-        const uploaded = await Promise.all(newMediaFiles.map((f) => uploadMediaToCloudinary(f)));
+        const uploaded = await Promise.all(newMediaFiles.map((f) => uploadMediaToS3(f)));
         uploadedMedia = [...uploadedMedia, ...uploaded];
       }
 

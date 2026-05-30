@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, ImagePlus, Trash2 } from "lucide-react";
 import { useEditPost } from "@/hooks/api/use-feed";
 import { Textarea } from "../ui/textarea";
-import { uploadMediaToCloudinary } from "@/services/cloudinary.service";
+import { uploadMediaToS3 } from "@/services/s3.service";
 
 interface EditPostModalProps {
   open: boolean;
@@ -81,7 +81,7 @@ export function EditPostModal({
       let uploadedMediaUrls: string[] = [];
       if (newMediaFiles.length > 0) {
         uploadedMediaUrls = await Promise.all(
-          newMediaFiles.map((file) => uploadMediaToCloudinary(file))
+          newMediaFiles.map((file) => uploadMediaToS3(file))
         );
       }
 

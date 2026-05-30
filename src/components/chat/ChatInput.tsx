@@ -2,7 +2,7 @@ import { Camera, Send, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { uploadImageToCloudinary } from '@/services/cloudinary.service';
+import { uploadImageToS3 } from '@/services/s3.service';
 import { cn } from '@/lib/utils';
 
 interface ChatInputProps {
@@ -26,7 +26,7 @@ export const ChatInput = ({ onSendMessage, onSendMedia, onTyping }: ChatInputPro
     if (!file) return;
     setIsUploading(true);
     try {
-      const url = await uploadImageToCloudinary(file);
+      const url = await uploadImageToS3(file);
       onSendMedia({ url, type: file.type.startsWith('video') ? 'video' : 'image', fileName: file.name });
     } finally {
       setIsUploading(false);

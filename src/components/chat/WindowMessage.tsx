@@ -4,7 +4,7 @@ import { ChevronLeft, Send, Plus, Smile, Check, CheckCheck, Clock, X } from 'luc
 import { chatAPI } from '@/lib/chat-api';
 import { socketService } from '@/services/socket.service';
 import { format, formatDistanceToNow } from 'date-fns';
-import { uploadMediaToCloudinary } from '@/services/cloudinary.service';
+import { uploadMediaToS3 } from '@/services/s3.service';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { generateAvatarUrl } from '@/utils/avatar-generator';
 
@@ -187,8 +187,8 @@ const MessageWindow = () => {
     try {
       let mediaData = null;
       if (fileToUpload) {
-        const cloudinaryUrl = await uploadMediaToCloudinary(fileToUpload.file);
-        mediaData = { url: cloudinaryUrl, type: fileToUpload.type };
+        const uploadedUrl = await uploadMediaToS3(fileToUpload.file);
+        mediaData = { url: uploadedUrl, type: fileToUpload.type };
       }
 
       await chatAPI.sendMessage({

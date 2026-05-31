@@ -11,6 +11,7 @@ const aiSearchClient = axios.create({
 
 export interface TextSearchRequest {
     q: string;
+    category?: string;
     lat?: number;
     lng?: number;
     radius_km?: number;
@@ -67,6 +68,7 @@ export const aiSearchService = {
     textSearch: async (params: TextSearchRequest): Promise<AISearchResponse> => {
         const { data } = await aiSearchClient.post<AISearchResponse>('/search', {
             q: params.q,
+            category: params.category,
             lat: params.lat,
             lng: params.lng,
             radius_km: params.radius_km ?? 10,

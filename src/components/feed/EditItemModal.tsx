@@ -13,7 +13,7 @@ interface EditItemModalProps {
   onClose: () => void;
   item: {
     _id: string;
-    type: "POST" | "PRODUCT";
+    type: 'POST' | 'PRODUCT';
     caption: string;
     tags: string[];
     media?: string[];
@@ -30,30 +30,30 @@ interface EditItemModalProps {
 }
 
 export const EditItemModal = ({ open, onClose, item }: EditItemModalProps) => {
-  const isProduct = item.type === "PRODUCT";
+  const isProduct = item.type === 'PRODUCT';
   const product = item.productDetails;
 
   // Post fields
   const [caption, setCaption] = useState(item.caption);
-  const [tagsInput, setTagsInput] = useState(item.tags?.join(", ") || "");
+  const [tagsInput, setTagsInput] = useState(item.tags?.join(', ') || '');
   // Product fields
-  const [productName, setProductName] = useState(product?.name || "");
-  const [price, setPrice] = useState(product?.price?.toString() || "");
-  const [description, setDescription] = useState(product?.description || "");
-  const [category, setCategory] = useState(product?.category || "");
-  const [stock, setStock] = useState(product?.stock?.toString() || "");
+  const [productName, setProductName] = useState(product?.name || '');
+  const [price, setPrice] = useState(product?.price?.toString() || '');
+  const [description, setDescription] = useState(product?.description || '');
+  const [category, setCategory] = useState(product?.category || '');
+  const [stock, setStock] = useState(product?.stock?.toString() || '');
   const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
   const [existingMedia, setExistingMedia] = useState<string[]>(product?.media || item.media || []);
   const [uploading, setUploading] = useState(false);
 
-  const editPost = useEditPost(item._id, "social");
+  const editPost = useEditPost(item._id, 'social');
   const editProduct = useEditProduct(product?._id || item._id);
 
   // Reset form when modal opens
   useEffect(() => {
     if (open) {
       setCaption(item.caption);
-      setTagsInput(item.tags?.join(", ") || "");
+      setTagsInput(item.tags?.join(', ') || '');
       if (isProduct && product) {
         setProductName(product.name);
         setPrice(product.price.toString());
@@ -114,13 +114,13 @@ export const EditItemModal = ({ open, onClose, item }: EditItemModalProps) => {
         // Also update the post caption & tags (optional)
         await editPost.mutateAsync({
           caption,
-          tags: tagsInput.split(",").map((t) => t.trim()),
+          tags: tagsInput.split(',').map((t) => t.trim()),
         });
       } else {
         // Update social post
         await editPost.mutateAsync({
           caption,
-          tags: tagsInput.split(",").map((t) => t.trim()),
+          tags: tagsInput.split(',').map((t) => t.trim()),
           media: uploadedMedia,
         });
       }
@@ -154,7 +154,7 @@ export const EditItemModal = ({ open, onClose, item }: EditItemModalProps) => {
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <h2 className="text-xl font-black text-gray-900">
-                Edit {isProduct ? "Product" : "Post"}
+                Edit {isProduct ? 'Product' : 'Post'}
               </h2>
               <button
                 onClick={onClose}
@@ -268,7 +268,11 @@ export const EditItemModal = ({ open, onClose, item }: EditItemModalProps) => {
                         key={`new-${idx}`}
                         className="relative w-20 h-20 rounded-lg overflow-hidden border group"
                       >
-                        <img src={previewUrl} className="w-full h-full object-cover" alt="preview" />
+                        <img
+                          src={previewUrl}
+                          className="w-full h-full object-cover"
+                          alt="preview"
+                        />
                         <button
                           type="button"
                           onClick={() => removeNewMedia(idx)}
@@ -292,7 +296,9 @@ export const EditItemModal = ({ open, onClose, item }: EditItemModalProps) => {
                   />
                 </label>
                 {newMediaFiles.length > 0 && (
-                  <p className="text-xs text-gray-500">{newMediaFiles.length} new file(s) selected</p>
+                  <p className="text-xs text-gray-500">
+                    {newMediaFiles.length} new file(s) selected
+                  </p>
                 )}
               </div>
 

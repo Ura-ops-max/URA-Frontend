@@ -1,15 +1,6 @@
 import React from 'react';
-import { formatDistanceToNow } from "date-fns";
-import { 
-  LogIn, 
-  Trash2, 
-  CheckCircle2, 
-  Heart, 
-  Send, 
-  Star, 
-  Circle,
-  ArrowRight
-} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { LogIn, Trash2, CheckCircle2, Heart, Send, Star, Circle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ActivityPanelProps {
@@ -19,15 +10,19 @@ interface ActivityPanelProps {
 }
 
 const ActivityPanel: React.FC<ActivityPanelProps> = ({ activities, isError, onClearAll }) => {
-  
   // Icon mapping based on your backend 'action' keys
   const getActionIcon = (action: string) => {
     switch (action) {
-      case 'LIKE': return <Heart size={12} className="text-rose-500 fill-rose-500" />;
-      case 'POST_PUBLISH': return <Send size={12} className="text-blue-500" />;
-      case 'REVIEW_CREATE': return <Star size={12} className="text-amber-500 fill-amber-500" />;
-      case 'LOGIN': return <LogIn size={12} className="text-emerald-500" />;
-      default: return <Circle size={12} className="text-slate-400" />;
+      case 'LIKE':
+        return <Heart size={12} className="text-rose-500 fill-rose-500" />;
+      case 'POST_PUBLISH':
+        return <Send size={12} className="text-blue-500" />;
+      case 'REVIEW_CREATE':
+        return <Star size={12} className="text-amber-500 fill-amber-500" />;
+      case 'LOGIN':
+        return <LogIn size={12} className="text-emerald-500" />;
+      default:
+        return <Circle size={12} className="text-slate-400" />;
     }
   };
 
@@ -51,7 +46,7 @@ const ActivityPanel: React.FC<ActivityPanelProps> = ({ activities, isError, onCl
       <div className="flex items-center justify-between px-3 py-2 mb-2 shrink-0">
         <h3 className="font-bold text-[16px] tracking-tight text-slate-900">Recent Activity</h3>
         {activities.length > 0 && (
-          <button 
+          <button
             onClick={onClearAll}
             className="group flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-all"
           >
@@ -71,8 +66,8 @@ const ActivityPanel: React.FC<ActivityPanelProps> = ({ activities, isError, onCl
           </div>
         ) : (
           displayActivities.map((act) => (
-            <div 
-              key={act._id} 
+            <div
+              key={act._id}
               className="group flex items-start gap-4 p-3 rounded-[22px] transition-all duration-300 hover:bg-white/70 active:scale-[0.98]"
             >
               {/* Icon Bubble */}
@@ -101,7 +96,10 @@ const ActivityPanel: React.FC<ActivityPanelProps> = ({ activities, isError, onCl
       {/* 3. View All Footer */}
       {hasMoreThanSix && (
         <div className="pt-3 shrink-0">
-          <Link to="/dashboard/settings/activities" className="w-full py-3.5 rounded-[20px] border border-dashed border-slate-200 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-white/60 hover:text-[#f97316] hover:border-[#f97316]/40 transition-all flex items-center justify-center gap-2 group shadow-sm hover:shadow-md">
+          <Link
+            to="/dashboard/settings/activities"
+            className="w-full py-3.5 rounded-[20px] border border-dashed border-slate-200 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-white/60 hover:text-[#f97316] hover:border-[#f97316]/40 transition-all flex items-center justify-center gap-2 group shadow-sm hover:shadow-md"
+          >
             View all activity
             <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
           </Link>

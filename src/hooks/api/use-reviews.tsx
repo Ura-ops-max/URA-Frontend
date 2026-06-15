@@ -15,8 +15,8 @@ export const useReviews = (itemId: string) => {
       const data = response.data.data;
       setReviews(data);
     } catch (err: any) {
-      console.error("Review fetch error:", err);
-      toast.error("Failed to load reviews");
+      console.error('Review fetch error:', err);
+      toast.error('Failed to load reviews');
     } finally {
       setIsLoading(false);
     }
@@ -26,11 +26,11 @@ export const useReviews = (itemId: string) => {
   const addReview = async (data: CreateReviewData) => {
     try {
       await reviewAPI.createReview(data);
-      toast.success("Review submitted!");
-      await fetchReviews(); 
+      toast.success('Review submitted!');
+      await fetchReviews();
       return { success: true };
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Failed to submit";
+      const msg = err.response?.data?.message || 'Failed to submit';
       toast.error(msg);
       return { success: false, error: msg };
     }
@@ -40,11 +40,11 @@ export const useReviews = (itemId: string) => {
   const editReview = async (reviewId: string, data: { rating?: number; comment?: string }) => {
     try {
       await reviewAPI.updateReview(reviewId, data);
-      toast.success("Review updated!");
+      toast.success('Review updated!');
       await fetchReviews();
       return { success: true };
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Failed to update review";
+      const msg = err.response?.data?.message || 'Failed to update review';
       toast.error(msg);
       return { success: false, error: msg };
     }
@@ -54,11 +54,11 @@ export const useReviews = (itemId: string) => {
   const handleDelete = async (reviewId: string) => {
     try {
       await reviewAPI.deleteReview(reviewId);
-      toast.success("Review deleted successfully");
+      toast.success('Review deleted successfully');
       await fetchReviews();
       return { success: true };
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Failed to delete review";
+      const msg = err.response?.data?.message || 'Failed to delete review';
       toast.error(msg);
       return { success: false, error: msg };
     }
@@ -69,7 +69,7 @@ export const useReviews = (itemId: string) => {
       await reviewAPI.likeReview(reviewId);
       await fetchReviews();
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Could not process like";
+      const msg = err.response?.data?.message || 'Could not process like';
       toast.error(msg);
     }
   };
@@ -79,7 +79,7 @@ export const useReviews = (itemId: string) => {
       await reviewAPI.dislikeReview(reviewId);
       await fetchReviews();
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Could not process dislike";
+      const msg = err.response?.data?.message || 'Could not process dislike';
       toast.error(msg);
     }
   };
@@ -96,6 +96,6 @@ export const useReviews = (itemId: string) => {
     handleDelete,
     handleLike,
     handleDislike,
-    refreshReviews: fetchReviews
+    refreshReviews: fetchReviews,
   };
 };

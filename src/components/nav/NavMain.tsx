@@ -11,7 +11,7 @@ import {
   ShoppingCart,
   Bookmark, // 🚨 Added Bookmark icon
   type LucideIcon,
-  PlusCircle
+  PlusCircle,
 } from 'lucide-react';
 import {
   SidebarGroup,
@@ -44,24 +44,27 @@ export function NavMain() {
   const { totalItems } = useCartContext();
 
   const { totalUnreadCount } = useGlobalChat();
-  
+
   const displayCount = totalUnreadCount > 99 ? '99+' : totalUnreadCount;
 
-  
   // 1. Shared Items
   const mainItems: NavItem[] = [
     { title: 'Feed', url: '/dashboard', icon: LayoutDashboard },
-    { title: 'Chat', url: '/dashboard/chat', icon: MessageCircle, showBadge: totalUnreadCount > 0, badgeValue: String(displayCount) },
+    {
+      title: 'Chat',
+      url: '/dashboard/chat',
+      icon: MessageCircle,
+      showBadge: totalUnreadCount > 0,
+      badgeValue: String(displayCount),
+    },
     { title: 'Bookmarks', url: '/dashboard/bookmarks', icon: Bookmark }, // 🚨 Added Bookmarks here
-    { 
-    title: 'Notifications', 
-    url: '/dashboard/notifications', 
-    icon: Bell, 
-    showBadge: unreadCount > 0, 
-    badgeValue: String(unreadCount )
-  },
-    // { title: 'Wallet', url: '/dashboard/wallet', icon: Wallet },
-
+    {
+      title: 'Notifications',
+      url: '/dashboard/notifications',
+      icon: Bell,
+      showBadge: unreadCount > 0,
+      badgeValue: String(unreadCount),
+    },
   ];
 
   // 2. Shopping & Savings Items
@@ -71,11 +74,11 @@ export function NavMain() {
       url: '/dashboard/product/cart',
       icon: ShoppingCart,
       showBadge: totalItems > 0,
-      badgeValue: totalItems
+      badgeValue: totalItems,
     },
     { title: 'My Orders', url: '/dashboard/my-orders', icon: ShoppingBag },
     { title: 'Deals', url: '/dashboard/deal-offer', icon: Tag },
-    {title: 'Payments', url: '/dashboard/payments/setup', icon: Wallet },
+    { title: 'Wallet', url: '/dashboard/wallet', icon: Wallet },
     // { title: 'Events', url: '/dashboard/events', icon: Calendar },
   ];
 
@@ -84,12 +87,17 @@ export function NavMain() {
     {
       title: 'List a Product',
       url: '/dashboard/post/create?type=product',
-      icon: PlusCircle
+      icon: PlusCircle,
     },
-    { title: 'Store Orders', url: '/dashboard/store-management', icon: Store, showBadge: true, badgeValue: 12 },
+    {
+      title: 'Store Orders',
+      url: '/dashboard/store-management',
+      icon: Store,
+      showBadge: true,
+      badgeValue: 12,
+    },
     // { title: 'Business Loan', url: '/dashboard/loans', icon: BadgePercent },
     // Inside businessItems array in NavMain.tsx
-
   ];
 
   const renderMenuItems = (items: NavItem[]) => (
@@ -100,14 +108,18 @@ export function NavMain() {
             isActive={item.url === pathname}
             asChild
             tooltip={item.title}
-            className={`transition-all duration-200 h-11 ${item.url === pathname
-              ? "bg-orange-50 text-orange-600 hover:bg-orange-50 hover:text-orange-600"
-              : "hover:bg-gray-100"
-              }`}
+            className={`transition-all duration-200 h-11 ${
+              item.url === pathname
+                ? 'bg-orange-50 text-orange-600 hover:bg-orange-50 hover:text-orange-600'
+                : 'hover:bg-gray-100'
+            }`}
           >
             <Link to={item.url} className="flex items-center gap-3">
               <div className="relative">
-                <item.icon className={`${item.url === pathname ? "stroke-[2.5px]" : "stroke-[1.5px]"}`} size={20} />
+                <item.icon
+                  className={`${item.url === pathname ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`}
+                  size={20}
+                />
 
                 {/* Collapsed Badge - Small dot for icon-only mode */}
                 {item.showBadge && (item.badgeValue ?? 0) > 0 && (
@@ -134,18 +146,24 @@ export function NavMain() {
   return (
     <>
       <SidebarGroup>
-        <SidebarGroupLabel className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">General</SidebarGroupLabel>
+        <SidebarGroupLabel className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+          General
+        </SidebarGroupLabel>
         {renderMenuItems(mainItems)}
       </SidebarGroup>
 
       <SidebarGroup>
-        <SidebarGroupLabel className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Shopping</SidebarGroupLabel>
+        <SidebarGroupLabel className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+          Shopping
+        </SidebarGroupLabel>
         {renderMenuItems(shoppingItems)}
       </SidebarGroup>
 
       {user?.isBusinessOwner && (
         <SidebarGroup>
-          <SidebarGroupLabel className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Business</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            Business
+          </SidebarGroupLabel>
           {renderMenuItems(businessItems)}
         </SidebarGroup>
       )}

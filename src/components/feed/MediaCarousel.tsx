@@ -1,8 +1,8 @@
 // src/components/feed/MediaCarousel.tsx
-import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { VideoPlayer } from "./VideoPlayer";
-import { cn } from "@/lib/utils";
+import { useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { VideoPlayer } from './VideoPlayer';
+import { cn } from '@/lib/utils';
 
 export const MediaCarousel = ({ media }: { media: string[] }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -21,7 +21,7 @@ export const MediaCarousel = ({ media }: { media: string[] }) => {
       const width = scrollRef.current.offsetWidth;
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -width : width,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }
   };
@@ -48,7 +48,10 @@ export const MediaCarousel = ({ media }: { media: string[] }) => {
         {media.map((url, i) => {
           const isVideo = url.match(/\.(mp4|webm|mov|m4v)$/i);
           return (
-            <div key={i} className="flex-shrink-0 w-full h-full snap-center relative flex items-center justify-center overflow-hidden">
+            <div
+              key={i}
+              className="flex-shrink-0 w-full h-full snap-center relative flex items-center justify-center overflow-hidden"
+            >
               {isVideo ? (
                 <VideoPlayer url={url} className="w-full h-full object-contain z-20" />
               ) : (
@@ -76,20 +79,26 @@ export const MediaCarousel = ({ media }: { media: string[] }) => {
       {media.length > 1 && (
         <>
           <button
-            onClick={(e) => { e.stopPropagation(); scroll('left'); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              scroll('left');
+            }}
             className={cn(
-              "hidden lg:flex absolute left-3 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md p-2 rounded-full z-[30] text-white transition-all",
-              showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              'hidden lg:flex absolute left-3 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md p-2 rounded-full z-[30] text-white transition-all',
+              showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none',
             )}
           >
             <ChevronLeft size={20} />
           </button>
 
           <button
-            onClick={(e) => { e.stopPropagation(); scroll('right'); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              scroll('right');
+            }}
             className={cn(
-              "hidden lg:flex absolute right-3 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md p-2 rounded-full z-[30] text-white transition-all",
-              showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              'hidden lg:flex absolute right-3 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md p-2 rounded-full z-[30] text-white transition-all',
+              showArrows ? 'opacity-100' : 'opacity-0 pointer-events-none',
             )}
           >
             <ChevronRight size={20} />
@@ -98,7 +107,13 @@ export const MediaCarousel = ({ media }: { media: string[] }) => {
           {/* Indicators */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-[30]">
             {media.map((_, i) => (
-              <div key={i} className={cn("h-1.5 rounded-full transition-all", index === i + 1 ? "w-4 bg-orange-500" : "w-1.5 bg-white/50")} />
+              <div
+                key={i}
+                className={cn(
+                  'h-1.5 rounded-full transition-all',
+                  index === i + 1 ? 'w-4 bg-orange-500' : 'w-1.5 bg-white/50',
+                )}
+              />
             ))}
           </div>
 

@@ -1,18 +1,22 @@
-import { useCategories } from "@/hooks/api/use-categories";
-import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { useCategories } from '@/hooks/api/use-categories';
+import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
-export default function CategoryRibbon({ activeCategory, onSelect }: {
+export default function CategoryRibbon({
+  activeCategory,
+  onSelect,
+}: {
   activeCategory: string;
-  onSelect: (cat: string) => void
+  onSelect: (cat: string) => void;
 }) {
   const { categories, isLoading } = useCategories('product');
 
-  if (isLoading) return (
-    <div className="flex justify-center p-4">
-      <Loader2 className="animate-spin text-orange-500" size={20} />
-    </div>
-  );
+  if (isLoading)
+    return (
+      <div className="flex justify-center p-4">
+        <Loader2 className="animate-spin text-orange-500" size={20} />
+      </div>
+    );
 
   return (
     <div className="w-full border-b bg-white/80 backdrop-blur-md sticky top-16 z-10">
@@ -24,12 +28,12 @@ export default function CategoryRibbon({ activeCategory, onSelect }: {
         */}
         <div className="flex items-center gap-3 overflow-x-auto py-4 scrollbar-base scrollbar-main">
           <button
-            onClick={() => onSelect("All")}
+            onClick={() => onSelect('All')}
             className={cn(
-              "px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
-              activeCategory === "All" 
-                ? "bg-orange-500 text-white shadow-md" 
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              'px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
+              activeCategory === 'All'
+                ? 'bg-orange-500 text-white shadow-md'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
             )}
           >
             All
@@ -40,10 +44,10 @@ export default function CategoryRibbon({ activeCategory, onSelect }: {
               key={cat}
               onClick={() => onSelect(cat)}
               className={cn(
-                "px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
+                'px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
                 activeCategory === cat
-                  ? "bg-orange-500 text-white shadow-md"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? 'bg-orange-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
               )}
             >
               {cat}

@@ -1,10 +1,10 @@
 // components/bookmarks/WishlistTab.tsx
-import { useWishlist } from "@/hooks/api/use-product";
-import { ProductCard } from "../feed/ProductCard";
-import { ProductDetailsModal } from "../feed/ProductDetailsModal";
-import { useState } from "react";
-import { Loader2, HeartOff } from "lucide-react";
-import type { ProductPostType } from "@/types/feed.types";
+import { useWishlist } from '@/hooks/api/use-product';
+import { ProductCard } from '../feed/ProductCard';
+import { ProductDetailsModal } from '../feed/ProductDetailsModal';
+import { useState } from 'react';
+import { Loader2, HeartOff } from 'lucide-react';
+import type { ProductPostType } from '@/types/feed.types';
 
 export default function WishlistTab() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useWishlist();
@@ -12,7 +12,12 @@ export default function WishlistTab() {
 
   const allProducts = data?.pages.flatMap((page) => page) || [];
 
-  if (isLoading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-orange-500" /></div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="animate-spin text-orange-500" />
+      </div>
+    );
 
   if (allProducts.length === 0) {
     return (
@@ -33,7 +38,7 @@ export default function WishlistTab() {
           onViewDetails={(p) => setSelectedProduct(p)}
         />
       ))}
-      
+
       {/* Reusing your modal logic */}
       <ProductDetailsModal
         isOpen={!!selectedProduct}
@@ -41,14 +46,14 @@ export default function WishlistTab() {
         onClose={() => setSelectedProduct(null)}
         isAuthenticated={true}
       />
-      
+
       {hasNextPage && (
-        <button 
-          onClick={() => fetchNextPage()} 
+        <button
+          onClick={() => fetchNextPage()}
           disabled={isFetchingNextPage}
           className="col-span-full py-4 text-orange-600 font-bold text-sm"
         >
-          {isFetchingNextPage ? "Loading more..." : "Load More"}
+          {isFetchingNextPage ? 'Loading more...' : 'Load More'}
         </button>
       )}
     </div>

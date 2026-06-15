@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 type Props = {
   tabs: string[];
@@ -9,12 +9,12 @@ type Props = {
 
 const ProfileTabs: React.FC<Props> = ({ tabs, active, onChange, isBusiness }) => {
   // STRICT FILTER LOGIC
-  const availableTabs = tabs.filter(tab => {
-    if (tab === "Feeds") return !isBusiness;     // Feeds: Users only
-    if (tab === "Following") return !isBusiness; // Following: Users only
-    if (tab === "Products") return isBusiness;   // Products: Business only
-    if (tab === "Reviews") return isBusiness;    // Reviews: Business only
-    
+  const availableTabs = tabs.filter((tab) => {
+    if (tab === 'Feeds') return !isBusiness; // Feeds: Users only
+    if (tab === 'Following') return !isBusiness; // Following: Users only
+    if (tab === 'Products') return isBusiness; // Products: Business only
+    if (tab === 'Reviews') return isBusiness; // Reviews: Business only
+
     // Posts, About, Followers: Both
     return true;
   });
@@ -27,9 +27,9 @@ const ProfileTabs: React.FC<Props> = ({ tabs, active, onChange, isBusiness }) =>
             key={t}
             onClick={() => onChange(t)}
             className={`py-3 relative transition-colors flex-shrink-0 text-sm ${
-              active === t 
-                ? "text-orange-500 font-bold" 
-                : "text-gray-500 hover:text-gray-900 font-medium"
+              active === t
+                ? 'text-orange-500 font-bold'
+                : 'text-gray-500 hover:text-gray-900 font-medium'
             }`}
           >
             {t}

@@ -37,23 +37,16 @@ export interface ProductCategory {
   name: string;
 }
 
-
 // --- New Definition for Product Card Display ---
 export interface ProductCardProps {
   id: string;
   name: string;
-  image: string;          // URL or path to the main product image
-  merchant: string;       // Name of the merchant/shop that posted the product
-  photoCount: number;     // Total number of media/photos associated with the product
-  likes: number;          // Total number of likes/saves
-  price?: string;         // Optional: Price string (if displayed on the card)
+  image: string; // URL or path to the main product image
+  merchant: string; // Name of the merchant/shop that posted the product
+  photoCount: number; // Total number of media/photos associated with the product
+  likes: number; // Total number of likes/saves
+  price?: string; // Optional: Price string (if displayed on the card)
 }
-
-
-
-
-
-
 
 // --- Updated/Added Types ---
 

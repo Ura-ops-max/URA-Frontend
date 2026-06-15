@@ -20,7 +20,7 @@ export const useCategories = (type: 'product' | 'business' = 'product') => {
         setCategories(data);
       } catch (err: any) {
         setError(err.message || 'Something went wrong');
-        console.error("Category Hook Error:", err);
+        console.error('Category Hook Error:', err);
       } finally {
         setIsLoading(false);
       }

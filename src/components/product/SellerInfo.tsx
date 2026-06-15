@@ -15,13 +15,15 @@ const SellerInfo: React.FC<SellerInfoProps> = ({ seller }) => {
         src={seller.profileImageUrl}
         alt={seller.name}
         className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-        onError={(e) => { e.currentTarget.src = 'https://i.pravatar.cc/150?img=50'; }} // Fallback
+        onError={(e) => {
+          e.currentTarget.src = 'https://i.pravatar.cc/150?img=50';
+        }} // Fallback
       />
-      
+
       <div className="flex-grow">
         {/* Seller Name */}
         <p className="font-bold text-gray-900 text-base">{seller.name}</p>
-        
+
         {/* Stats: Rating and Followers */}
         <div className="flex items-center space-x-3 text-sm text-gray-600">
           <div className="flex items-center">
@@ -32,7 +34,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({ seller }) => {
           <span>{seller.followers} Followers</span>
         </div>
       </div>
-      
+
       {/* Optional: Add a 'View Profile' or 'Chat' button here */}
     </div>
   );

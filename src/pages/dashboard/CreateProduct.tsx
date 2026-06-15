@@ -13,7 +13,6 @@ import ChatList from '@/components/dashboard/ChatList';
 import { DashboardSkeleton } from '@/components/skeleton/DashboardSkeleton';
 import { useChat } from '@/hooks/use-chat';
 
-
 const CreateProduct = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, related, isLoading } = useAuthContext();
@@ -25,11 +24,11 @@ const CreateProduct = () => {
   const {
     conversations,
     isLoading: isChatsLoading,
-    isError: chatError // This maps the hook's isError to the name chatError
+    isError: chatError, // This maps the hook's isError to the name chatError
   } = useChat(activeProfileId!);
   // 1. FIX: Scroll main container to top when page loads or tab changes
   useEffect(() => {
-    const container = document.getElementById("main-feed-container");
+    const container = document.getElementById('main-feed-container');
     if (container) {
       container.scrollTo({ top: 0, behavior: 'instant' });
     }
@@ -47,7 +46,6 @@ const CreateProduct = () => {
 
   if (!user || !related) return <Navigate to="/auth/login" replace />;
 
-
   // 1. Define the Widget Content as a reusable constant to keep code DRY
   const TipsWidget = ({ className }: { className?: string }) => (
     <SidebarWidget isDesktop={true} isError={false} errorTitle={''} className={className}>
@@ -58,9 +56,8 @@ const CreateProduct = () => {
           </div>
           <p className="text-xs text-gray-600 leading-relaxed">
             {activeTab === 'product'
-              ? "Items with **clear pricing** and **multiple photos** sell 3x faster."
-              : "Posts with **high-quality images** receive 3x more engagement."
-            }
+              ? 'Items with **clear pricing** and **multiple photos** sell 3x faster.'
+              : 'Posts with **high-quality images** receive 3x more engagement.'}
           </p>
         </div>
       </div>
@@ -77,10 +74,7 @@ const CreateProduct = () => {
         // Use subtle headers for the widgets
         className="bg-white/40 backdrop-blur-xl border-white/20 rounded-[24px] overflow-hidden"
       >
-        <ChatList
-          chatList={conversations}
-          activeProfileId={activeProfileId!}
-        />
+        <ChatList chatList={conversations} activeProfileId={activeProfileId!} />
       </SidebarWidget>
     </>
   );
@@ -103,8 +97,8 @@ const CreateProduct = () => {
             <p className="text-[11px] text-gray-500 leading-normal">
               {activeTab === 'product' ? (
                 <>
-                  Your products are automatically listed in the <strong>Global Shop</strong>.
-                  Ensure your pricing is competitive to attract more buyers.
+                  Your products are automatically listed in the <strong>Global Shop</strong>. Ensure
+                  your pricing is competitive to attract more buyers.
                 </>
               ) : (
                 <>
@@ -126,8 +120,8 @@ const CreateProduct = () => {
           </div>
           <h4 className="font-black text-sm mb-1">Sell Faster</h4>
           <p className="text-[10px] opacity-80 leading-normal">
-            High-quality photos and detailed descriptions increase your chances of a sale by 40%.
-            Be clear about shipping and stock!
+            High-quality photos and detailed descriptions increase your chances of a sale by 40%. Be
+            clear about shipping and stock!
           </p>
         </div>
       ) : (
@@ -138,8 +132,8 @@ const CreateProduct = () => {
           </div>
           <h4 className="font-black text-sm mb-1">Engage More</h4>
           <p className="text-[10px] opacity-90 leading-normal">
-            Posts with questions or polls get 2x more comments.
-            Use #hashtags to help people outside your network find your content.
+            Posts with questions or polls get 2x more comments. Use #hashtags to help people outside
+            your network find your content.
           </p>
         </div>
       )}
@@ -158,8 +152,11 @@ const CreateProduct = () => {
           {isBusiness && (
             <button
               onClick={() => setSearchParams({ type: 'product' })}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[20px] text-sm font-bold transition-all ${activeTab === 'product' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-                }`}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[20px] text-sm font-bold transition-all ${
+                activeTab === 'product'
+                  ? 'bg-gray-900 text-white shadow-md'
+                  : 'text-gray-500 hover:bg-gray-50'
+              }`}
             >
               <PackagePlus size={18} />
               <span>List Product</span>
@@ -168,8 +165,11 @@ const CreateProduct = () => {
 
           <button
             onClick={() => setSearchParams({ type: 'post' })}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[20px] text-sm font-bold transition-all ${activeTab === 'post' ? 'bg-orange-500 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-              }`}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[20px] text-sm font-bold transition-all ${
+              activeTab === 'post'
+                ? 'bg-orange-500 text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50'
+            }`}
           >
             <Megaphone size={18} />
             <span>Make a Post</span>
@@ -180,10 +180,14 @@ const CreateProduct = () => {
         <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-6 lg:p-8 mb-10">
           <div className="mb-8 flex items-start gap-4">
             {/* Dynamic Icon to give visual feedback */}
-            <div className={cn(
-              "p-3 rounded-2xl hidden sm:block",
-              activeTab === 'product' ? "bg-gray-100 text-gray-900" : "bg-orange-100 text-orange-600"
-            )}>
+            <div
+              className={cn(
+                'p-3 rounded-2xl hidden sm:block',
+                activeTab === 'product'
+                  ? 'bg-gray-100 text-gray-900'
+                  : 'bg-orange-100 text-orange-600',
+              )}
+            >
               {activeTab === 'product' ? <PackagePlus size={24} /> : <Megaphone size={24} />}
             </div>
 

@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,24 +12,32 @@ import { useUsernameCheck } from '@/hooks/api/use-username-check';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { PasswordInput } from '@/components/shared/PasswordInput';
 
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{6,}$/;
-const PASSWORD_MESSAGE = 'Password must be at least 6 characters with uppercase, lowercase, number, and special character.';
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{6,}$/;
+const PASSWORD_MESSAGE =
+  'Password must be at least 6 characters with uppercase, lowercase, number, and special character.';
 const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
 const USERNAME_MESSAGE = 'Username can only contain letters, numbers, and underscores';
 
-const registerSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-  username: z.string()
-    .min(3, 'Username must be at least 3 characters')
-    .regex(USERNAME_REGEX, USERNAME_MESSAGE),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().regex(PASSWORD_REGEX, PASSWORD_MESSAGE),
-  confirmPassword: z.string().min(1, 'Password confirmation is required'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+const registerSchema = z
+  .object({
+    firstName: z.string().min(2, 'First name must be at least 2 characters'),
+    lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+    username: z
+      .string()
+      .min(3, 'Username must be at least 3 characters')
+      .regex(USERNAME_REGEX, USERNAME_MESSAGE),
+    email: z.string().email('Please enter a valid email address'),
+    phone: z
+      .string()
+      .regex(/^0[789][01]\d{8}$/, 'Enter a valid Nigerian phone number (e.g., 08012345678)'),
+    password: z.string().regex(PASSWORD_REGEX, PASSWORD_MESSAGE),
+    confirmPassword: z.string().min(1, 'Password confirmation is required'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -42,21 +49,19 @@ export default function RegisterPage() {
     handleSubmit,
     formState: { errors },
     setError,
-    watch
+    watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    mode: "onChange" // Ensures validation triggers as user types
+    mode: 'onChange',
   });
 
   const { mutate: register, isPending } = useRegister({ setError, setGlobalError });
 
-  // --- FIX: Username logic to prevent "hanging" or misleading status ---
-  const usernameValue = watch('username') || "";
+  const usernameValue = watch('username') || '';
   const shouldCheckUsername = usernameValue.length >= 3 && !errors.username;
 
-  // We pass the value to the hook; logic inside hook handles the API call
   const { isChecking, isAvailable, isTakenError, isValidationError } = useUsernameCheck(
-    shouldCheckUsername ? usernameValue : ""
+    shouldCheckUsername ? usernameValue : '',
   );
 
   const apiErrorMessage = isValidationError || isTakenError;
@@ -70,7 +75,9 @@ export default function RegisterPage() {
     <div className="w-full max-w-[440px] animate-in fade-in slide-in-from-right-8 duration-700">
       <div className="mb-10 text-center lg:text-left">
         <h2 className="text-4xl font-black text-gray-900 tracking-tighter">Sign Up</h2>
-        <p className="mt-3 text-gray-500 font-medium text-sm">Get started with URA and unlock a world of possibilities.</p>
+        <p className="mt-3 text-gray-500 font-medium text-sm">
+          Get started with URA and unlock a world of possibilities.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -83,66 +90,178 @@ export default function RegisterPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label className={cn("text-[10px] font-black uppercase tracking-widest ml-1 transition-colors", errors.firstName ? "text-red-500" : "text-gray-400")}>First Name</Label>
+            <Label
+              className={cn(
+                'text-[10px] font-black uppercase tracking-widest ml-1 transition-colors',
+                errors.firstName ? 'text-red-500' : 'text-gray-400',
+              )}
+            >
+              First Name
+            </Label>
             <Input
               {...registerField('firstName')}
               placeholder="Binta"
-              className={cn("h-12 rounded-2xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all", errors.firstName && 'border-red-500 ring-red-50')}
+              className={cn(
+                'h-12 rounded-2xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all',
+                errors.firstName && 'border-red-500 ring-red-50',
+              )}
             />
-            {errors.firstName && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.firstName.message}</p>}
+            {errors.firstName && (
+              <p className="text-[10px] text-red-500 font-bold ml-1">{errors.firstName.message}</p>
+            )}
           </div>
           <div className="space-y-1.5">
-            <Label className={cn("text-[10px] font-black uppercase tracking-widest ml-1 transition-colors", errors.lastName ? "text-red-500" : "text-gray-400")}>Last Name</Label>
+            <Label
+              className={cn(
+                'text-[10px] font-black uppercase tracking-widest ml-1 transition-colors',
+                errors.lastName ? 'text-red-500' : 'text-gray-400',
+              )}
+            >
+              Last Name
+            </Label>
             <Input
               {...registerField('lastName')}
               placeholder="Yusuf"
-              className={cn("h-12 rounded-2xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all", errors.lastName && 'border-red-500 ring-red-50')}
+              className={cn(
+                'h-12 rounded-2xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all',
+                errors.lastName && 'border-red-500 ring-red-50',
+              )}
             />
-            {errors.lastName && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.lastName.message}</p>}
+            {errors.lastName && (
+              <p className="text-[10px] text-red-500 font-bold ml-1">{errors.lastName.message}</p>
+            )}
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <Label className={cn("text-[10px] font-black uppercase tracking-widest ml-1 transition-colors", (errors.username || apiErrorMessage) ? "text-red-500" : "text-gray-400")}>Username</Label>
+          <Label
+            className={cn(
+              'text-[10px] font-black uppercase tracking-widest ml-1 transition-colors',
+              errors.username || apiErrorMessage ? 'text-red-500' : 'text-gray-400',
+            )}
+          >
+            Username
+          </Label>
           <div className="relative">
             <Input
               {...registerField('username')}
               placeholder="bintabespoke"
               className={cn(
-                "h-12 rounded-2xl border-gray-200 bg-gray-50/50 pr-10",
-                (isAvailable === false || errors.username) ? 'border-red-500' : (isAvailable === true && shouldCheckUsername) ? 'border-green-500' : ''
+                'h-12 rounded-2xl border-gray-200 bg-gray-50/50 pr-10',
+                isAvailable === false || errors.username
+                  ? 'border-red-500'
+                  : isAvailable === true && shouldCheckUsername
+                    ? 'border-green-500'
+                    : '',
               )}
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
               {isChecking && <Loader2 className="h-4 w-4 animate-spin text-orange-500" />}
-              {!isChecking && isAvailable === true && shouldCheckUsername && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-              {!isChecking && (isAvailable === false || (errors.username && usernameValue.length >= 3)) && <XCircle className="h-4 w-4 text-red-500" />}
+              {!isChecking && isAvailable === true && shouldCheckUsername && (
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+              )}
+              {!isChecking &&
+                (isAvailable === false || (errors.username && usernameValue.length >= 3)) && (
+                  <XCircle className="h-4 w-4 text-red-500" />
+                )}
             </div>
           </div>
-          {errors.username && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.username.message}</p>}
-          {!errors.username && apiErrorMessage && <p className="text-[10px] text-red-500 font-bold ml-1">{apiErrorMessage}</p>}
+          {errors.username && (
+            <p className="text-[10px] text-red-500 font-bold ml-1">{errors.username.message}</p>
+          )}
+          {!errors.username && apiErrorMessage && (
+            <p className="text-[10px] text-red-500 font-bold ml-1">{apiErrorMessage}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
-          <Label className={cn("text-[10px] font-black uppercase tracking-widest ml-1 transition-colors", errors.email ? "text-red-500" : "text-gray-400")}>Email Address</Label>
+          <Label
+            className={cn(
+              'text-[10px] font-black uppercase tracking-widest ml-1 transition-colors',
+              errors.email ? 'text-red-500' : 'text-gray-400',
+            )}
+          >
+            Email Address
+          </Label>
           <Input
             {...registerField('email')}
             placeholder="bintabespoke@gmail.com"
-            className={cn("h-12 rounded-2xl border-gray-200 bg-gray-50/50", errors.email && 'border-red-500')}
+            className={cn(
+              'h-12 rounded-2xl border-gray-200 bg-gray-50/50',
+              errors.email && 'border-red-500',
+            )}
           />
-          {errors.email && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="text-[10px] text-red-500 font-bold ml-1">{errors.email.message}</p>
+          )}
+
+          <div className="space-y-1.5">
+            <Label
+              className={cn(
+                'text-[10px] font-black uppercase tracking-widest ml-1',
+                errors.phone ? 'text-red-500' : 'text-gray-400',
+              )}
+            >
+              Phone Number
+            </Label>
+            <Input
+              {...registerField('phone')}
+              placeholder="08012345678"
+              className={cn(
+                'h-12 rounded-2xl border-gray-200 bg-gray-50/50',
+                errors.phone && 'border-red-500',
+              )}
+            />
+            {errors.phone && (
+              <p className="text-[10px] text-red-500 font-bold ml-1">{errors.phone.message}</p>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label className={cn("text-[10px] font-black uppercase tracking-widest ml-1 transition-colors", errors.password ? "text-red-500" : "text-gray-400")}>Password</Label>
-            <PasswordInput {...registerField('password')} className={cn("h-12 rounded-2xl border-gray-200 bg-gray-50/50", errors.password && 'border-red-500')} />
-            {errors.password && <p className="text-[10px] text-red-500 font-bold ml-1 leading-tight">{errors.password.message}</p>}
+            <Label
+              className={cn(
+                'text-[10px] font-black uppercase tracking-widest ml-1 transition-colors',
+                errors.password ? 'text-red-500' : 'text-gray-400',
+              )}
+            >
+              Password
+            </Label>
+            <PasswordInput
+              {...registerField('password')}
+              className={cn(
+                'h-12 rounded-2xl border-gray-200 bg-gray-50/50',
+                errors.password && 'border-red-500',
+              )}
+            />
+            {errors.password && (
+              <p className="text-[10px] text-red-500 font-bold ml-1 leading-tight">
+                {errors.password.message}
+              </p>
+            )}
           </div>
           <div className="space-y-1.5">
-            <Label className={cn("text-[10px] font-black uppercase tracking-widest ml-1 transition-colors", errors.confirmPassword ? "text-red-500" : "text-gray-400")}>Confirm</Label>
-            <PasswordInput {...registerField('confirmPassword')} className={cn("h-12 rounded-2xl border-gray-200 bg-gray-50/50", errors.confirmPassword && 'border-red-500')} />
-            {errors.confirmPassword && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.confirmPassword.message}</p>}
+            <Label
+              className={cn(
+                'text-[10px] font-black uppercase tracking-widest ml-1 transition-colors',
+                errors.confirmPassword ? 'text-red-500' : 'text-gray-400',
+              )}
+            >
+              Confirm
+            </Label>
+            <PasswordInput
+              {...registerField('confirmPassword')}
+              className={cn(
+                'h-12 rounded-2xl border-gray-200 bg-gray-50/50',
+                errors.confirmPassword && 'border-red-500',
+              )}
+            />
+            {errors.confirmPassword && (
+              <p className="text-[10px] text-red-500 font-bold ml-1">
+                {errors.confirmPassword.message}
+              </p>
+            )}
           </div>
         </div>
 
@@ -155,13 +274,23 @@ export default function RegisterPage() {
         </Button>
 
         <div className="relative py-3">
-          <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-100" /></div>
-          <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest text-gray-300"><span className="bg-white px-4">Or continue with</span></div>
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-gray-100" />
+          </div>
+          <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest text-gray-300">
+            <span className="bg-white px-4">Or continue with</span>
+          </div>
         </div>
 
-        {/* Social Buttons (Omitted for brevity, keep as you had them) */}
+        {/* Social Buttons */}
         <div className="grid grid-cols-2 gap-3">
-          <Button type="button" variant="outline">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              window.location.href = `${import.meta.env.VITE_API_ROOT_URL}/api/v1/auth/google`;
+            }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="0.98em"
@@ -188,12 +317,7 @@ export default function RegisterPage() {
             <span>Google</span>
           </Button>
           <Button type="button" variant="outline">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="1em"
-              height="1em"
-              viewBox="0 0 256 256"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 256 256">
               <path fill="#f1511b" d="M121.666 121.666H0V0h121.666z"></path>
               <path fill="#80cc28" d="M256 121.666H134.335V0H256z"></path>
               <path fill="#00adef" d="M121.663 256.002H0V134.336h121.663z"></path>
@@ -205,11 +329,19 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm font-medium text-gray-500">
           Already have an account?
-          <Link to="/auth/login" className="ml-1 text-[#FF6B35] font-black hover:underline underline-offset-4">Sign In</Link>
+          <Link
+            to="/auth/login"
+            className="ml-1 text-[#FF6B35] font-black hover:underline underline-offset-4"
+          >
+            Sign In
+          </Link>
         </p>
 
         <p className="text-center text-[11px] text-gray-400 mt-4 px-4 leading-relaxed">
-          By signing up you agree to our <Link to="/privacy" className="underline hover:text-gray-600 transition-colors">Privacy Policy</Link>
+          By signing up you agree to our{' '}
+          <Link to="/privacy" className="underline hover:text-gray-600 transition-colors">
+            Privacy Policy
+          </Link>
         </p>
       </form>
     </div>

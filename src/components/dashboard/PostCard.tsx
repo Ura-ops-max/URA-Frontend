@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Bookmark, Heart, MessageCircle, Share2, Star } from "lucide-react";
-import { Link } from "react-router-dom";
-import useAuth from "@/hooks/api/use-auth";
+import { useState } from 'react';
+import { Bookmark, Heart, MessageCircle, Share2, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import useAuth from '@/hooks/api/use-auth';
 
 interface PostCardProps {
   post: {
@@ -48,13 +48,13 @@ export default function PostCard({ post, onRequireAuth }: PostCardProps) {
       {/* HEADER */}
       <div className="flex items-center gap-3 p-4">
         <img
-          src={post.business.profileImage || "/images/default-avatar.png"}
+          src={post.business.profileImage || '/images/default-avatar.png'}
           className="w-12 h-12 rounded-full object-cover"
         />
 
         <div className="flex-1">
           <h3 className="font-semibold text-gray-900">{post.business.businessName}</h3>
-          <p className="text-xs text-gray-500">@{post.business.username ?? "username"}</p>
+          <p className="text-xs text-gray-500">@{post.business.username ?? 'username'}</p>
 
           {/* Rating */}
           <div className="flex items-center text-yellow-500 text-xs mt-1">
@@ -62,7 +62,7 @@ export default function PostCard({ post, onRequireAuth }: PostCardProps) {
               <Star
                 key={i}
                 size={14}
-                className={i < (post.business.rating ?? 4) ? "fill-yellow-500" : ""}
+                className={i < (post.business.rating ?? 4) ? 'fill-yellow-500' : ''}
               />
             ))}
           </div>
@@ -78,41 +78,39 @@ export default function PostCard({ post, onRequireAuth }: PostCardProps) {
       </div>
 
       {/* MEDIA (GRID) */}
-{/* MEDIA (GRID) */}
-{post.media && post.media.length > 0 && (
-  <div className="grid gap-2 p-4"
-       style={{
-         gridTemplateColumns:
-           post.media.length === 1 ? '1fr' :
-           post.media.length === 2 ? '1fr 1fr' :
-           '2fr 1fr'
-       }}
-  >
-    {/* First image (always present) */}
-    <img
-      src={post.media[0]}
-      className={`rounded-xl w-full object-cover transition ${
-        post.media.length === 1 ? 'h-[260px]' : 'h-[260px]'
-      }`}
-    />
-
-    {/* For 2+ images, render the rest in a column */}
-    {post.media.length > 1 && (
-      <div className="flex flex-col gap-2">
-        {post.media.slice(1, 3).map((img, index) => (
+      {/* MEDIA (GRID) */}
+      {post.media && post.media.length > 0 && (
+        <div
+          className="grid gap-2 p-4"
+          style={{
+            gridTemplateColumns:
+              post.media.length === 1 ? '1fr' : post.media.length === 2 ? '1fr 1fr' : '2fr 1fr',
+          }}
+        >
+          {/* First image (always present) */}
           <img
-            key={index}
-            src={img}
+            src={post.media[0]}
             className={`rounded-xl w-full object-cover transition ${
-              post?.media?.length === 2 ? 'h-[260px]' : 'h-[125px]'
+              post.media.length === 1 ? 'h-[260px]' : 'h-[260px]'
             }`}
           />
-        ))}
-      </div>
-    )}
-  </div>
-)}
 
+          {/* For 2+ images, render the rest in a column */}
+          {post.media.length > 1 && (
+            <div className="flex flex-col gap-2">
+              {post.media.slice(1, 3).map((img, index) => (
+                <img
+                  key={index}
+                  src={img}
+                  className={`rounded-xl w-full object-cover transition ${
+                    post?.media?.length === 2 ? 'h-[260px]' : 'h-[125px]'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* CONTENT */}
       <div className="px-4">
@@ -124,10 +122,7 @@ export default function PostCard({ post, onRequireAuth }: PostCardProps) {
         {/* TAGS */}
         <div className="flex flex-wrap gap-2 mt-3">
           {post.tags?.map((tag) => (
-            <span
-              key={tag}
-              className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full"
-            >
+            <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
               #{tag}
             </span>
           ))}
@@ -139,9 +134,7 @@ export default function PostCard({ post, onRequireAuth }: PostCardProps) {
         <div className="flex items-center gap-5">
           <button onClick={toggleLike} className="flex items-center gap-1">
             <Heart
-              className={`w-5 h-5 ${
-                liked ? "fill-red-500 stroke-red-500" : "stroke-gray-600"
-              }`}
+              className={`w-5 h-5 ${liked ? 'fill-red-500 stroke-red-500' : 'stroke-gray-600'}`}
             />
           </button>
 

@@ -9,9 +9,9 @@ export const useOrders = () => {
     setIsLoading(true);
     try {
       const response = await orderAPI.getMyOrders();
-      setOrders(response.data);
+      setOrders(response.data?.orders ?? response.data ?? []);
     } catch (err) {
-      console.error("Order fetch error:", err);
+      console.error('Order fetch error:', err);
     } finally {
       setIsLoading(false);
     }

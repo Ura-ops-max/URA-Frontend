@@ -12,10 +12,7 @@ export default function LoginPage() {
   // Extract server-side state from mutation
   const { mutate: login, isPending, error: serverError } = useLogin();
 
-  const {
-    register,
-    handleSubmit,
-  } = useForm({
+  const { register, handleSubmit } = useForm({
     defaultValues: {
       identifier: '',
       password: '',
@@ -33,7 +30,9 @@ export default function LoginPage() {
     <div className="w-full max-w-[400px] animate-in fade-in slide-in-from-right-8 duration-700">
       <div className="mb-10 text-center lg:text-left">
         <h2 className="text-4xl font-black text-gray-900 tracking-tighter">Sign In</h2>
-        <p className="mt-3 text-gray-500 font-medium text-sm">Welcome back! Please enter your details.</p>
+        <p className="mt-3 text-gray-500 font-medium text-sm">
+          Welcome back! Please enter your details.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -50,8 +49,8 @@ export default function LoginPage() {
           <Label
             htmlFor="identifier"
             className={cn(
-              "text-[10px] font-black uppercase tracking-widest ml-1 transition-colors",
-              errorMessage ? "text-red-500" : "text-gray-400"
+              'text-[10px] font-black uppercase tracking-widest ml-1 transition-colors',
+              errorMessage ? 'text-red-500' : 'text-gray-400',
             )}
           >
             Username or Email
@@ -63,8 +62,8 @@ export default function LoginPage() {
             {...register('identifier', { required: 'Username or email is required' })}
             disabled={isPending}
             className={cn(
-              "h-12 rounded-2xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all",
-              errorMessage && "border-red-300 ring-red-50"
+              'h-12 rounded-2xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all',
+              errorMessage && 'border-red-300 ring-red-50',
             )}
           />
         </div>
@@ -75,8 +74,8 @@ export default function LoginPage() {
             <Label
               htmlFor="password"
               className={cn(
-                "text-[10px] font-black uppercase tracking-widest transition-colors",
-                errorMessage ? "text-red-500" : "text-gray-400"
+                'text-[10px] font-black uppercase tracking-widest transition-colors',
+                errorMessage ? 'text-red-500' : 'text-gray-400',
               )}
             >
               Password
@@ -94,8 +93,8 @@ export default function LoginPage() {
             {...register('password', { required: 'Password is required' })}
             disabled={isPending}
             className={cn(
-              "h-12 rounded-2xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all",
-              errorMessage && "border-red-300 ring-red-50"
+              'h-12 rounded-2xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all',
+              errorMessage && 'border-red-300 ring-red-50',
             )}
           />
         </div>
@@ -117,9 +116,15 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Social Buttons (Omitted for brevity, keep as you had them) */}
+        {/* Social Buttons */}
         <div className="grid grid-cols-2 gap-3">
-          <Button type="button" variant="outline">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              window.location.href = `${import.meta.env.VITE_API_ROOT_URL}/api/v1/auth/google`;
+            }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="0.98em"
@@ -146,12 +151,7 @@ export default function LoginPage() {
             <span>Google</span>
           </Button>
           <Button type="button" variant="outline">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="1em"
-              height="1em"
-              viewBox="0 0 256 256"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 256 256">
               <path fill="#f1511b" d="M121.666 121.666H0V0h121.666z"></path>
               <path fill="#80cc28" d="M256 121.666H134.335V0H256z"></path>
               <path fill="#00adef" d="M121.663 256.002H0V134.336h121.663z"></path>

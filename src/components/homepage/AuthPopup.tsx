@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 interface Props {
   open: boolean;
@@ -15,13 +15,11 @@ export default function AuthPopup({ open, onClose }: Props) {
         initial={{ scale: 0.7, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.7, opacity: 0 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
         className="bg-white shadow-xl rounded-2xl p-6 max-w-sm w-[90%] text-center"
       >
         <h2 className="text-xl font-semibold text-gray-800">Sign In Required</h2>
-        <p className="text-gray-500 mt-2">
-          You need an account to perform this action.
-        </p>
+        <p className="text-gray-500 mt-2">You need an account to perform this action.</p>
 
         <div className="mt-5 space-y-3">
           <Link
@@ -39,10 +37,7 @@ export default function AuthPopup({ open, onClose }: Props) {
           </Link>
         </div>
 
-        <button
-          onClick={onClose}
-          className="mt-4 text-gray-400 hover:text-gray-600 text-sm"
-        >
+        <button onClick={onClose} className="mt-4 text-gray-400 hover:text-gray-600 text-sm">
           Maybe later
         </button>
       </motion.div>

@@ -14,27 +14,27 @@ interface ReviewsSectionProps {
 }
 
 const ReviewsSection: React.FC<ReviewsSectionProps> = ({ itemId, itemModel }) => {
-  const { reviews, isLoading, refreshReviews, handleLike, handleDislike, handleDelete } = useReviews(itemId);
+  const { reviews, isLoading, refreshReviews, handleLike, handleDislike, handleDelete } =
+    useReviews(itemId);
   const [isFormOpen, setIsFormOpen] = useState(false); // State to control form visibility
   const [editingReview, setEditingReview] = useState<any>(null);
   // Calculate summary data from live reviews for the ReviewSummary component
   const totalReviews = reviews.length;
-  const averageRating = totalReviews > 0
-    ? reviews.reduce((acc, rev) => acc + rev.rating, 0) / totalReviews
-    : 0;
+  const averageRating =
+    totalReviews > 0 ? reviews.reduce((acc, rev) => acc + rev.rating, 0) / totalReviews : 0;
 
   const distribution = {
-    5: reviews.filter(r => r.rating === 5).length,
-    4: reviews.filter(r => r.rating === 4).length,
-    3: reviews.filter(r => r.rating === 3).length,
-    2: reviews.filter(r => r.rating === 2).length,
-    1: reviews.filter(r => r.rating === 1).length,
+    5: reviews.filter((r) => r.rating === 5).length,
+    4: reviews.filter((r) => r.rating === 4).length,
+    3: reviews.filter((r) => r.rating === 3).length,
+    2: reviews.filter((r) => r.rating === 2).length,
+    1: reviews.filter((r) => r.rating === 1).length,
   };
 
   const summaryData = {
     totalReviews,
     averageRating,
-    distribution
+    distribution,
   };
 
   const handleCloseDrawer = () => {
@@ -45,8 +45,8 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ itemId, itemModel }) =>
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
       {/* 1. Summary Section */}
-      <ReviewSummary summary={summaryData} onAddReview={() => setIsFormOpen(true)} /> {/* Pass handler */}
-
+      <ReviewSummary summary={summaryData} onAddReview={() => setIsFormOpen(true)} />{' '}
+      {/* Pass handler */}
       {/* 2. Individual Reviews */}
       <div className="divide-y divide-gray-50">
         {isLoading ? (
@@ -80,7 +80,6 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ itemId, itemModel }) =>
           </div>
         )}
       </div>
-
       {/* The Review Form (conditionally rendered as a simple slide-in for now) */}
       <AnimatePresence>
         {isFormOpen && (
@@ -96,10 +95,10 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ itemId, itemModel }) =>
 
             {/* 2. Modern Drag-to-Close Drawer */}
             <motion.div
-              initial={{ y: "100%" }}
+              initial={{ y: '100%' }}
               animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               drag="y"
               dragConstraints={{ top: 0 }}
               dragElastic={0.2}

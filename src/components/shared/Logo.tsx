@@ -59,7 +59,7 @@ const Logo = forwardRef<HTMLAnchorElement, LogoProps>(
       external = false,
       onClick,
     },
-    ref
+    ref,
   ) => {
     const sizes = sizeConfig[size];
     const hoverClass = hoverEffects[hoverEffect];
@@ -115,12 +115,7 @@ const Logo = forwardRef<HTMLAnchorElement, LogoProps>(
 
     if (external) {
       return (
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          {...commonProps}
-        >
+        <a href={url} target="_blank" rel="noopener noreferrer" {...commonProps}>
           {content}
         </a>
       );
@@ -131,7 +126,7 @@ const Logo = forwardRef<HTMLAnchorElement, LogoProps>(
         {content}
       </Link>
     );
-  }
+  },
 );
 
 Logo.displayName = 'Logo';

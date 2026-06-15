@@ -19,11 +19,16 @@ export const formatTimeAgo = (dateString: string | Date) => {
     // Standard relative time logic
     const distance = formatDistanceToNowStrict(date);
     const unitMap: Record<string, string> = {
-      'second': 's', 'seconds': 's',
-      'minute': 'm', 'minutes': 'm',
-      'hour': 'hr', 'hours': 'hrs',
-      'day': 'd', 'days': 'd',
-      'month': 'mo', 'months': 'mo',
+      second: 's',
+      seconds: 's',
+      minute: 'm',
+      minutes: 'm',
+      hour: 'hr',
+      hours: 'hrs',
+      day: 'd',
+      days: 'd',
+      month: 'mo',
+      months: 'mo',
     };
 
     const [value, unit] = distance.split(' ');

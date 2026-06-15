@@ -1,6 +1,6 @@
 // src/components/profile/ProfilePostsFeed.tsx
-import React, { useEffect, useState } from "react";
-import PostCard from "@/components/dashboard/PostCard";
+import React, { useEffect, useState } from 'react';
+import PostCard from '@/components/dashboard/PostCard';
 
 interface Post {
   _id: string;
@@ -29,11 +29,11 @@ const ProfilePostsFeed: React.FC<Props> = ({ profile }) => {
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        const res = await fetch("/mock-data/post.json");
-        if (!res.ok) throw new Error("Failed to fetch posts");
+        const res = await fetch('/mock-data/post.json');
+        if (!res.ok) throw new Error('Failed to fetch posts');
 
         const json: Post[] = await res.json();
-        
+
         setPosts(json);
       } catch (err) {
         console.error(err);

@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, ImagePlus, Trash2 } from "lucide-react";
-import { useEditPost } from "@/hooks/api/use-feed";
-import { Textarea } from "../ui/textarea";
-import { uploadMediaToS3 } from "@/services/s3.service";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, ImagePlus, Trash2 } from 'lucide-react';
+import { useEditPost } from '@/hooks/api/use-feed';
+import { Textarea } from '../ui/textarea';
+import { uploadMediaToS3 } from '@/services/s3.service';
 
 interface EditPostModalProps {
   open: boolean;
@@ -32,17 +32,17 @@ export function EditPostModal({
   initialMedia = [],
 }: EditPostModalProps) {
   const [caption, setCaption] = useState(initialCaption);
-  const [tagsInput, setTagsInput] = useState(initialTags.join(", "));
+  const [tagsInput, setTagsInput] = useState(initialTags.join(', '));
   const [existingMedia, setExistingMedia] = useState<string[]>(initialMedia);
   const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const editMutation = useEditPost(postId, "social");
+  const editMutation = useEditPost(postId, 'social');
 
   // Reset form when modal opens
   useEffect(() => {
     if (open) {
       setCaption(initialCaption);
-      setTagsInput(initialTags.join(", "));
+      setTagsInput(initialTags.join(', '));
       setExistingMedia(initialMedia);
       setNewMediaFiles([]);
     }
@@ -72,7 +72,7 @@ export function EditPostModal({
 
   const handleSubmit = async () => {
     const tags = tagsInput
-      .split(",")
+      .split(',')
       .map((tag) => tag.trim())
       .filter((tag) => tag.length > 0);
 
@@ -90,7 +90,7 @@ export function EditPostModal({
       await editMutation.mutateAsync({ caption, tags, media: finalMedia });
       onOpenChange(false);
     } catch (error) {
-      console.error("Failed to update post:", error);
+      console.error('Failed to update post:', error);
     } finally {
       setIsUploading(false);
     }
@@ -132,7 +132,10 @@ export function EditPostModal({
             <div className="flex flex-wrap gap-3 mb-3">
               {/* Existing media preview */}
               {existingMedia.map((url, idx) => (
-                <div key={`existing-${idx}`} className="relative w-20 h-20 rounded-lg overflow-hidden border group">
+                <div
+                  key={`existing-${idx}`}
+                  className="relative w-20 h-20 rounded-lg overflow-hidden border group"
+                >
                   <img src={url} className="w-full h-full object-cover" alt="" />
                   <button
                     type="button"
@@ -147,7 +150,10 @@ export function EditPostModal({
               {newMediaFiles.map((file, idx) => {
                 const previewUrl = URL.createObjectURL(file);
                 return (
-                  <div key={`new-${idx}`} className="relative w-20 h-20 rounded-lg overflow-hidden border group">
+                  <div
+                    key={`new-${idx}`}
+                    className="relative w-20 h-20 rounded-lg overflow-hidden border group"
+                  >
                     <img src={previewUrl} className="w-full h-full object-cover" alt="preview" />
                     <button
                       type="button"
@@ -188,7 +194,7 @@ export function EditPostModal({
                 Saving...
               </>
             ) : (
-              "Save Changes"
+              'Save Changes'
             )}
           </Button>
         </DialogFooter>

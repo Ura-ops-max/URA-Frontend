@@ -1,13 +1,9 @@
 // src/components/homepage/MarketPlace.tsx
 import React, { useState } from 'react';
-import { usePostsFeed } from "@/hooks/api/use-feed";
-import ProductPostCard from "../feed/ProductPostCard";
-import CategoryRibbon from "./CategoryRibbon";
-import { Loader2, AlertCircle, ShoppingBag, ChartNoAxesCombined, Star, MapPin } from "lucide-react";
-
-
-
-
+import { usePostsFeed } from '@/hooks/api/use-feed';
+import ProductPostCard from '../feed/ProductPostCard';
+import CategoryRibbon from './CategoryRibbon';
+import { Loader2, AlertCircle, ShoppingBag, ChartNoAxesCombined, Star, MapPin } from 'lucide-react';
 
 // Small utility types
 type Stat = {
@@ -16,7 +12,6 @@ type Stat = {
   icon?: React.ReactNode;
 };
 
-
 // ---------- Feed (composed) ----------
 const sampleStats: Stat[] = [
   { label: 'Businesses', value: '50K', icon: <ChartNoAxesCombined className="w-6 h-6" /> },
@@ -24,9 +19,7 @@ const sampleStats: Stat[] = [
   { label: 'State', value: '36', icon: <MapPin className="w-6 h-6" /> },
 ];
 
-
-
-      // ---------- Stats Row ----------
+// ---------- Stats Row ----------
 export const StatsRow: React.FC<{ stats: Stat[] }> = ({ stats }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -44,9 +37,8 @@ export const StatsRow: React.FC<{ stats: Stat[] }> = ({ stats }) => {
   );
 };
 
-
 const MarketplaceFeed = () => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   // Fetching data - restrict: false allows public viewing
   const { data, status, refetch } = usePostsFeed(undefined, false);
@@ -54,13 +46,14 @@ const MarketplaceFeed = () => {
   // 1. Flatten pages and 2. Filter ONLY for Product types immediately
   const allProducts = React.useMemo(() => {
     const posts = data?.pages?.flat() || [];
-    return posts.filter(post => post.type === 'PRODUCT');
+    return posts.filter((post) => post.type === 'PRODUCT');
   }, [data]);
 
   // 3. Apply Category Filter
-  const filteredProducts = selectedCategory === "All"
-    ? allProducts
-    : allProducts.filter(post => post?.product?.category === selectedCategory);
+  const filteredProducts =
+    selectedCategory === 'All'
+      ? allProducts
+      : allProducts.filter((post) => post?.product?.category === selectedCategory);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
@@ -69,10 +62,7 @@ const MarketplaceFeed = () => {
         <StatsRow stats={sampleStats} />
       </div>
       <section className="bg-gray-50 min-h-screen">
-        <CategoryRibbon
-          activeCategory={selectedCategory}
-          onSelect={setSelectedCategory}
-        />
+        <CategoryRibbon activeCategory={selectedCategory} onSelect={setSelectedCategory} />
 
         <div className="max-w-4xl mx-auto px-4 py-8">
           {status === 'pending' && (
@@ -86,7 +76,9 @@ const MarketplaceFeed = () => {
             <div className="text-center py-10 bg-white rounded-3xl border border-red-100 p-8 shadow-sm">
               <AlertCircle className="mx-auto text-red-500 mb-4" size={32} />
               <p className="text-gray-900 font-bold">Could not load products</p>
-              <p className="text-gray-500 text-sm mb-6">Check your internet connection and try again.</p>
+              <p className="text-gray-500 text-sm mb-6">
+                Check your internet connection and try again.
+              </p>
               <button
                 onClick={() => refetch()}
                 className="bg-orange-500 text-white px-10 py-2 rounded-full font-bold hover:bg-orange-600 transition shadow-lg shadow-orange-200"
@@ -111,8 +103,8 @@ const MarketplaceFeed = () => {
               </div>
               <h3 className="text-gray-900 font-bold text-lg">No products found</h3>
               <p className="text-gray-400 text-sm">
-                {selectedCategory === "All"
-                  ? "The marketplace is empty right now."
+                {selectedCategory === 'All'
+                  ? 'The marketplace is empty right now.'
                   : `No items available in the ${selectedCategory} category.`}
               </p>
             </div>

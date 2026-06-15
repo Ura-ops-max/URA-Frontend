@@ -25,33 +25,29 @@ const Dashboard = () => {
   const {
     conversations,
     isLoading: isChatsLoading,
-    isError: chatError // This maps the hook's isError to the name chatError
+    isError: chatError, // This maps the hook's isError to the name chatError
   } = useChat(activeProfileId!);
 
   const {
     activities,
     isError: isActivityError,
-    clearAll
+    clearAll,
   } = useActivity(isDesktop ? { enabled: true } : { enabled: false });
 
   const {
     data: posts,
     isLoading: isPostsLoading,
-    isError: isBookmarksError
+    isError: isBookmarksError,
   } = useBookmarkedItems('Post');
 
-  const {
-    data: businesses,
-    isLoading: isBizLoading,
-  } = useBookmarkedItems('Business');
+  const { data: businesses, isLoading: isBizLoading } = useBookmarkedItems('Business');
 
   // Combine them for a "Recent Saved" list
   const allBookmarks = React.useMemo(() => {
-    return [...(posts || []), ...(businesses || [])].sort((a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    return [...(posts || []), ...(businesses || [])].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   }, [posts, businesses]);
-
 
   // 1. Loading State
   if (isContextLoading || isChatsLoading) {
@@ -80,10 +76,7 @@ const Dashboard = () => {
             // Use subtle headers for the widgets
             className="bg-white/40 backdrop-blur-xl border-white/20 rounded-[24px] overflow-hidden"
           >
-            <ChatList
-              chatList={conversations}
-              activeProfileId={activeProfileId!}
-            />
+            <ChatList chatList={conversations} activeProfileId={activeProfileId!} />
           </SidebarWidget>
         </div>
       }

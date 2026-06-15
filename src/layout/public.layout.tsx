@@ -6,19 +6,17 @@ import { Outlet } from 'react-router-dom';
 
 const PublichLayout = () => {
   return (
-      <AuthProvider>
-    
-    <CartProvider>
-      <div>
-        <NavBar />
-        <div className="min-h-dvh">
-          <Outlet />
+    <AuthProvider>
+      <CartProvider>
+        <div>
+          <NavBar />
+          <div className="min-h-dvh">
+            <Outlet />
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
-    </CartProvider>
+      </CartProvider>
     </AuthProvider>
-
   );
 };
 

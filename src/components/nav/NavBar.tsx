@@ -18,15 +18,15 @@ export const NavBar = () => {
   }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, to: string) => {
-  if (to.startsWith('#')) {
-    e.preventDefault(); // Stop React Router from trying to change the URL path
-    const element = document.getElementById(to.replace('#', ''));
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    if (to.startsWith('#')) {
+      e.preventDefault(); // Stop React Router from trying to change the URL path
+      const element = document.getElementById(to.replace('#', ''));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+      setMenuState(false); // Close mobile menu if open
     }
-    setMenuState(false); // Close mobile menu if open
-  }
-};
+  };
   return (
     <header>
       <nav data-state={menuState && 'active'} className="fixed z-20 w-full px-2">

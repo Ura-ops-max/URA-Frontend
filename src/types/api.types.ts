@@ -1,4 +1,3 @@
-
 export type loginType = { email: string; password: string };
 
 export type LoginResponseType = {
@@ -28,6 +27,7 @@ export type registerType = {
   username: string;
   email: string;
   password: string;
+  phone: string;
 };
 
 // USER TYPE - matches backend IUser model
@@ -37,11 +37,17 @@ export type UserType = {
   lastName: string;
   username: string;
   email: string;
+  phone?: string;
+  paylukCustomerId?: string;
+  shippingAddress?: {
+    phone?: string;
+    city?: string;
+    fullAddress?: string;
+  };
   coverPicture?: string;
   isBusinessOwner: boolean;
   profilePicture?: string;
-  bio?: string; // Add this to your IUser schema if needed
-  
+  bio?: string;
   emailVerified?: boolean;
   twoFactorEnabled?: boolean;
   lastLoginAt?: Date;
@@ -81,7 +87,7 @@ export type BusinessType = {
 };
 export interface IOperatingHour {
   day: string;
-  open: string;  // Will be "09:00" or "Closed"
+  open: string; // Will be "09:00" or "Closed"
   close: string; // Will be "17:00" or "Closed"
 }
 
@@ -130,15 +136,14 @@ export interface CurrentUserResponseType {
   message?: string;
   user: UserType;
   // Add this line:
-  business: BusinessType | null; 
+  business: BusinessType | null;
   related: RelatedData;
 }
-
 
 export type UsernameCheckResponse = {
   available: boolean;
   message: string; // e.g., "Username is available" or "Username is taken"
-}
+};
 
 export interface Chat {
   id: string;
@@ -164,7 +169,6 @@ export interface Bookmark {
   description: string;
   avatar: string;
 }
-
 
 // types/api.types.ts
 export interface ICommentAuthor {

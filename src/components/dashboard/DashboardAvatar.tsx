@@ -27,32 +27,32 @@ export const DashboardAvatar = () => {
         <DropdownMenuTrigger asChild>
           <button className="outline-none block rounded-full hover:ring-2 hover:ring-orange-100 transition-all">
             <Avatar className="h-9 w-9 border border-gray-200">
-              <AvatarImage src={user.profilePicture || generateAvatarUrl(`${user?.firstName} ${user?.lastName}`)} alt={user.firstName} />
+              <AvatarImage
+                src={
+                  user.profilePicture || generateAvatarUrl(`${user?.firstName} ${user?.lastName}`)
+                }
+                alt={user.firstName}
+              />
               <AvatarFallback className="p-0">
-                <img 
-                  src={generateAvatarUrl(`${user?.firstName} ${user?.lastName}`)} 
-                  alt="avatar" 
-                />
+                <img src={generateAvatarUrl(`${user?.firstName} ${user?.lastName}`)} alt="avatar" />
               </AvatarFallback>
             </Avatar>
           </button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent className="w-56" align="end" sideOffset={10}>
-          <div className="px-2 py-1.5 text-sm font-semibold text-gray-900">
-            My Account
-          </div>
+          <div className="px-2 py-1.5 text-sm font-semibold text-gray-900">My Account</div>
           <DropdownMenuSeparator />
-          
-          <DropdownMenuItem 
-            className="cursor-pointer flex items-center gap-2" 
+
+          <DropdownMenuItem
+            className="cursor-pointer flex items-center gap-2"
             onClick={() => navigate(`/dashboard/profile/user/${user._id}`)}
           >
             <User size={16} />
             <span>Profile</span>
           </DropdownMenuItem>
 
-          <DropdownMenuItem 
+          <DropdownMenuItem
             className="cursor-pointer flex items-center gap-2"
             onClick={() => navigate('/dashboard/settings')}
           >
@@ -61,9 +61,9 @@ export const DashboardAvatar = () => {
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
-          
-          <DropdownMenuItem 
-            className="cursor-pointer flex items-center gap-2 text-red-600 focus:text-red-600 focus:bg-red-50" 
+
+          <DropdownMenuItem
+            className="cursor-pointer flex items-center gap-2 text-red-600 focus:text-red-600 focus:bg-red-50"
             onClick={() => setIsLogoutOpen(true)}
           >
             <LogOut size={16} />

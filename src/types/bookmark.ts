@@ -1,5 +1,5 @@
 // src/types/bookmark.ts
-import type { ProductCardProps } from '@/types/product'; 
+import type { ProductCardProps } from '@/types/product';
 
 // Merchant/User Bookmark structure (based on mobile design)
 export interface MerchantBookmark {

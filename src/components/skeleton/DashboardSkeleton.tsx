@@ -1,10 +1,9 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const DashboardSkeleton = () => {
   return (
     <div className="min-h-screen bg-[#FFF9F6] py-8">
       <div className="mx-auto max-w-7xl px-4 lg:px-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
-        
         {/* LEFT SIDEBAR SKELETON */}
         <aside className="space-y-6 lg:col-span-1 hidden lg:block">
           {/* Profile Card Skeleton */}
@@ -15,7 +14,7 @@ export const DashboardSkeleton = () => {
               <Skeleton className="h-3 w-1/2 mx-auto animate-pulse" />
             </div>
           </div>
-          
+
           {/* Chat List Skeleton */}
           <div className="rounded-xl border bg-white p-4 shadow-sm space-y-4">
             <Skeleton className="h-4 w-1/3 animate-pulse" />
@@ -82,7 +81,6 @@ export const DashboardSkeleton = () => {
             </div>
           </div>
         </aside>
-
       </div>
     </div>
   );

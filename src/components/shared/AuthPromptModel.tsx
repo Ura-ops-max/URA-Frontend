@@ -1,7 +1,6 @@
-
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Lock, UserPlus, LogIn } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Lock, UserPlus, LogIn } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthPromptModalProps {
   isOpen: boolean;
@@ -14,9 +13,9 @@ interface AuthPromptModalProps {
 export const AuthPromptModal = ({
   isOpen,
   onClose,
-  title = "Authentication Required",
-  subtitle = "Please log in to your account to continue with this action.",
-  actionName = "continue"
+  title = 'Authentication Required',
+  subtitle = 'Please log in to your account to continue with this action.',
+  actionName = 'continue',
 }: AuthPromptModalProps) => {
   const navigate = useNavigate();
 
@@ -42,7 +41,7 @@ export const AuthPromptModal = ({
           className="relative w-full max-w-sm bg-white rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
         >
           {/* Close Button */}
-          <button 
+          <button
             onClick={onClose}
             className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
@@ -56,14 +55,12 @@ export const AuthPromptModal = ({
             </div>
 
             <h2 className="text-2xl font-black text-gray-900 mb-2">{title}</h2>
-            <p className="text-gray-500 text-sm leading-relaxed mb-8 px-4">
-              {subtitle}
-            </p>
+            <p className="text-gray-500 text-sm leading-relaxed mb-8 px-4">{subtitle}</p>
 
             {/* Buttons Stack */}
             <div className="w-full flex flex-col gap-3">
               <button
-                onClick={() => navigate("/auth/login")}
+                onClick={() => navigate('/auth/login')}
                 className="w-full bg-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-800 transition-all active:scale-[0.98]"
               >
                 <LogIn size={18} />
@@ -71,7 +68,7 @@ export const AuthPromptModal = ({
               </button>
 
               <button
-                onClick={() => navigate("/auth/register")}
+                onClick={() => navigate('/auth/register')}
                 className="w-full bg-white text-gray-900 border-2 border-gray-100 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-50 transition-all active:scale-[0.98]"
               >
                 <UserPlus size={18} />
@@ -79,7 +76,7 @@ export const AuthPromptModal = ({
               </button>
             </div>
 
-            <button 
+            <button
               onClick={onClose}
               className="mt-6 text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
             >

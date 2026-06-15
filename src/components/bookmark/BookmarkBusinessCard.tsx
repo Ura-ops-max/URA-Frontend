@@ -1,9 +1,9 @@
 // components/bookmarks/BookmarkBusinessCard.tsx
-import { Link } from "react-router-dom";
-import { CheckCircle2, Star, Bookmark, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useToggleBookmark } from "@/hooks/api/use-feed"; // Your existing hook
-import { generateAvatarUrl } from "@/utils/avatar-generator";
+import { Link } from 'react-router-dom';
+import { CheckCircle2, Star, Bookmark, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToggleBookmark } from '@/hooks/api/use-feed'; // Your existing hook
+import { generateAvatarUrl } from '@/utils/avatar-generator';
 
 export const BookmarkBusinessCard = ({ biz }: { biz: any }) => {
   // ✅ This works! The hook is at the top level of THIS component.

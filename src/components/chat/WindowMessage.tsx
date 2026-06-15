@@ -22,8 +22,11 @@ const MessageWindow = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [partnerLastSeen, _setPartnerLastSeen] = useState<string | null>(null);
 
-
-  const [pendingFile, setPendingFile] = useState<{ file: File; preview: string; type: 'image' | 'video' } | null>(null);
+  const [pendingFile, setPendingFile] = useState<{
+    file: File;
+    preview: string;
+    type: 'image' | 'video';
+  } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const currentChat = conversations?.find((c: any) => c._id === conversationId);
@@ -31,16 +34,18 @@ const MessageWindow = () => {
     const pId = typeof p.participantId === 'object' ? p.participantId._id : p.participantId;
     return pId !== activeProfileId;
   });
-  const isBusiness = other?.participantModel === 'Business'
+  const isBusiness = other?.participantModel === 'Business';
   const details = other?.participantId;
-  const partnerName = other?.participantModel === 'User'
-    ? `${details?.firstName} ${details?.lastName}`
-    : details?.businessName || 'Chat';
+  const partnerName =
+    other?.participantModel === 'User'
+      ? `${details?.firstName} ${details?.lastName}`
+      : details?.businessName || 'Chat';
   const partnerAvatar = details?.profilePicture || details?.businessLogo;
   const partnerId = typeof details === 'object' ? details._id : details;
 
-  const profileRoute = isBusiness ? `/dashboard/profile/business/${partnerId}` : `/dashboard/profile/user/${partnerId}`;
-
+  const profileRoute = isBusiness
+    ? `/dashboard/profile/business/${partnerId}`
+    : `/dashboard/profile/user/${partnerId}`;
 
   const [isOnline, setIsOnline] = useState(details?.isOnline || false);
 
@@ -59,14 +64,12 @@ const MessageWindow = () => {
     socketService.onStatusChange(handleStatus);
 
     // IMMEDIATE CHECK: Force a check for this partner on mount
-    socketService.emit("check_online_status", partnerId);
+    socketService.emit('check_online_status', partnerId);
 
     return () => {
       socketService.off('user_status_changed', handleStatus);
     };
   }, [partnerId]);
-
-
 
   // This ensures the server knows you are online and who you are
   useEffect(() => {
@@ -96,7 +99,7 @@ const MessageWindow = () => {
         const { data } = await chatAPI.getMessages(conversationId, activeProfileId);
         setMessages(data.data);
       } catch (err) {
-        console.error("Failed to load messages", err);
+        console.error('Failed to load messages', err);
       } finally {
         setIsLoading(false);
       }
@@ -111,7 +114,9 @@ const MessageWindow = () => {
         setMessages((prev) => {
           const exists = prev.some((m) => (m._id || m.id) === (newMessage._id || newMessage.id));
           if (exists) return prev;
-          const pendingIndex = prev.findIndex(m => m.status === 'pending' && m.content === newMessage.content);
+          const pendingIndex = prev.findIndex(
+            (m) => m.status === 'pending' && m.content === newMessage.content,
+          );
           if (pendingIndex !== -1) {
             const updated = [...prev];
             updated[pendingIndex] = { ...newMessage, status: newMessage.status || 'sent' };
@@ -120,7 +125,10 @@ const MessageWindow = () => {
           return [...prev, newMessage];
         });
 
-        const msgSenderId = typeof newMessage.senderId === 'object' ? newMessage.senderId?._id : (newMessage.senderId || newMessage.sender);
+        const msgSenderId =
+          typeof newMessage.senderId === 'object'
+            ? newMessage.senderId?._id
+            : newMessage.senderId || newMessage.sender;
         if (msgSenderId !== activeProfileId) {
           chatAPI.getMessages(conversationId!, activeProfileId);
         }
@@ -129,12 +137,18 @@ const MessageWindow = () => {
 
     const handleSeen = ({ seenBy }: any) => {
       if (seenBy !== activeProfileId) {
-        setMessages(prev => prev.map(m => m.status !== 'seen' ? { ...m, status: 'seen' } : m));
+        setMessages((prev) =>
+          prev.map((m) => (m.status !== 'seen' ? { ...m, status: 'seen' } : m)),
+        );
       }
     };
 
     const handleDelivered = ({ messageId }: any) => {
-      setMessages(prev => prev.map(m => (m._id === messageId && m.status !== 'seen') ? { ...m, status: 'delivered' } : m));
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === messageId && m.status !== 'seen' ? { ...m, status: 'delivered' } : m,
+        ),
+      );
     };
 
     socketService.on('message:received', handleReceived);
@@ -179,7 +193,7 @@ const MessageWindow = () => {
       senderId: activeProfileId,
       media: fileToUpload ? { url: fileToUpload.preview, type: fileToUpload.type } : null,
       createdAt: new Date().toISOString(),
-      status: 'pending'
+      status: 'pending',
     };
 
     setMessages((prev) => [...prev, optimisticMsg]);
@@ -195,14 +209,14 @@ const MessageWindow = () => {
         conversationId: conversationId!,
         content: textToSend,
         senderId: activeProfileId,
-        senderModel: (activeTab === 'PERSONAL' ? 'User' : 'Business'),
-        media: mediaData
+        senderModel: activeTab === 'PERSONAL' ? 'User' : 'Business',
+        media: mediaData,
       } as any);
 
       if (fileToUpload) URL.revokeObjectURL(fileToUpload.preview);
     } catch (err) {
-      console.error("Failed to send", err);
-      setMessages((prev) => prev.map(m => m._id === tempId ? { ...m, status: 'error' } : m));
+      console.error('Failed to send', err);
+      setMessages((prev) => prev.map((m) => (m._id === tempId ? { ...m, status: 'error' } : m)));
     }
   };
 
@@ -219,12 +233,19 @@ const MessageWindow = () => {
     <div className="flex flex-col h-full bg-white dark:bg-slate-950">
       <header className="flex items-center justify-between p-4 border-b dark:border-slate-800 bg-white dark:bg-slate-900 z-10">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/dashboard/chat')} className="md:hidden p-2 text-slate-500"><ChevronLeft size={24} /></button>
+          <button
+            onClick={() => navigate('/dashboard/chat')}
+            className="md:hidden p-2 text-slate-500"
+          >
+            <ChevronLeft size={24} />
+          </button>
           <div className="relative shrink-0">
-            <div className={`
+            <div
+              className={`
                     p-[2px] rounded-full transition-all duration-500
                     ${isOnline ? 'bg-gradient-to-tr from-emerald-400 to-emerald-500' : 'bg-transparent'}
-                  `}>
+                  `}
+            >
               <div className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 overflow-hidden bg-slate-100">
                 <img
                   src={partnerAvatar || generateAvatarUrl(partnerName)}
@@ -239,8 +260,7 @@ const MessageWindow = () => {
             )}
           </div>
 
-          <Link
-            to={profileRoute}>
+          <Link to={profileRoute}>
             <div className="flex flex-col">
               <h3 className="font-bold text-sm dark:text-white leading-none">{partnerName}</h3>
               <div className="flex items-center gap-1.5 mt-0.5">
@@ -257,19 +277,16 @@ const MessageWindow = () => {
                     {/* Subtle grey dot for offline */}
                     <span className="h-2 w-2 rounded-full bg-slate-300"></span>
                     <span className="text-[11px] md:text-xs text-slate-500 font-normal">
-                      {partnerLastSeen ? (
-                        // Custom formatter for a cleaner "last seen" string
-                        `Last seen ${formatDistanceToNow(new Date(partnerLastSeen), {
-                          addSuffix: true
-                        }).replace('about ', '')}`
-                      ) : (
-                        'Offline'
-                      )}
+                      {partnerLastSeen
+                        ? // Custom formatter for a cleaner "last seen" string
+                          `Last seen ${formatDistanceToNow(new Date(partnerLastSeen), {
+                            addSuffix: true,
+                          }).replace('about ', '')}`
+                        : 'Offline'}
                     </span>
                   </div>
                 )}
               </div>
-
             </div>
           </Link>
         </div>
@@ -277,25 +294,49 @@ const MessageWindow = () => {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-base scrollbar-large bg-[#F5F1EE] dark:bg-slate-950">
         {messages.map((msg, index) => {
-          const msgSenderId = typeof msg.senderId === 'object' ? msg.senderId?._id : (msg.senderId || msg.sender?._id || msg.sender);
+          const msgSenderId =
+            typeof msg.senderId === 'object'
+              ? msg.senderId?._id
+              : msg.senderId || msg.sender?._id || msg.sender;
           const isMe = msgSenderId === activeProfileId;
           return (
-            <div key={msg._id || index} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-              <div className={`relative max-w-[75%] shadow-sm overflow-hidden ${isMe
-                ? 'bg-[#FF6B35] text-white rounded-2xl rounded-tr-none'
-                : 'bg-white text-[#4A3F35] rounded-2xl rounded-tl-none border border-gray-100'
-                }`}>
+            <div
+              key={msg._id || index}
+              className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`relative max-w-[75%] shadow-sm overflow-hidden ${
+                  isMe
+                    ? 'bg-[#FF6B35] text-white rounded-2xl rounded-tr-none'
+                    : 'bg-white text-[#4A3F35] rounded-2xl rounded-tl-none border border-gray-100'
+                }`}
+              >
                 {msg.media?.url && (
                   <div className="p-1 bg-black/5 rounded-xl mb-1">
                     {msg.media.type === 'video' ? (
-                      <video src={msg.media.url} controls muted playsInline className="rounded-lg max-h-64 w-full object-contain bg-black" />
+                      <video
+                        src={msg.media.url}
+                        controls
+                        muted
+                        playsInline
+                        className="rounded-lg max-h-64 w-full object-contain bg-black"
+                      />
                     ) : (
-                      <img src={msg.media.url} alt="Shared media" className="rounded-lg max-h-64 w-full object-cover cursor-pointer" onClick={() => window.open(msg.media.url, '_blank')} />
+                      <img
+                        src={msg.media.url}
+                        alt="Shared media"
+                        className="rounded-lg max-h-64 w-full object-cover cursor-pointer"
+                        onClick={() => window.open(msg.media.url, '_blank')}
+                      />
                     )}
                   </div>
                 )}
-                {msg.content && <p className="leading-relaxed text-[15px] px-4 py-2">{msg.content}</p>}
-                <div className={`flex items-center gap-1 pb-1.5 px-3 opacity-80 text-[10px] ${isMe ? 'justify-end' : 'justify-start'}`}>
+                {msg.content && (
+                  <p className="leading-relaxed text-[15px] px-4 py-2">{msg.content}</p>
+                )}
+                <div
+                  className={`flex items-center gap-1 pb-1.5 px-3 opacity-80 text-[10px] ${isMe ? 'justify-end' : 'justify-start'}`}
+                >
                   {msg.createdAt && format(new Date(msg.createdAt), 'HH:mm')}
                   {isMe && renderStatus(msg)}
                 </div>
@@ -314,7 +355,11 @@ const MessageWindow = () => {
               {pendingFile.type === 'video' ? (
                 <video src={pendingFile.preview} className="w-full h-full object-cover" muted />
               ) : (
-                <img src={pendingFile.preview} className="w-full h-full object-cover" alt="preview" />
+                <img
+                  src={pendingFile.preview}
+                  className="w-full h-full object-cover"
+                  alt="preview"
+                />
               )}
               <button
                 onClick={() => setPendingFile(null)}
@@ -338,13 +383,19 @@ const MessageWindow = () => {
                 width="100%"
                 height={350}
                 theme={Theme.AUTO}
-                onEmojiClick={(emojiData) => setInputText(prev => prev + emojiData.emoji)}
+                onEmojiClick={(emojiData) => setInputText((prev) => prev + emojiData.emoji)}
               />
             </div>
           </div>
         )}
 
-        <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" accept="image/*,video/*" />
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileSelect}
+          className="hidden"
+          accept="image/*,video/*"
+        />
 
         {/* FORM CONTAINER */}
         <form

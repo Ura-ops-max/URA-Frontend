@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { tokenStorage } from "@/lib/token-storage";
-import { getCurrentUserQueryFn } from "@/lib/api"; // real backend fn
+import { useQuery } from '@tanstack/react-query';
+import { tokenStorage } from '@/lib/token-storage';
+import { getCurrentUserQueryFn } from '@/lib/api'; // real backend fn
 import { AxiosError } from 'axios';
-import { mockApi } from "@/services/mockApi";
+import { mockApi } from '@/services/mockApi';
 
 /**
  * This flag controls whether we use backend or mock data.
@@ -16,10 +16,10 @@ const useAuth = () => {
   const enabled = USE_MOCK_API || hasToken; // always enabled in mock mode
 
   const query = useQuery({
-    queryKey: ["authUser"],
+    queryKey: ['authUser'],
     queryFn: async () => {
       if (USE_MOCK_API) {
-        return mockApi.get("currentUser"); // no need for extra await
+        return mockApi.get('currentUser'); // no need for extra await
       }
       return getCurrentUserQueryFn();
     },
@@ -45,6 +45,5 @@ const useAuth = () => {
     isAuthenticated,
   };
 };
-
 
 export default useAuth;

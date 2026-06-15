@@ -5,7 +5,10 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer id='contact' className="bg-orange-500 mt-24 p-8 md:p-24 flex flex-col md:flex-row justify-between items-center gap-8 text-black font-semibold text-lg">
+    <footer
+      id="contact"
+      className="bg-orange-500 mt-24 p-8 md:p-24 flex flex-col md:flex-row justify-between items-center gap-8 text-black font-semibold text-lg"
+    >
       <p>&copy; {currentYear} Ura. All rights reserved.</p>
 
       <div className="flex gap-6">

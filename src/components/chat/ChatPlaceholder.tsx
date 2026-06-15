@@ -1,4 +1,4 @@
-import { MessageSquare } from "lucide-react";
+import { MessageSquare } from 'lucide-react';
 
 const ChatPlaceholder = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-8 bg-gray-50/30 dark:bg-transparent">
@@ -12,4 +12,4 @@ const ChatPlaceholder = () => (
   </div>
 );
 
-export default ChatPlaceholder
+export default ChatPlaceholder;

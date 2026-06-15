@@ -5,12 +5,18 @@ import { formatDistanceToNow } from 'date-fns';
 export const ActivityLog = ({ activities }: { activities: any[] }) => {
   const getIcon = (type: string) => {
     switch (type) {
-      case 'comment': return <MessageSquare size={16} className="text-blue-500" />;
-      case 'like': return <Heart size={16} className="text-red-500" />;
-      case 'signup': return <UserPlus size={16} className="text-green-500" />;
-      case 'order': return <ShoppingBag size={16} className="text-orange-500" />;
-      case 'post': return <PlusCircle size={16} className="text-purple-500" />;
-      default: return <Activity size={16} className="text-gray-500" />;
+      case 'comment':
+        return <MessageSquare size={16} className="text-blue-500" />;
+      case 'like':
+        return <Heart size={16} className="text-red-500" />;
+      case 'signup':
+        return <UserPlus size={16} className="text-green-500" />;
+      case 'order':
+        return <ShoppingBag size={16} className="text-orange-500" />;
+      case 'post':
+        return <PlusCircle size={16} className="text-purple-500" />;
+      default:
+        return <Activity size={16} className="text-gray-500" />;
     }
   };
 
@@ -32,7 +38,10 @@ export const ActivityLog = ({ activities }: { activities: any[] }) => {
             {/* Content */}
             <div className="flex flex-col pt-1">
               <p className="text-sm text-gray-700">
-                <span className="font-bold text-gray-900">You</span> {activity.actionType === 'signup' ? 'joined the community' : `performed a ${activity.actionType}`}
+                <span className="font-bold text-gray-900">You</span>{' '}
+                {activity.actionType === 'signup'
+                  ? 'joined the community'
+                  : `performed a ${activity.actionType}`}
                 {activity.contentPreview && (
                   <span className="text-gray-500 italic">: "{activity.contentPreview}"</span>
                 )}

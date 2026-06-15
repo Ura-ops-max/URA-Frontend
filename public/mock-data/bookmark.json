@@ -1,4 +1,3 @@
-
 {
   "posts": [
     {
@@ -51,41 +50,41 @@
     }
   ],
   "merchants": [
-    { 
-      "id": "1", 
-      "name": "Adira Grills", 
-      "rating": 4.0, 
-      "reviewCount": 80, 
-      "address": "7 Street Wuse Zone 4 Abuja", 
-      "snippet": "Twice the taste, one fiery bite", 
-      "profileImageUrl": "https://picsum.photos/id/237/60/60" 
+    {
+      "id": "1",
+      "name": "Adira Grills",
+      "rating": 4.0,
+      "reviewCount": 80,
+      "address": "7 Street Wuse Zone 4 Abuja",
+      "snippet": "Twice the taste, one fiery bite",
+      "profileImageUrl": "https://picsum.photos/id/237/60/60"
     },
-    { 
-      "id": "2", 
-      "name": "Ibeji Grills", 
-      "rating": 4.0, 
-      "reviewCount": 80, 
-      "address": "7 Street Wuse Zone 4 Abuja", 
-      "snippet": "Twice the taste, one fiery bite", 
-      "profileImageUrl": "https://picsum.photos/id/56/60/60" 
+    {
+      "id": "2",
+      "name": "Ibeji Grills",
+      "rating": 4.0,
+      "reviewCount": 80,
+      "address": "7 Street Wuse Zone 4 Abuja",
+      "snippet": "Twice the taste, one fiery bite",
+      "profileImageUrl": "https://picsum.photos/id/56/60/60"
     },
-    { 
-      "id": "3", 
-      "name": "Fries & Chops", 
-      "rating": 4.6, 
-      "reviewCount": 80, 
-      "address": "G & M Park Gwaripa Abuja", 
-      "snippet": "leave your taste buds with an epiphany", 
-      "profileImageUrl": "https://picsum.photos/id/350/60/60" 
+    {
+      "id": "3",
+      "name": "Fries & Chops",
+      "rating": 4.6,
+      "reviewCount": 80,
+      "address": "G & M Park Gwaripa Abuja",
+      "snippet": "leave your taste buds with an epiphany",
+      "profileImageUrl": "https://picsum.photos/id/350/60/60"
     },
-    { 
-      "id": "4", 
-      "name": "Chop & Chill Bistro", 
-      "rating": 4.1, 
-      "reviewCount": 80, 
-      "address": "Wuse 2, Abuja", 
-      "snippet": "A playful, Afro-urban eatery", 
-      "profileImageUrl": "https://picsum.photos/id/23/60/60" 
+    {
+      "id": "4",
+      "name": "Chop & Chill Bistro",
+      "rating": 4.1,
+      "reviewCount": 80,
+      "address": "Wuse 2, Abuja",
+      "snippet": "A playful, Afro-urban eatery",
+      "profileImageUrl": "https://picsum.photos/id/23/60/60"
     }
   ]
 }

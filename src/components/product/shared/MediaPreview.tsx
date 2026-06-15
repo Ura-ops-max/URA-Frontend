@@ -1,11 +1,20 @@
 // src/components/product/MediaPreview.tsx
 import { X, Play } from 'lucide-react';
 
-export const MediaPreview = ({ files, onRemove }: { files: any[], onRemove: (index: number) => void }) => {
+export const MediaPreview = ({
+  files,
+  onRemove,
+}: {
+  files: any[];
+  onRemove: (index: number) => void;
+}) => {
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-4">
       {files.map((file, index) => (
-        <div key={index} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 group">
+        <div
+          key={index}
+          className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 group"
+        >
           {file.type.startsWith('video') ? (
             <div className="relative w-full h-full">
               <video src={file.preview} className="w-full h-full object-cover" />

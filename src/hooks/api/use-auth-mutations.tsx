@@ -7,13 +7,10 @@ import type { LoginResponseType, RegisterResponseType } from '@/types/api.types'
 import type { AxiosError } from 'axios';
 import type { UseFormSetError } from 'react-hook-form';
 
-import type { BackendErrorResponse } from '@/types/api.error.types'; // Your provided error type
-import type { RegisterFormData } from '@/pages/auth/SignUp'; // The type we exported from the page
-
-// --- Define the hook's required properties ---
+import type { BackendErrorResponse } from '@/types/api.error.types';
+import type { RegisterFormData } from '@/pages/auth/SignUp';
 interface UseRegisterProps {
   setError: UseFormSetError<RegisterFormData>;
-  // Type for React state setter function
   setGlobalError: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -46,7 +43,8 @@ export const useRegister = ({ setError, setGlobalError }: UseRegisterProps) => {
     mutationFn: registerMutationFn,
 
     onSuccess: (response: RegisterResponseType) => {
-      const message = response?.message || 'Registration successful! Check your email for verification.';
+      const message =
+        response?.message || 'Registration successful! Check your email for verification.';
       toast.success(message);
       navigate('/auth/login');
     },
@@ -55,19 +53,19 @@ export const useRegister = ({ setError, setGlobalError }: UseRegisterProps) => {
       setGlobalError('');
       const errorData = error.response?.data;
       const status = error.response?.status;
-      console.log("status", status);
-      console.log("errorData", errorData);
+      console.log('status', status);
+      console.log('errorData', errorData);
       if ((status === 400 || status === 409) && errorData?.error.details) {
-        console.log("errorData", errorData);
+        console.log('errorData', errorData);
         let fieldsHandled = false;
 
-        errorData.error.details.forEach(detail => {
+        errorData.error.details.forEach((detail) => {
           const field = detail.field as keyof RegisterFormData;
 
           if (['firstName', 'lastName', 'email', 'password', 'username'].includes(field)) {
             setError(field, {
               type: 'server',
-              message: detail.message
+              message: detail.message,
             });
             fieldsHandled = true;
           }
@@ -93,7 +91,6 @@ export const useRegister = ({ setError, setGlobalError }: UseRegisterProps) => {
     },
   });
 };
-
 
 export const useLogout = () => {
   const navigate = useNavigate();
@@ -122,4 +119,3 @@ export const useLogout = () => {
     },
   });
 };
-

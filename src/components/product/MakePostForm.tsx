@@ -20,13 +20,15 @@ const MakePostForm = () => {
   const [fetchingProducts, setFetchingProducts] = useState(false);
 
   const [postType, setPostType] = useState<'normal' | 'product'>(
-    searchParams.get('attach') ? 'product' : 'normal'
+    searchParams.get('attach') ? 'product' : 'normal',
   );
 
   const [caption, setCaption] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
-  const [media, setMedia] = useState<{ file: File, preview: string, type: 'image' | 'video' }[]>([]);
+  const [media, setMedia] = useState<{ file: File; preview: string; type: 'image' | 'video' }[]>(
+    [],
+  );
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   // --- FETCH REAL INVENTORY ---
@@ -35,10 +37,10 @@ const MakePostForm = () => {
       const fetchInventory = async () => {
         setFetchingProducts(true);
         try {
-          const res = await API.get('/post/my-products');
+          const res = await API.get('/products/mine');
           if (res.data.success) setMyProducts(res.data.products);
         } catch (err) {
-          toast.error("Could not load your inventory");
+          toast.error('Could not load your inventory');
         } finally {
           setFetchingProducts(false);
         }
@@ -49,18 +51,18 @@ const MakePostForm = () => {
 
   const handleProductSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     // Note: backend uses _id
-    const prod = myProducts.find(p => p._id === e.target.value);
+    const prod = myProducts.find((p) => p._id === e.target.value);
     setSelectedProduct(prod);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newMedia = files.map(file => {
+    const newMedia = files.map((file) => {
       const isVideo = file.type.startsWith('video');
       return {
         file,
         preview: URL.createObjectURL(file),
-        type: (isVideo ? 'video' : 'image') as "image" | "video"
+        type: (isVideo ? 'video' : 'image') as 'image' | 'video',
       };
     });
     setMedia((prev) => [...prev, ...newMedia]);
@@ -68,10 +70,10 @@ const MakePostForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
-    if (!caption.trim()) return toast.error("Caption is compulsory!");
-    if (postType === 'product' && !selectedProduct) return toast.error("Please link a product!");
+    if (!caption.trim()) return toast.error('Caption is compulsory!');
+    if (postType === 'product' && !selectedProduct) return toast.error('Please link a product!');
     // if (postType === 'normal' && media.length === 0) return toast.error("Please add some media!");
 
     // Construct the data to match your backend validator
@@ -82,7 +84,7 @@ const MakePostForm = () => {
         tags,
         productId: selectedProduct?._id, // Send the real MongoDB ID
       },
-      files: media.map(m => m.file)
+      files: media.map((m) => m.file),
     };
 
     createPost(payload, {
@@ -92,7 +94,7 @@ const MakePostForm = () => {
         setTags([]);
         setMedia([]);
         setSelectedProduct(null);
-      }
+      },
     });
   };
 
@@ -125,23 +127,26 @@ const MakePostForm = () => {
           <label className="mt-2 flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-200 rounded-[32px] bg-gray-50/50 hover:bg-orange-50/50 hover:border-orange-200 cursor-pointer transition-all group">
             <Upload className="w-8 h-8 text-gray-400 group-hover:text-orange-500 mb-2" />
             <span className="text-xs font-bold text-gray-400 uppercase">Photos / Video</span>
-            <input 
+            <input
               type="file"
               className="hidden"
-              multiple 
+              multiple
               accept="image/*,video/*"
-              onChange={handleFileChange} 
+              onChange={handleFileChange}
             />
           </label>
-          <MediaPreview files={media} onRemove={(idx) => setMedia(media.filter((_, i) => i !== idx))} />
+          <MediaPreview
+            files={media}
+            onRemove={(idx) => setMedia(media.filter((_, i) => i !== idx))}
+          />
         </section>
       ) : (
         <section className="animate-in fade-in slide-in-from-top-2 space-y-4">
           <div className="flex items-center justify-between ml-1">
             <label className="text-sm font-bold text-gray-700">Select Product</label>
-            <button 
-              type="button" 
-              onClick={() => setSearchParams({ type: 'product' })} 
+            <button
+              type="button"
+              onClick={() => setSearchParams({ type: 'product' })}
               className="text-[10px] font-black text-orange-600 flex items-center gap-1 hover:underline"
             >
               <PlusCircle size={12} /> NEW PRODUCT
@@ -149,16 +154,23 @@ const MakePostForm = () => {
           </div>
 
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+            <Search
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+              size={18}
+            />
             <select
               className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-[24px] text-sm font-bold outline-none focus:border-orange-500 appearance-none cursor-pointer"
               onChange={handleProductSelect}
-              value={selectedProduct?._id || ""}
+              value={selectedProduct?._id || ''}
               disabled={fetchingProducts}
             >
-              <option value="" disabled>{fetchingProducts ? "Loading inventory..." : "Search your shop..."}</option>
-              {myProducts.map(p => (
-                <option key={p._id} value={p._id}>{p.name} — ₦{p.price.toLocaleString()}</option>
+              <option value="" disabled>
+                {fetchingProducts ? 'Loading inventory...' : 'Search your shop...'}
+              </option>
+              {myProducts.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.name} — ₦{p.price.toLocaleString()}
+                </option>
               ))}
             </select>
           </div>
@@ -172,10 +184,18 @@ const MakePostForm = () => {
               />
               <div className="flex-1">
                 <h4 className="text-sm font-bold text-gray-900">{selectedProduct.name}</h4>
-                <p className="text-xs font-bold text-orange-600">₦{selectedProduct.price.toLocaleString()}</p>
-                <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">In Stock: {selectedProduct.stock}</p>
+                <p className="text-xs font-bold text-orange-600">
+                  ₦{selectedProduct.price.toLocaleString()}
+                </p>
+                <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">
+                  In Stock: {selectedProduct.stock}
+                </p>
               </div>
-              <button type="button" onClick={() => setSelectedProduct(null)} className="text-gray-400 hover:text-red-500">
+              <button
+                type="button"
+                onClick={() => setSelectedProduct(null)}
+                className="text-gray-400 hover:text-red-500"
+              >
                 <X size={18} />
               </button>
             </div>
@@ -188,7 +208,7 @@ const MakePostForm = () => {
         <textarea
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
-          placeholder={postType === 'product' ? "Announce this item..." : "What's happening?"}
+          placeholder={postType === 'product' ? 'Announce this item...' : "What's happening?"}
           className="w-full p-5 bg-gray-50 border border-gray-200 rounded-[28px] h-32 resize-none outline-none focus:border-orange-500 transition-all text-sm font-medium"
         />
       </FormField>

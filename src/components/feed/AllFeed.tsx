@@ -1,14 +1,14 @@
 // src/components/feed/AllFeed.tsx
-import { useEffect, useState } from "react";
-import { useInView } from "react-intersection-observer";
-import { Loader2, RefreshCcw, PlusCircle, ArrowUp } from "lucide-react";
-import { useInfiniteFeed } from "@/hooks/api/use-feed";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
+import { Loader2, RefreshCcw, PlusCircle, ArrowUp } from 'lucide-react';
+import { useInfiniteFeed } from '@/hooks/api/use-feed';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-import SocialPostCard from "./SocialPostCard";
-import ProductPostCard from "./ProductPostCard";
-import { Link } from "react-router-dom";
+import SocialPostCard from './SocialPostCard';
+import ProductPostCard from './ProductPostCard';
+import { Link } from 'react-router-dom';
 
 interface AllFeedProps {
   userId?: string;
@@ -31,26 +31,26 @@ export default function AllFeed({ userId, onRequireAuth, onCreatePostClick }: Al
   const { ref: bottomRef, inView: isBottomInView } = useInView();
 
   // 1. Scroll-to-Top Visibility
-// Update your useEffect inside AllFeed.tsx
-useEffect(() => {
-  const container = document.getElementById("main-feed-container");
-  
-  const handleScroll = () => {
-    if (container) {
-      setShowScrollTop(container.scrollTop > 400);
-    }
-  };
+  // Update your useEffect inside AllFeed.tsx
+  useEffect(() => {
+    const container = document.getElementById('main-feed-container');
 
-  if (container) {
-    container.addEventListener("scroll", handleScroll);
-  }
+    const handleScroll = () => {
+      if (container) {
+        setShowScrollTop(container.scrollTop > 400);
+      }
+    };
 
-  return () => {
     if (container) {
-      container.removeEventListener("scroll", handleScroll);
+      container.addEventListener('scroll', handleScroll);
     }
-  };
-}, []);
+
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
 
   // 2. Infinite Scroll trigger
   useEffect(() => {
@@ -59,15 +59,14 @@ useEffect(() => {
     }
   }, [isBottomInView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-
   const scrollToTop = () => {
-  const container = document.getElementById("main-feed-container");
-  if (container && container.scrollHeight > window.innerHeight) {
-    container.scrollTo({ top: 0, behavior: 'smooth' });
-  } else {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-};
+    const container = document.getElementById('main-feed-container');
+    if (container && container.scrollHeight > window.innerHeight) {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // 3. Status Handling
   if (status === 'pending' && !isRefetching) {
@@ -107,11 +106,9 @@ useEffect(() => {
         <p className="text-gray-500 max-w-[250px] mb-6">
           {userId
             ? "This user hasn't shared anything yet."
-            : "Your network is quiet. Why not start the conversation?"}
+            : 'Your network is quiet. Why not start the conversation?'}
         </p>
-        <Link
-          to="/dashboard/post/create?type=post"
-        >
+        <Link to="/dashboard/post/create?type=post">
           <Button
             onClick={onCreatePostClick}
             className="bg-orange-600 hover:bg-orange-700 text-white rounded-full px-8"
@@ -119,20 +116,18 @@ useEffect(() => {
             Create your first post
           </Button>
         </Link>
-
       </div>
     );
   }
 
   return (
-    <div 
+    <div
       id="main-feed-container"
       className="relative h-[calc(100vh-180px)] overflow-y-auto overflow-x-hidden pb-10 scrollbar-base scrollbar-main lg:px-4 scroll-smooth"
     >
-
-    <div className="grid gap-6 mx-auto max-w-full">
-      {/* Updating Indicator */}
-      {/* {isRefetching && !isFetchingNextPage && (
+      <div className="grid gap-6 mx-auto max-w-full">
+        {/* Updating Indicator */}
+        {/* {isRefetching && !isFetchingNextPage && (
         <div className="flex justify-center py-2 sticky top-0 z-10 animate-bounce">
           <div className="bg-orange-500 text-white px-4 py-1 rounded-full text-xs flex items-center gap-2 shadow-lg">
             <RefreshCcw size={12} className="animate-spin" /> Updating Feed...
@@ -140,45 +135,49 @@ useEffect(() => {
         </div>
       )} */}
 
-      {/* Feed List */}
-      <div className="grid gap-6">
-      {allPosts.map((post) => (
-        post?.type === 'PRODUCT'
-          ? <ProductPostCard key={post._id} post={post} onRequireAuth={onRequireAuth} />
-          : <SocialPostCard key={post._id} post={post} onRequireAuth={onRequireAuth} />
-      ))}
-      </div>
-      {/* Load More / Footer */}
-      <div ref={bottomRef} className="py-10 text-center">
-        {isFetchingNextPage ? (
-          <Loader2 className="w-6 h-6 animate-spin mx-auto text-orange-500" />
-        ) : !hasNextPage ? (
-          <div className="space-y-4 pt-4 border-t border-dashed border-gray-200">
-            <p className="text-gray-400 text-sm italic font-light">
-              You've caught up with everything!
-            </p>
-            <Button
-              variant="ghost"
-              onClick={scrollToTop}
-              className="text-orange-600 hover:text-orange-700 gap-2"
-            >
-              <ArrowUp size={16} /> Back to Top
-            </Button>
-          </div>
-        ) : null}
-      </div>
+        {/* Feed List */}
+        <div className="grid gap-6">
+          {allPosts.map((post) =>
+            post?.type === 'PRODUCT' ? (
+              <ProductPostCard key={post._id} post={post} onRequireAuth={onRequireAuth} />
+            ) : (
+              <SocialPostCard key={post._id} post={post} onRequireAuth={onRequireAuth} />
+            ),
+          )}
+        </div>
+        {/* Load More / Footer */}
+        <div ref={bottomRef} className="py-10 text-center">
+          {isFetchingNextPage ? (
+            <Loader2 className="w-6 h-6 animate-spin mx-auto text-orange-500" />
+          ) : !hasNextPage ? (
+            <div className="space-y-4 pt-4 border-t border-dashed border-gray-200">
+              <p className="text-gray-400 text-sm italic font-light">
+                You've caught up with everything!
+              </p>
+              <Button
+                variant="ghost"
+                onClick={scrollToTop}
+                className="text-orange-600 hover:text-orange-700 gap-2"
+              >
+                <ArrowUp size={16} /> Back to Top
+              </Button>
+            </div>
+          ) : null}
+        </div>
 
-      {/* Floating Scroll Top */}
-      <button
-        onClick={scrollToTop}
-        className={cn(
-          "fixed bottom-24 right-6 p-3 bg-orange-600 text-white rounded-full shadow-2xl transition-all duration-300 transform z-50 hover:scale-110 active:scale-95",
-          showScrollTop ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
-        )}
-      >
-        <ArrowUp size={24} strokeWidth={3} />
-      </button>
-    </div>
+        {/* Floating Scroll Top */}
+        <button
+          onClick={scrollToTop}
+          className={cn(
+            'fixed bottom-24 right-6 p-3 bg-orange-600 text-white rounded-full shadow-2xl transition-all duration-300 transform z-50 hover:scale-110 active:scale-95',
+            showScrollTop
+              ? 'translate-y-0 opacity-100'
+              : 'translate-y-20 opacity-0 pointer-events-none',
+          )}
+        >
+          <ArrowUp size={24} strokeWidth={3} />
+        </button>
+      </div>
     </div>
   );
 }

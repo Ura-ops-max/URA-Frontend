@@ -1,5 +1,5 @@
-import { useState } from "react";
-import AuthPopup from "@/components/homepage/AuthPopup";
+import { useState } from 'react';
+import AuthPopup from '@/components/homepage/AuthPopup';
 
 export default function useAuthGuard(isLoggedIn: boolean) {
   const [open, setOpen] = useState(false);

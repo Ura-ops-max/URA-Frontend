@@ -11,16 +11,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const cartMethods = useCartHook();
 
   // If user isn't logged in, we override the count to 0
-  const value = useMemo(() => ({
-    ...cartMethods,
-    totalItems: isAuthenticated ? cartMethods.totalItems : 0,
-  }), [cartMethods, isAuthenticated]);
-
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
+  const value = useMemo(
+    () => ({
+      ...cartMethods,
+      totalItems: isAuthenticated ? cartMethods.totalItems : 0,
+    }),
+    [cartMethods, isAuthenticated],
   );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCartContext = () => {

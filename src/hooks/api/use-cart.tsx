@@ -14,7 +14,7 @@ export const useCart = () => {
       const response = await cartAPI.getCart();
       setCart(response.data);
     } catch (err) {
-      console.error("Fetch cart error:", err);
+      console.error('Fetch cart error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -30,9 +30,9 @@ export const useCart = () => {
     try {
       const response = await cartAPI.addToCart({ productId, quantity });
       setCart(response.data);
-      toast.success("Added to cart");
+      toast.success('Added to cart');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to add item");
+      toast.error(err.response?.data?.message || 'Failed to add item');
     } finally {
       setIsUpdating(false);
     }
@@ -46,7 +46,7 @@ export const useCart = () => {
       const response = await cartAPI.updateQuantity({ productId, quantity: newQuantity });
       setCart(response.data);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Update failed");
+      toast.error(err.response?.data?.message || 'Update failed');
     } finally {
       setIsUpdating(false);
     }
@@ -58,9 +58,9 @@ export const useCart = () => {
     try {
       const response = await cartAPI.removeFromCart(productId);
       setCart(response.data);
-      toast.success("Item removed");
+      toast.success('Item removed');
     } catch (err) {
-      toast.error("Failed to remove item");
+      toast.error('Failed to remove item');
     } finally {
       setIsUpdating(false);
     }
@@ -75,6 +75,6 @@ export const useCart = () => {
     addItem,
     updateQty,
     removeItem,
-    refreshCart: fetchCart
+    refreshCart: fetchCart,
   };
 };

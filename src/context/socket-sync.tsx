@@ -18,7 +18,7 @@ export const SocketSync = () => {
 
       // 3. Listen for Live Notifications
       socketService.on('notification_received', (data) => {
-        toast.info(data.message || "You have a new notification");
+        toast.info(data.message || 'You have a new notification');
       });
 
       // 4. Listen for Real-time Messages
@@ -29,7 +29,7 @@ export const SocketSync = () => {
 
       // Cleanup on logout or unmount
       return () => {
-        // Optional: you can choose not to disconnect if you want the 
+        // Optional: you can choose not to disconnect if you want the
         // socket to stay alive during brief state flickers
         // socketService.disconnect();
       };

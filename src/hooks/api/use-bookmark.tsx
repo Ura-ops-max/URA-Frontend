@@ -5,7 +5,6 @@ import { fetchBookmarkList, fetchBookmarksLoad } from '@/lib/api';
 
 import type { Bookmark } from '@/types/api.types';
 
-
 type BookmarkQueryOptions = Omit<UseQueryOptions<Bookmark[]>, 'queryKey' | 'queryFn'>;
 
 export const useBookmarks = (options: BookmarkQueryOptions = {}) => {
@@ -22,7 +21,6 @@ export const useBookmarks = (options: BookmarkQueryOptions = {}) => {
     error,
   };
 };
-
 
 export const useBookmarkedItems = (type: 'Post' | 'Business') => {
   return useQuery({

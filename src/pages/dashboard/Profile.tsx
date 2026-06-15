@@ -1,41 +1,41 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {  useParams } from "react-router-dom";
-import { useAuthContext } from "@/context/auth-provider";
-import { useUserProfile } from "@/hooks/api/use-user-profile";
+import React, { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useAuthContext } from '@/context/auth-provider';
+import { useUserProfile } from '@/hooks/api/use-user-profile';
 
 // Components
-import ProfileHeader from "@/components/profile/ProfileHeader";
-import ProfileTabs from "@/components/profile/ProfileTabs";
-import ProfileAbout from "@/components/profile/ProfileAbout";
-import ProfileInfo from "@/components/profile/ProfileInfo";
-import ReviewsSection from "@/components/profile/ReviewSection";
-import PostsFeed from "@/components/feed/PostFeed";
-import ProductsFeed from "@/components/feed/ProductsFeed";
+import ProfileHeader from '@/components/profile/ProfileHeader';
+import ProfileTabs from '@/components/profile/ProfileTabs';
+import ProfileAbout from '@/components/profile/ProfileAbout';
+import ProfileInfo from '@/components/profile/ProfileInfo';
+import ReviewsSection from '@/components/profile/ReviewSection';
+import PostsFeed from '@/components/feed/PostFeed';
+import ProductsFeed from '@/components/feed/ProductsFeed';
 
 // Types - Use the central ProfileResponse to avoid assignment conflicts
-import type { ProfileResponse } from "@/types/api.types";
-import FollowList from "@/components/profile/FollowList";
-import { ProfileSkeleton } from "@/components/skeleton/ProfileSkelenton";
+import type { ProfileResponse } from '@/types/api.types';
+import FollowList from '@/components/profile/FollowList';
+import { ProfileSkeleton } from '@/components/skeleton/ProfileSkelenton';
 
 const TABS = {
-  FEEDS: "Feeds",
-  POSTS: "Posts",
-  PRODUCTS: "Products",
-  ABOUT: "About",
-  REVIEWS: "Reviews",
-  FOLLOWERS: "Followers", // New
-  FOLLOWING: "Following", // New
+  FEEDS: 'Feeds',
+  POSTS: 'Posts',
+  PRODUCTS: 'Products',
+  ABOUT: 'About',
+  REVIEWS: 'Reviews',
+  FOLLOWERS: 'Followers', // New
+  FOLLOWING: 'Following', // New
 } as const;
 
 const ProfilePage: React.FC = () => {
   const { userId, businessId } = useParams<{ userId?: string; businessId?: string }>();
-  const { user: currentUser, related} = useAuthContext();
+  const { user: currentUser, related } = useAuthContext();
 
   if (!currentUser) {
     return <ProfileSkeleton />; // Or return null
   }
 
-  const isBusinessProfile = location.pathname.includes("/business/");
+  const isBusinessProfile = location.pathname.includes('/business/');
   const targetId = businessId || userId;
 
   const [activeTab, setActiveTab] = useState<string>(TABS.FEEDS);
@@ -50,10 +50,7 @@ const ProfilePage: React.FC = () => {
   }, [currentUser, targetId, isBusinessProfile]);
   // Inside ProfilePage.tsx
 
-  const { data: profile, isLoading} = useUserProfile(
-    targetId,
-    isBusinessProfile
-  );
+  const { data: profile, isLoading } = useUserProfile(targetId, isBusinessProfile);
 
   const userProfile = useMemo(() => {
     // 1. If we have fetched data from the server, use it (most accurate)
@@ -66,8 +63,8 @@ const ProfilePage: React.FC = () => {
         business: currentUser.isBusinessOwner ? currentUser.business : null,
         related: {
           counts: { posts: 0, followers: 0, following: 0 },
-          stats: { rating: 0, reviewsCount: 0 }
-        }
+          stats: { rating: 0, reviewsCount: 0 },
+        },
       } as unknown as ProfileResponse;
     }
 
@@ -76,46 +73,49 @@ const ProfilePage: React.FC = () => {
   // --- CRITICAL FIXES BELOW ---
 
   // Set correct initial tab based on profile type
-useEffect(() => {
-  if (isBusinessProfile && activeTab === TABS.FEEDS) {
-    setActiveTab(TABS.POSTS); // Businesses default to Posts
-  }
-}, [isBusinessProfile]);
+  useEffect(() => {
+    if (isBusinessProfile && activeTab === TABS.FEEDS) {
+      setActiveTab(TABS.POSTS); // Businesses default to Posts
+    }
+  }, [isBusinessProfile]);
 
+  const renderTabContent = () => {
+    if (!userProfile) return null;
+    console.log(isBusinessProfile);
+    switch (activeTab) {
+      case TABS.FEEDS:
+        return !isBusinessProfile ? (
+          <PostsFeed targetId={targetId!} type="feed" />
+        ) : (
+          <PostsFeed targetId={targetId!} type="post" />
+        );
 
-const renderTabContent = () => {
-  if (!userProfile) return null;
-console.log(isBusinessProfile);
-  switch (activeTab) {
-    case TABS.FEEDS: 
-      return !isBusinessProfile ? <PostsFeed targetId={targetId!} type="feed"/> : <PostsFeed targetId={targetId!} type="post"/>;
+      case TABS.POSTS:
+        return <PostsFeed targetId={targetId!} type="post" />;
 
-    case TABS.POSTS: 
-      return <PostsFeed targetId={targetId!} type="post"/>;
+      case TABS.PRODUCTS:
+        return isBusinessProfile ? <ProductsFeed targetId={targetId!} type="post" /> : null;
 
-    case TABS.PRODUCTS:
-      return isBusinessProfile ? <ProductsFeed targetId={targetId!} type="post"/> : null;
+      case TABS.REVIEWS:
+        return isBusinessProfile ? (
+          <ReviewsSection itemId={targetId!} itemModel="Business" />
+        ) : null;
 
-    case TABS.REVIEWS: 
-      return isBusinessProfile ? <ReviewsSection itemId={targetId!} itemModel="Business" /> : null;
+      case TABS.FOLLOWERS:
+        return <FollowList targetId={targetId!} type="followers" currentUser={currentUser} />;
 
-    case TABS.FOLLOWERS:
-      return (
-        <FollowList targetId={targetId!} type="followers" currentUser={currentUser} />
-      );
+      case TABS.FOLLOWING:
+        return !isBusinessProfile ? (
+          <FollowList targetId={targetId!} type="following" currentUser={currentUser} />
+        ) : null;
 
-    case TABS.FOLLOWING:
-      return !isBusinessProfile ? (
-        <FollowList targetId={targetId!} type="following" currentUser={currentUser} />
-      ) : null;
+      case TABS.ABOUT:
+        return <ProfileAbout profile={userProfile} isBusinessPage={isBusinessProfile} />;
 
-    case TABS.ABOUT: 
-      return <ProfileAbout profile={userProfile} isBusinessPage={isBusinessProfile}  />;
-
-    default: 
-      return null;
-  }
-};
+      default:
+        return null;
+    }
+  };
   if (isLoading && !userProfile) return <ProfileSkeleton />;
 
   // Guard for JSX rendering
@@ -125,13 +125,11 @@ console.log(isBusinessProfile);
     /* 1. Wrapper: Changed max-w to 7xl and increased py to give the header more air */
     <div className="min-h-screen bg-[#FFF9F6] pt-6 pb-10 px-4 lg:px-12 animate-in fade-in duration-500">
       <div className="max-w-7xl mx-auto">
-
         {/* Profile Header stays at the top */}
         <ProfileHeader profile={userProfile} isBusiness={isBusinessProfile} />
 
         {/* 2. Grid: items-start prevents the sidebar from stretching unnecessarily */}
         <div className="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-3 items-start">
-
           {/* LEFT SIDEBAR */}
           <aside className="lg:col-span-1">
             {/* Added a subtle wrapper for the info card to ensure it feels separate */}
@@ -176,4 +174,3 @@ console.log(isBusinessProfile);
 };
 
 export default ProfilePage;
-

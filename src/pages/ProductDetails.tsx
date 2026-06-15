@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { mockApi } from '@/services/mockApi';
 import type { SingleProduct } from '@/types/product';
-import { ArrowLeft, ChevronRight, ShoppingCart } from 'lucide-react'; 
+import { ArrowLeft, ChevronRight, ShoppingCart } from 'lucide-react';
 import SellerInfo from '@/components/product/SellerInfo'; // <-- IMPORTED NEW COMPONENT
 
 const ProductDetails: React.FC = () => {
@@ -17,9 +17,9 @@ const ProductDetails: React.FC = () => {
       try {
         const data = await mockApi.get('single-product');
         if (data) setProduct(data as SingleProduct);
-        else setError("Product not found");
+        else setError('Product not found');
       } catch (err) {
-        setError("Error fetching data");
+        setError('Error fetching data');
       } finally {
         setLoading(false);
       }
@@ -31,7 +31,11 @@ const ProductDetails: React.FC = () => {
   if (loading) return <div className="p-10 text-center">Loading...</div>;
   if (error || !product) return <div className="p-10 text-center text-red-500">{error}</div>;
 
-  const DetailItem: React.FC<{ label: string; value: string | number; isPrice?: boolean }> = ({ label, value, isPrice }) => (
+  const DetailItem: React.FC<{ label: string; value: string | number; isPrice?: boolean }> = ({
+    label,
+    value,
+    isPrice,
+  }) => (
     <div className="flex items-center space-x-2 text-lg">
       <ChevronRight className="w-5 h-5 text-orange-500 flex-shrink-0" />
       <span className="font-semibold text-gray-800">{label} :</span>
@@ -59,15 +63,16 @@ const ProductDetails: React.FC = () => {
 
       {/* Main Layout Container */}
       <div className="max-w-7xl mx-auto px-4 lg:px-8 flex flex-col lg:flex-row lg:items-center lg:justify-center lg:min-h-[70vh] gap-8 lg:gap-16 lg:py-8 py-6">
-        
         {/* Image Section */}
         <div className="w-full lg:w-1/2 flex justify-center">
           <div className="w-full max-w-[500px] aspect-square rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-            <img 
-              src={product.imageUrl} 
-              alt={product.name} 
+            <img
+              src={product.imageUrl}
+              alt={product.name}
               className="w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.src = 'https://picsum.photos/600/600?text=Product+Image'; }}
+              onError={(e) => {
+                e.currentTarget.src = 'https://picsum.photos/600/600?text=Product+Image';
+              }}
             />
           </div>
         </div>
@@ -76,11 +81,13 @@ const ProductDetails: React.FC = () => {
         <div className="w-full lg:w-1/2 flex flex-col space-y-6">
           <div>
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{product.name}</h2>
-            
+
             {/* NEW: Seller Information */}
             <SellerInfo seller={product.seller} />
-            
-            <div className="space-y-2 pt-4"> {/* Added padding to separate from SellerInfo */}
+
+            <div className="space-y-2 pt-4">
+              {' '}
+              {/* Added padding to separate from SellerInfo */}
               <h3 className="text-xl font-bold text-gray-800">Description</h3>
               <p className="text-gray-600 text-lg leading-relaxed max-w-md">
                 {product.description}

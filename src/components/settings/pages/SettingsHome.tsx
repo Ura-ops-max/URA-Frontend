@@ -1,6 +1,4 @@
-import { Settings } from "lucide-react";
-
-          
+import { Settings } from 'lucide-react';
 
 export const SettingsHome = () => {
   return (

@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import { useInView } from "react-intersection-observer";
-import { Loader2, RefreshCcw, FileText, ArrowUp } from "lucide-react";
-import { usePostsFeed } from "@/hooks/api/use-feed";
-import { useAuthContext } from "@/context/auth-provider";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import SocialPostCard from "./SocialPostCard";
-import ProductPostCard from "./ProductPostCard";
+import { useEffect, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
+import { Loader2, RefreshCcw, FileText, ArrowUp } from 'lucide-react';
+import { usePostsFeed } from '@/hooks/api/use-feed';
+import { useAuthContext } from '@/context/auth-provider';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import SocialPostCard from './SocialPostCard';
+import ProductPostCard from './ProductPostCard';
 
 interface PostsFeedProps {
   targetId?: string; // Passed from the Profile Page
@@ -14,33 +14,29 @@ interface PostsFeedProps {
   type: string;
 }
 
-export default function PostsFeed({ targetId, onRequireAuth, type="feed" }: PostsFeedProps) {
+export default function PostsFeed({ targetId, onRequireAuth, type = 'feed' }: PostsFeedProps) {
   const { user: currentUser } = useAuthContext();
 
   // 1. Determine which ID to use: targetId from params OR the logged-in user's ID
   const effectiveUserId = targetId || currentUser?._id;
-  const isPostType = type === 'post'
+  const isPostType = type === 'post';
   // 2. Fetch only 'POST' type for this specific author
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    status,
-    refetch,
-  } = usePostsFeed(effectiveUserId, isPostType);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status, refetch } = usePostsFeed(
+    effectiveUserId,
+    isPostType,
+  );
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   const { ref: bottomRef, inView: isBottomInView } = useInView();
 
   // Handle Internal Scroll for the "Back to Top" button
   useEffect(() => {
-    const container = document.getElementById("main-feed-container");
+    const container = document.getElementById('main-feed-container');
     const handleScroll = () => {
       if (container) setShowScrollTop(container.scrollTop > 400);
     };
-    if (container) container.addEventListener("scroll", handleScroll);
-    return () => container?.removeEventListener("scroll", handleScroll);
+    if (container) container.addEventListener('scroll', handleScroll);
+    return () => container?.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Infinite Scroll Trigger
@@ -51,7 +47,7 @@ export default function PostsFeed({ targetId, onRequireAuth, type="feed" }: Post
   }, [isBottomInView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   const scrollToTop = () => {
-    const container = document.getElementById("main-feed-container");
+    const container = document.getElementById('main-feed-container');
     container?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -68,7 +64,11 @@ export default function PostsFeed({ targetId, onRequireAuth, type="feed" }: Post
     return (
       <div className="text-center py-10 bg-red-50 rounded-2xl border border-red-100">
         <p className="text-red-500 font-medium mb-3">Failed to load posts.</p>
-        <Button onClick={() => refetch()} variant="outline" className="bg-white border-red-200 text-red-600">
+        <Button
+          onClick={() => refetch()}
+          variant="outline"
+          className="bg-white border-red-200 text-red-600"
+        >
           <RefreshCcw size={14} className="mr-2" /> Try Again
         </Button>
       </div>
@@ -106,11 +106,13 @@ export default function PostsFeed({ targetId, onRequireAuth, type="feed" }: Post
 
       {/* Post List */}
       <div className="grid gap-6">
-        {allPosts.map((post) => (
-          post?.type === 'PRODUCT'
-            ? <ProductPostCard key={post._id} post={post} onRequireAuth={onRequireAuth} />
-            : <SocialPostCard key={post._id} post={post} onRequireAuth={onRequireAuth} />
-        ))}
+        {allPosts.map((post) =>
+          post?.type === 'PRODUCT' ? (
+            <ProductPostCard key={post._id} post={post} onRequireAuth={onRequireAuth} />
+          ) : (
+            <SocialPostCard key={post._id} post={post} onRequireAuth={onRequireAuth} />
+          ),
+        )}
       </div>
       {/* Infinite Scroll Sentinel */}
       <div ref={bottomRef} className="py-10 text-center">
@@ -129,8 +131,10 @@ export default function PostsFeed({ targetId, onRequireAuth, type="feed" }: Post
       <button
         onClick={scrollToTop}
         className={cn(
-          "fixed bottom-10 right-10 p-4 bg-orange-600 text-white rounded-full shadow-2xl transition-all duration-500 z-50 hover:scale-110",
-          showScrollTop ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
+          'fixed bottom-10 right-10 p-4 bg-orange-600 text-white rounded-full shadow-2xl transition-all duration-500 z-50 hover:scale-110',
+          showScrollTop
+            ? 'translate-y-0 opacity-100'
+            : 'translate-y-20 opacity-0 pointer-events-none',
         )}
       >
         <ArrowUp size={20} strokeWidth={3} />

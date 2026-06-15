@@ -13,7 +13,7 @@ export const mockApi = {
       // console.log("Fetched JSON:", json);
       return json;
     } catch (err) {
-      console.error("Error fetching mock data:", err);
+      console.error('Error fetching mock data:', err);
       return null;
     }
   },

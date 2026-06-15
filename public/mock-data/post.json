@@ -5,9 +5,7 @@
     "description": "Beautifully tailored Ankara gown perfect for weddings, birthdays, and evening outings. Available in multiple sizes.",
     "price": 25000,
     "tags": ["ankara", "fashion", "dress"],
-    "media": [
-      "https://picsum.photos/id/1011/800/600"
-    ],
+    "media": ["https://picsum.photos/id/1011/800/600"],
     "business": {
       "_id": "6732abcd1290bb8d19f3b002",
       "businessName": "Binta Couture",
@@ -79,9 +77,7 @@
     "description": "Perfect for gala events, proms, and formal dinners.",
     "price": 38000,
     "tags": ["evening gown", "fashion", "luxury"],
-    "media": [
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800"
-    ],
+    "media": ["https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800"],
     "business": {
       "_id": "6732abcd1290bb8d19f3b002",
       "businessName": "Binta Couture",

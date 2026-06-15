@@ -7,15 +7,18 @@ const AuthLayout = () => {
       {/* LEFT SIDE: Brand Hero (Desktop Only) */}
       <div className="relative hidden w-[45%] lg:flex flex-col justify-between p-12 overflow-hidden">
         {/* The background image from your inspiration */}
-        <div 
+        <div
           className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop')" }} 
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop')",
+          }}
         />
         {/* Dark Overlay to make text pop */}
         <div className="absolute inset-0 z-10 bg-black/40" />
 
         <div className="relative z-20">
-          <Logo /> 
+          <Logo />
         </div>
 
         <div className="relative z-20 mb-8">
@@ -23,7 +26,8 @@ const AuthLayout = () => {
             Welcome to URA!
           </h1>
           <p className="mt-4 text-lg text-white/90 font-medium max-w-md leading-relaxed">
-            Sign Up for the full URA experience. Connect with your local market, grow your brand, faster, smarter, and socially.
+            Sign Up for the full URA experience. Connect with your local market, grow your brand,
+            faster, smarter, and socially.
           </p>
         </div>
       </div>

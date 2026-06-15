@@ -16,12 +16,15 @@ import { Tag } from 'lucide-react';
 const DealsAndOffers = () => {
   const { user, related, isLoading: isContextLoading } = useAuthContext();
   const isDesktop = useIsDesktop();
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeCategory, setActiveCategory] = useState('All');
 
   const activeProfileId = related?.business_id ?? user?._id ?? '';
 
-  const { chats, isLoading: isChatsLoading, isError: chatError } =
-    useChats(isDesktop ? { enabled: true } : { enabled: false });
+  const {
+    chats,
+    isLoading: isChatsLoading,
+    isError: chatError,
+  } = useChats(isDesktop ? { enabled: true } : { enabled: false });
 
   if (isContextLoading || isChatsLoading) {
     return <DashboardSkeleton />;
@@ -37,16 +40,11 @@ const DealsAndOffers = () => {
       leftColumn={
         <div className="sticky top-8 space-y-6">
           <ProfileCard user={user} related={related} />
-          <SidebarWidget
-            isDesktop={isDesktop}
-            isError={chatError}
-            errorTitle="Recent Chats"
-          >
-            <ChatList chatList={chats} isError={chatError} activeProfileId={activeProfileId}  />
+          <SidebarWidget isDesktop={isDesktop} isError={chatError} errorTitle="Recent Chats">
+            <ChatList chatList={chats} isError={chatError} activeProfileId={activeProfileId} />
           </SidebarWidget>
         </div>
       }
-
     >
       {/* HEADER SECTION */}
       <div className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm mb-2">
@@ -56,21 +54,20 @@ const DealsAndOffers = () => {
           </div>
           <div>
             <h1 className="text-2xl font-black text-gray-900">Deals & Offers</h1>
-            <p className="text-sm text-gray-500">Explore the best products from verified businesses</p>
+            <p className="text-sm text-gray-500">
+              Explore the best products from verified businesses
+            </p>
           </div>
         </div>
 
-        <CategoryPills
-          selected={activeCategory}
-          onSelect={setActiveCategory}
-        />
+        <CategoryPills selected={activeCategory} onSelect={setActiveCategory} />
       </div>
 
       {/* PRODUCTS FEED */}
       <div className="min-h-[600px]">
         <ProductsFeed
-          type='feed'
-          category={activeCategory === "All" ? undefined : activeCategory}
+          type="feed"
+          category={activeCategory === 'All' ? undefined : activeCategory}
         />
       </div>
     </DashboardContainer>

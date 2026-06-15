@@ -5,25 +5,25 @@ import type {
   RegisterResponseType,
   registerType,
   UsernameCheckResponse,
-
 } from '@/types/api.types';
 import API from './axios-client';
+
 import { uploadImageToS3, uploadMediaToS3 } from "@/services/s3.service";
 import type { UnifiedPost, ProductPostType } from '@/types/feed.types';
 
-
-export const checkUsernameAvailability = async (username: string): Promise<UsernameCheckResponse> => {
+export const checkUsernameAvailability = async (
+  username: string,
+): Promise<UsernameCheckResponse> => {
   // Only call the API if the username is not empty
   if (!username) {
     return { available: true, message: '' };
   }
 
   const response = await API.get(`/auth/check-username`, {
-    params: { username }
+    params: { username },
   });
   return response.data;
 };
-
 
 export const loginMutationFn = async (data: loginType): Promise<LoginResponseType> => {
   const response = await API.post('/auth/login', data);
@@ -42,22 +42,20 @@ export const logoutMutationFn = async (refreshToken?: string) =>
   await API.post('/auth/logout', refreshToken ? { refreshToken } : {});
 
 export const getCurrentUserQueryFn = async (): Promise<CurrentUserResponseType> => {
-  const response = await API.get(`/user/current`);
-  // console.log("Current user response:", response.data);
+  const response = await API.get(`/users/me`);
   return response.data;
 };
 
 // Required userId to prevent accidental fallbacks
 // Existing User Fetcher
 export const getUserQueryFn = async (userId: string): Promise<CurrentUserResponseType> => {
-  const response = await API.get(`/user/profile/${userId}`);
-  return response.data; // Ensure this matches your ProfileResponse type
+  const response = await API.get(`/users/${userId}`);
+  return response.data;
 };
 
 // New Business Fetcher
 export const getBusinessQueryFn = async (businessId: string): Promise<CurrentUserResponseType> => {
-  // This fetches the user data associated with this business ID
-  const response = await API.get(`/user/business/profile/${businessId}`);
+  const response = await API.get(`/users/business/${businessId}`);
   return response.data;
 };
 
@@ -84,11 +82,9 @@ export const updateProfileMutationFn = async (data: {
 
   // 3. Send clean JSON to your backend
   // Note: We are no longer using multipart/form-data headers here!
-  const response = await API.patch(`/user/profile/update`, payload);
+  const response = await API.patch(`/users/me/profile`, payload);
   return response.data;
 };
-
-
 
 // src/hooks/api/use-user-mutations.ts
 export const updateBusinessMutationFn = async (data: any) => {
@@ -97,6 +93,7 @@ export const updateBusinessMutationFn = async (data: any) => {
   const handleImage = async (_field: string, value: any) => {
     if (value instanceof File) {
       // User uploaded a new file
+
       return await uploadImageToS3(value);
     } else if (value === "DELETE_IMAGE") {
       // User explicitly wants to remove the photo
@@ -111,48 +108,46 @@ export const updateBusinessMutationFn = async (data: any) => {
   const cover = await handleImage('businessCover', data.businessCover);
 
   // If the result is undefined, we remove the key so it doesn't overwrite DB
-  if (logo === undefined) delete payload.businessLogo; else payload.businessLogo = logo;
-  if (cover === undefined) delete payload.businessCover; else payload.businessCover = cover;
+  if (logo === undefined) delete payload.businessLogo;
+  else payload.businessLogo = logo;
+  if (cover === undefined) delete payload.businessCover;
+  else payload.businessCover = cover;
 
-  const response = await API.patch(`/user/business/update`, payload);
+  const response = await API.patch(`/users/me/business`, payload);
   return response.data;
 };
 
-
 export const fetchChatList = async () => {
-  const response = await API.get('/chat/conversations/list');
-  return response.data.data; // Assuming response.data is { success: true, data: [...] }
+  const response = await API.get('/conversations');
+  return response.data.data;
 };
 
 export const fetchActivityList = async () => {
-  const response = await API.get('/log/activities');
-  console.log('response', response);
-  return response.data;
-}
-
-export const fetchBookmarkList = async () => {
-  const response = await API.get('/bookmark/list');
-  return response.data.bookmarks;
-}
-
-
-export const fetchBookmarksLoad = async (type: 'Post' | 'Business') => {
-  // We pass the type as a query parameter as expected by our controller
-  const response = await API.get(`/bookmark/load?type=${type}`);
+  const response = await API.get('/logs/activities');
   return response.data;
 };
 
-export const fetchPostFeedQueryFn = async (userId?: string, page: number = 1): Promise<UnifiedPost[]> => {
-  const url = userId
-    ? `/post/feed?userId=${userId}&page=${page}`
-    : `/post/feed?page=${page}`;
+export const fetchBookmarkList = async () => {
+  const response = await API.get('/bookmarks/list');
+  return response.data.bookmarks;
+};
+
+export const fetchBookmarksLoad = async (type: 'Post' | 'Business') => {
+  const response = await API.get(`/bookmarks/load?type=${type}`);
+  return response.data;
+};
+
+export const fetchPostFeedQueryFn = async (
+  userId?: string,
+  page: number = 1,
+): Promise<UnifiedPost[]> => {
+  const url = userId ? `/posts/feed?userId=${userId}&page=${page}` : `/posts/feed?page=${page}`;
 
   const response = await API.get(url);
   return response.data.posts;
 };
 
 // src/services/post.service.ts
-
 
 interface FetchParams {
   targetId?: string;
@@ -163,41 +158,51 @@ interface FetchParams {
 export const postService = {
   // Fetch Social Content
   getSocialPosts: async ({ targetId, restrict, page }: FetchParams): Promise<UnifiedPost[]> => {
-    const { data } = await API.get("/post/social", {
-      params: { authorId: targetId, restrict, page, limit: 15 }
+    const { data } = await API.get('/posts/social', {
+      params: { authorId: targetId, restrict, page, limit: 15 },
     });
     return data.posts;
   },
 
   // Fetch Business Content
-  getProductPosts: async ({ targetId, restrict, page }: FetchParams): Promise<ProductPostType[]> => {
-    const { data } = await API.get("/post/product", {
-      params: { businessId: targetId, restrict, page, limit: 15 }
+  getProductPosts: async ({
+    targetId,
+    restrict,
+    page,
+  }: FetchParams): Promise<ProductPostType[]> => {
+    const { data } = await API.get('/products', {
+      params: { businessId: targetId, restrict, page, limit: 15 },
     });
     return data.posts;
   },
 
-  updatePost: async (postId: string, data: { caption?: string; tags?: string[]; media?: string[] }) => {
-    const response = await API.patch(`/post/${postId}?type=post`, data);
+  updatePost: async (
+    postId: string,
+    data: { caption?: string; tags?: string[]; media?: string[] },
+  ) => {
+    const response = await API.patch(`/posts/${postId}`, data);
     return response.data.data;
   },
 
   updateProduct: async (productId: string, data: any) => {
-    const response = await API.patch(`/post/${productId}?type=product`, data);
+    const response = await API.patch(`/products/${productId}`, data);
     return response.data.data;
   },
 
-  deletePost: async (postId: string, type: 'post' | 'product' = 'post') => {
-  await API.delete(`/post/${postId}?type=${type}`);
-},
+  deletePost: async (postId: string) => {
+    await API.delete(`/posts/${postId}`);
+  },
+
+  deleteProduct: async (productId: string) => {
+    await API.delete(`/products/${productId}`);
+  },
 };
-
-
 
 export const createPostMutationFn = async ({ data, files }: { data: any; files: File[] }) => {
   // 1. Upload media only if files exist
   let mediaUrls: string[] = [];
   if (files && files.length > 0) {
+
     mediaUrls = await Promise.all(
       files.map((file) => uploadMediaToS3(file))
     );
@@ -210,23 +215,18 @@ export const createPostMutationFn = async ({ data, files }: { data: any; files: 
     media: mediaUrls,
   };
 
-  const response = await API.post("/post/create", payload);
+  const response = await API.post('/posts', payload);
   return response.data;
 };
-
 
 // --- api.service.ts ---
 export const toggleFollowUser = async (targetId: string, isBusiness: boolean) => {
-  // We pass isBusiness in the body as your controller expects
-  const response = await API.post(`/user/follow/${targetId}`, { isBusiness });
+  const response = await API.post(`/users/follow/${targetId}`, { isBusiness });
   return response.data;
 };
 
-
-export const toggleBookmarkApi = async (targetId: string, targetType: "Business" | "Post") => {
-  const { data } = await API.post(`/user/bookmarks/toggle/${targetId}`, {
-    targetType,
-  });
+export const toggleBookmarkApi = async (targetId: string, targetType: 'Business' | 'Post') => {
+  const { data } = await API.post(`/users/bookmarks/${targetId}`, { targetType });
   return data;
 };
 
@@ -234,22 +234,18 @@ export const toggleBookmarkApi = async (targetId: string, targetType: "Business"
 
 export const toggleWishlist = async (productId: string) => {
   const { data } = await API.patch(`/products/wishlist/${productId}`);
-  return data; // returns { success: true, isWishlisted: boolean }
+  return data;
 };
 
 export const toggleLikeApi = async (targetId: string, targetType: 'post' | 'product') => {
-  const { data } = await API.patch(`/post/likes/${targetType}/${targetId}`);
-  return data; // { success: true, isLiked: boolean, likesCount: number }
+  const { data } = await API.patch(`/posts/likes/${targetType}/${targetId}`);
+  return data;
 };
 
-export const fetchFollowList = async (targetId: string, type: "followers" | "following") => {
-  // Replace with your actual API base URL
-  const { data } = await API.get(`/user/${targetId}/social`, {
-    params: { type }
-  });
-  return data.users; // Returning the 'users' array from your controller's res.json
+export const fetchFollowList = async (targetId: string, type: 'followers' | 'following') => {
+  const { data } = await API.get(`/users/${targetId}/social`, { params: { type } });
+  return data.users;
 };
-
 
 export const searchAPI = {
   getGlobalSearch: (params: {
@@ -259,11 +255,11 @@ export const searchAPI = {
     city?: string;
     minPrice?: number;
     maxPrice?: number;
-    tags?: string;       // Added for Post filtering
+    tags?: string; // Added for Post filtering
     isBusiness?: boolean;
-    inStock?: boolean;   // Added for Product filtering
-    openNow?: boolean;   // Added for Business filtering
-    rating?: number;     // Added for Business/Product filtering
+    inStock?: boolean; // Added for Product filtering
+    openNow?: boolean; // Added for Business filtering
+    rating?: number; // Added for Business/Product filtering
   }) => API.get('/search', { params }),
 
   // History Management
@@ -276,46 +272,28 @@ export const searchAPI = {
   clearAllHistory: () => API.delete('/search/history'),
 };
 
-
 // src/services/category-service.ts
 
 export const fetchProductCategories = async (): Promise<string[]> => {
-  const { data } = await API.get('/product/product-categories'); // Update with your actual base URL
-
-  return data.data; // This is the array of strings from your backend
+  const { data } = await API.get('/products/categories');
+  return data.data;
 };
 
 export const cartAPI = {
-  // Get current user's cart
   getCart: () => API.get('/cart'),
-
-  // Add item: { productId, quantity }
-  addToCart: (data: { productId: string; quantity: number }) => 
-    API.post('/cart/add', data),
-
-  // Update quantity: { productId, quantity }
-  updateQuantity: (data: { productId: string; quantity: number }) => 
-    API.put('/cart/update', data),
-
-  // Remove item
-  removeFromCart: (productId: string) => 
-    API.delete(`/cart/remove/${productId}`),
+  addToCart: (data: { productId: string; quantity: number }) => API.post('/cart/items', data),
+  updateQuantity: (data: { productId: string; quantity: number }) => API.patch('/cart/items', data),
+  removeFromCart: (productId: string) => API.delete(`/cart/items/${productId}`),
 };
 
 export const orderAPI = {
-  // Checkout: { shippingAddress: { fullAddress, city, phone }, paymentMethod }
-  checkout: (data: { 
-    shippingAddress: { fullAddress: string; city: string; phone: string }; 
+  checkout: (data: {
+    shippingAddress: { fullAddress: string; city: string; phone: string };
     paymentMethod: string;
-  }) => API.post('/order/checkout', data),
-
-  // Get all user orders
-  getMyOrders: () => API.get('/order/my-orders'),
-
-  // Get specific order
-  getOrderById: (id: string) => API.get(`/order/${id}`),
+  }) => API.post('/orders', data),
+  getMyOrders: () => API.get('/orders'),
+  getOrderById: (id: string) => API.get(`/orders/${id}`),
 };
-
 
 export interface CreateReviewData {
   reviewedItem: string;
@@ -332,7 +310,7 @@ export const reviewAPI = {
   createReview: (data: CreateReviewData) => API.post('/reviews', data),
 
   // Update an existing review
-  updateReview: (id: string, data: { rating?: number; comment?: string }) => 
+  updateReview: (id: string, data: { rating?: number; comment?: string }) =>
     API.patch(`/reviews/${id}`, data),
 
   // Delete a review

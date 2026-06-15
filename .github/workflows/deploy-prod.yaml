@@ -17,7 +17,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -55,7 +55,7 @@ jobs:
             --cache-control "public,max-age=31536000,immutable" \
             --exclude "index.html" \
             --exclude "*.txt"
-          
+
           aws s3 cp dist/index.html s3://${{ secrets.S3_BUCKET_NAME }}/index.html \
             --cache-control "public,max-age=0,must-revalidate"
 

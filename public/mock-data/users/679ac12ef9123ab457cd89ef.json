@@ -24,21 +24,20 @@
     "updatedAt": "2025-01-15T10:35:00Z"
   },
   "related": {
-    "businesses":
-      {
-        "_id": "6732abcd1290bb8d19f3b001",
-        "businessName": "Doe Ventures",
-        "profileImage": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800",
-        "coverImage": "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=800",
-        "followers": ["user4444", "user5555"],
-        "likes": ["user7777"],
-        "category": "Technology",
-        "address": "23 Admiralty Way, Lekki, Lagos",
-        "phone": "+234 812 345 6789",
-        "website": "https://janetdoe.com",
-        "openingTime": "08:00 AM",
-        "closingTime": "06:00 PM"
-        },
+    "businesses": {
+      "_id": "6732abcd1290bb8d19f3b001",
+      "businessName": "Doe Ventures",
+      "profileImage": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800",
+      "coverImage": "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=800",
+      "followers": ["user4444", "user5555"],
+      "likes": ["user7777"],
+      "category": "Technology",
+      "address": "23 Admiralty Way, Lekki, Lagos",
+      "phone": "+234 812 345 6789",
+      "website": "https://janetdoe.com",
+      "openingTime": "08:00 AM",
+      "closingTime": "06:00 PM"
+    },
     "recentPosts": [
       {
         "_id": "9742abcd1290bb8d19f3c210",

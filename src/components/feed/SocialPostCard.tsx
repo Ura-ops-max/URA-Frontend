@@ -1,16 +1,16 @@
-import { useState } from "react";
-import { CheckCircle2, Flag, Trash2, BellOff, Link2, UserPlus, Loader2, Edit2 } from "lucide-react";
-import type { CardProps, SocialPostType } from "@/types/feed.types";
-import { MediaCarousel } from "./MediaCarousel";
-import { PostActions } from "./PostAction";
-import { generateAvatarUrl } from "@/utils/avatar-generator";
-import { Link } from "react-router-dom";
+import { useState } from 'react';
+import { CheckCircle2, Flag, Trash2, BellOff, Link2, UserPlus, Loader2, Edit2 } from 'lucide-react';
+import type { CardProps, SocialPostType } from '@/types/feed.types';
+import { MediaCarousel } from './MediaCarousel';
+import { PostActions } from './PostAction';
+import { generateAvatarUrl } from '@/utils/avatar-generator';
+import { Link } from 'react-router-dom';
 import { formatTimeAgo } from '@/utils/date-format';
-import { PostMenu } from "./PostMenu";
-import { toast } from "sonner";
-import { useAuthContext } from "@/context/auth-provider";
-import { AuthPromptModal } from "../shared/AuthPromptModel";
-import { useDeletePost } from "@/hooks/api/use-feed";
+import { PostMenu } from './PostMenu';
+import { toast } from 'sonner';
+import { useAuthContext } from '@/context/auth-provider';
+import { AuthPromptModal } from '../shared/AuthPromptModel';
+import { useDeletePost } from '@/hooks/api/use-feed';
 
 import {
   Dialog,
@@ -19,9 +19,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { EditItemModal } from "./EditItemModal";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { EditItemModal } from './EditItemModal';
 
 export default function SocialPostCard({ post, onRequireAuth }: CardProps<SocialPostType>) {
   const { user, isAuthenticated } = useAuthContext();
@@ -29,19 +29,26 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const isOwner = post.authorId === user?._id;
   const deletePostMutation = useDeletePost(post._id, 'social');
-    const [showEditModal, setShowEditModal] = useState(false);
-
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // 1. AUTH MODAL STATE (Matches ProductPostCard)
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authConfig, setAuthConfig] = useState({ title: "", subtitle: "", action: "" });
+  const [authConfig, setAuthConfig] = useState({ title: '', subtitle: '', action: '' });
 
   const ensureAuth = (type: 'menu' | 'follow') => {
     if (isAuthenticated) return true;
 
     const configs = {
-      menu: { title: "More Options", subtitle: "Sign in to follow users, mute notifications, or report content.", action: "access menu" },
-      follow: { title: "Follow this creator?", subtitle: "Sign in to see more updates from David in your home feed.", action: "follow" },
+      menu: {
+        title: 'More Options',
+        subtitle: 'Sign in to follow users, mute notifications, or report content.',
+        action: 'access menu',
+      },
+      follow: {
+        title: 'Follow this creator?',
+        subtitle: 'Sign in to see more updates from David in your home feed.',
+        action: 'follow',
+      },
     };
 
     setAuthConfig(configs[type]);
@@ -58,41 +65,41 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
       onError: () => {
         // Error is already handled by the mutation hook (toast)
         setShowDeleteConfirm(false);
-      }
+      },
     });
   };
 
   const menuActions = [
     {
-      label: "Copy Link",
+      label: 'Copy Link',
       icon: Link2,
       show: true,
       onClick: () => {
         navigator.clipboard.writeText(`${window.location.origin}/post/${post._id}`);
-        toast.success("Link copied!");
-      }
+        toast.success('Link copied!');
+      },
     },
     {
-      label: isOwner ? "Mute Notifications" : "Follow User",
+      label: isOwner ? 'Mute Notifications' : 'Follow User',
       icon: isOwner ? BellOff : UserPlus,
       show: true,
-      onClick: () => isOwner ? console.log("Muted") : ensureAuth('follow'),
+      onClick: () => (isOwner ? console.log('Muted') : ensureAuth('follow')),
     },
     {
-      label: "Report Post",
+      label: 'Report Post',
       icon: Flag,
       variant: 'danger' as const,
       show: !isOwner,
-      onClick: () => console.log("Reported"),
+      onClick: () => console.log('Reported'),
     },
-     {
-    label: "Edit Post",
-    icon: Edit2, // import { Edit2 } from "lucide-react"
-    show: isOwner,
-    onClick: () => setShowEditModal(true),
-  },
     {
-      label: "Delete Post",
+      label: 'Edit Post',
+      icon: Edit2, // import { Edit2 } from "lucide-react"
+      show: isOwner,
+      onClick: () => setShowEditModal(true),
+    },
+    {
+      label: 'Delete Post',
       icon: Trash2,
       variant: 'danger' as const,
       show: isOwner,
@@ -100,7 +107,7 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
         if (!isOwner) return;
         setShowDeleteConfirm(true);
       },
-    }
+    },
   ];
 
   const handleMenuIntercept = (e: React.MouseEvent) => {
@@ -113,12 +120,11 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
 
   const TEXT_LIMIT = 120; // Matched to ProductPostCard
   const shouldShowReadMore = post.caption.length > TEXT_LIMIT;
-  const displayText = isExpanded ? post.caption : post.caption.slice(0, TEXT_LIMIT) + "...";
+  const displayText = isExpanded ? post.caption : post.caption.slice(0, TEXT_LIMIT) + '...';
   const user_image = post.displayAvatar || generateAvatarUrl(post.displayName);
 
   return (
     <div className="bg-white border-b border-gray-100 lg:rounded-[2rem] lg:border lg:mb-10 lg:shadow-xl overflow-hidden animate-fadeIn transition-transform duration-300">
-
       {/* 1. TOP HEADER & CAPTION SECTION (Identical to ProductPostCard) */}
       <div className="p-4 lg:p-6 pb-2">
         <div className="flex items-center justify-between mb-4">
@@ -129,7 +135,10 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
               alt={post.displayName}
             />
             <div>
-              <Link to={`/dashboard/profile/user/${post.authorId}`} className="flex items-center gap-1 group">
+              <Link
+                to={`/dashboard/profile/user/${post.authorId}`}
+                className="flex items-center gap-1 group"
+              >
                 <h3 className="font-black text-gray-900 text-[16px] group-hover:text-orange-600 transition-colors">
                   {post.displayName}
                 </h3>
@@ -150,7 +159,7 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
           <div onClickCapture={handleMenuIntercept}>
             <PostMenu
               actions={menuActions}
-              triggerClassName={!isAuthenticated ? "pointer-events-none" : ""}
+              triggerClassName={!isAuthenticated ? 'pointer-events-none' : ''}
             />
           </div>
         </div>
@@ -158,8 +167,11 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
         <p className="text-gray-700 text-[15px] leading-relaxed mb-3">
           {shouldShowReadMore ? displayText : post.caption}
           {shouldShowReadMore && (
-            <button onClick={() => setIsExpanded(!isExpanded)} className="text-orange-600 font-extrabold ml-1 hover:underline">
-              {isExpanded ? "Show Less" : "Read More"}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-orange-600 font-extrabold ml-1 hover:underline"
+            >
+              {isExpanded ? 'Show Less' : 'Read More'}
             </button>
           )}
         </p>
@@ -168,7 +180,10 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
             {post.tags.map((tag, idx) => (
-              <span key={idx} className="text-[13px] font-bold text-orange-600 hover:text-orange-700 cursor-pointer">
+              <span
+                key={idx}
+                className="text-[13px] font-bold text-orange-600 hover:text-orange-700 cursor-pointer"
+              >
                 #{tag}
               </span>
             ))}
@@ -200,7 +215,7 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
         isBookmarked={post.isBookmarked}
       />
 
- {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -228,7 +243,7 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
                   Deleting...
                 </>
               ) : (
-                "Delete"
+                'Delete'
               )}
             </Button>
           </DialogFooter>
@@ -236,17 +251,17 @@ export default function SocialPostCard({ post, onRequireAuth }: CardProps<Social
       </Dialog>
 
       <EditItemModal
-      key={post._id + (post.media?.join(',') || '')} 
-  open={showEditModal}
-  onClose={() => setShowEditModal(false)}
-  item={{
-    _id: post._id,
-    type: "POST",
-    caption: post.caption,
-    tags: post.tags || [],
-    media: post.media || [],
-  }}
-/>
+        key={post._id + (post.media?.join(',') || '')}
+        open={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        item={{
+          _id: post._id,
+          type: 'POST',
+          caption: post.caption,
+          tags: post.tags || [],
+          media: post.media || [],
+        }}
+      />
 
       {/* AUTH MODAL INSTANCE */}
       <AuthPromptModal

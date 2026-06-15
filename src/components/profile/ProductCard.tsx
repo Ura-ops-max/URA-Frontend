@@ -8,7 +8,6 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition transform cursor-pointer flex flex-col">
-      
       {/* Image */}
       <div className="aspect-[4/3] w-full overflow-hidden">
         <img

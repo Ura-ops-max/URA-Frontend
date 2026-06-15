@@ -136,7 +136,6 @@
   animation: spin-slow 2s linear infinite;
 }
 
-
 @layer base {
   html {
     /* Set Urbanist as the base font for the entire app */
@@ -147,13 +146,12 @@
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "cv02", "cv03", "cv04";
+    font-feature-settings: 'cv02', 'cv03', 'cv04';
     /* Improves Urbanist legibility */
   }
 }
 
 @layer utilities {
-
   /* The ultimate "Hide Scrollbar" utility */
   .no-scrollbar::-webkit-scrollbar {
     display: none;

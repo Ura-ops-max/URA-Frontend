@@ -36,11 +36,11 @@ export const TagInput = ({ tags, setTags, tagInput, setTagInput, placeholder }: 
               className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none flex items-center gap-1 px-2 py-1 text-xs"
             >
               #{tag}
-              <button 
+              <button
                 type="button" // Critical: prevents form submission
                 onClick={(e) => {
-                    e.preventDefault();
-                    removeTag(tag);
+                  e.preventDefault();
+                  removeTag(tag);
                 }}
               >
                 <X size={12} className="hover:text-red-500" />
@@ -54,7 +54,7 @@ export const TagInput = ({ tags, setTags, tagInput, setTagInput, placeholder }: 
         value={tagInput}
         onChange={(e) => setTagInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder || "Type and press enter..."}
+        placeholder={placeholder || 'Type and press enter...'}
         className="text-xs w-full bg-gray-50 border border-dashed border-gray-300 rounded-lg p-2.5 outline-none focus:border-orange-400 transition-all"
       />
     </div>

@@ -18,9 +18,8 @@
     "updatedAt": "2025-01-10T10:00:00Z"
   },
 
-"related": {
-  "businesses":
-    {
+  "related": {
+    "businesses": {
       "_id": "6732abcd1290bb8d19f3b002",
       "businessName": "Glow Beauty Studio",
       "profileImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
@@ -35,27 +34,26 @@
       "closingTime": "07:00 PM"
     },
 
-  "recentPosts": [
-    {
-      "_id": "9742abcd1290bb8d19f3c210",
-      "business": "6732abcd1290bb8d19f3b001",
-      "name": "New Robotics Kit",
-      "description": "Introducing our latest robotics starter kit.",
-      "itemNumber": "RBX-100",
-      "price": 129.99,
-      "media": ["https://source.unsplash.com/featured/?fashion"],
-      "tags": ["robotics", "innovation"],
-      "likes": ["user3333"],
-      "createdAt": "2025-01-12T09:00:00Z",
-      "updatedAt": "2025-01-12T10:00:00Z"
+    "recentPosts": [
+      {
+        "_id": "9742abcd1290bb8d19f3c210",
+        "business": "6732abcd1290bb8d19f3b001",
+        "name": "New Robotics Kit",
+        "description": "Introducing our latest robotics starter kit.",
+        "itemNumber": "RBX-100",
+        "price": 129.99,
+        "media": ["https://source.unsplash.com/featured/?fashion"],
+        "tags": ["robotics", "innovation"],
+        "likes": ["user3333"],
+        "createdAt": "2025-01-12T09:00:00Z",
+        "updatedAt": "2025-01-12T10:00:00Z"
+      }
+    ],
+
+    "counts": {
+      "posts": 2,
+      "followers": 3,
+      "following": 4
     }
-  ],
-
-  "counts": {
-    "posts": 2,
-    "followers": 3,
-    "following": 4
   }
-}
-
 }

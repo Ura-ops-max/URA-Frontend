@@ -1,21 +1,28 @@
-import  { useEffect, useState } from "react";
-import { Pencil, UserPlus,
-  MessageCircle, Briefcase, Share2, Bookmark,
-  UserCheck, PlusCircle, User,
+import { useEffect, useState } from 'react';
+import {
+  Pencil,
+  UserPlus,
+  MessageCircle,
+  Briefcase,
+  Share2,
+  Bookmark,
+  UserCheck,
+  PlusCircle,
+  User,
   Settings,
   BarChart3,
   Star,
-} from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import type { UserType, BusinessType } from "@/types/api.types";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { useProfileActions } from "@/hooks/api/use-user-profile";
-import { UnfollowDialog } from "./UnfollowDialog";
-import { useToggleBookmark } from "@/hooks/api/use-feed";
-import { BusinessContactInfo } from "./BusinessContactInfo";
-import { chatAPI } from "@/lib/chat-api";
-import { useAuthContext } from "@/context/auth-provider";
+} from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import type { UserType, BusinessType } from '@/types/api.types';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { useProfileActions } from '@/hooks/api/use-user-profile';
+import { UnfollowDialog } from './UnfollowDialog';
+import { useToggleBookmark } from '@/hooks/api/use-feed';
+import { BusinessContactInfo } from './BusinessContactInfo';
+import { chatAPI } from '@/lib/chat-api';
+import { useAuthContext } from '@/context/auth-provider';
 
 type Props = {
   user: UserType;
@@ -29,11 +36,11 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
   const navigate = useNavigate();
   const { user: Me } = useAuthContext();
 
-  const isBusinessRoute = location.pathname.includes("/business/");
+  const isBusinessRoute = location.pathname.includes('/business/');
   const [showUnfollowDialog, setShowUnfollowDialog] = useState(false);
   const isSaved = related?.isBookmarked;
   // const isFollowing = related?.isFollowing;
-  const displayName = (isBusinessRoute ? business?.businessName : user?.firstName) || "User";
+  const displayName = (isBusinessRoute ? business?.businessName : user?.firstName) || 'User';
   const targetId = isBusinessRoute ? business?._id : user._id;
 
   const [localIsSaved, setLocalIsSaved] = useState(isSaved);
@@ -77,7 +84,6 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
     }
   };
 
-
   const confirmUnfollow = () => {
     // Instant UI Change
     setLocalIsFollowing(false);
@@ -96,10 +102,10 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
         });
       } else {
         navigator.clipboard.writeText(window.location.href);
-        toast.success("Link copied to clipboard!");
+        toast.success('Link copied to clipboard!');
       }
     } catch (err) {
-      console.log("Error sharing", err);
+      console.log('Error sharing', err);
     }
   };
   const handleStartChat = async () => {
@@ -109,18 +115,16 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
       senderId: Me?._id!,
       senderModel: 'User',
       receiverId: targetId,
-      receiverModel: (isBusinessRoute ? 'Business' : 'User') as 'User' | 'Business'
+      receiverModel: (isBusinessRoute ? 'Business' : 'User') as 'User' | 'Business',
     } as any;
 
     try {
       const { data } = await chatAPI.accessConversation(payload);
       navigate(`/dashboard/chat/${data.data._id}`);
     } catch (err) {
-      console.error("Error starting chat:", err);
+      console.error('Error starting chat:', err);
     }
   };
-
-
 
   // const handleFollow = (e: React.MouseEvent) => {
   //   e.preventDefault();
@@ -133,10 +137,11 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
   //   }
   // };
   // Button Styles
-  const btnBase = "flex items-center justify-center transition-all duration-200";
-  const btnAction = "flex-col py-4 px-1 h-auto text-[11px] gap-2 rounded-[22px] font-bold border";
+  const btnBase = 'flex items-center justify-center transition-all duration-200';
+  const btnAction = 'flex-col py-4 px-1 h-auto text-[11px] gap-2 rounded-[22px] font-bold border';
 
-  const title = isBusinessRoute && business ? business.businessName : `${user.firstName} ${user.lastName}`;
+  const title =
+    isBusinessRoute && business ? business.businessName : `${user.firstName} ${user.lastName}`;
   const subTitle = isBusinessRoute && business ? '' : `@${user.username}`;
   const bio = isBusinessRoute && business ? business.about : (user as any).bio;
 
@@ -152,7 +157,7 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
             <div className="flex items-center gap-1.5 mt-1">
               <div className="flex items-center">
                 {[1, 2, 3, 4, 5].map((star) => {
-                  // Logic: If rating is 3.5, stars 1, 2, 3 are filled. 
+                  // Logic: If rating is 3.5, stars 1, 2, 3 are filled.
                   // We'll use business.related.rating once available.
                   const ratingValue = business?.averageRating || 0;
                   return (
@@ -160,17 +165,17 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
                       key={star}
                       size={14}
                       className={cn(
-                        "transition-colors",
+                        'transition-colors',
                         star <= Math.round(ratingValue)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-200"
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-200',
                       )}
                     />
                   );
                 })}
               </div>
               <span className="text-xs font-bold text-gray-500">
-                ({business?.totalReviews || "No ratings"})
+                ({business?.totalReviews || 'No ratings'})
               </span>
             </div>
           )}
@@ -179,7 +184,7 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
         <p className="text-orange-600 font-bold text-sm mt-1">{subTitle}</p>
 
         <p className="mt-4 text-gray-500 leading-relaxed text-sm">
-          {bio || "No bio description yet."}
+          {bio || 'No bio description yet.'}
         </p>
       </div>
 
@@ -214,7 +219,11 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
             {isBusinessRoute ? (
               <Link
                 to="/dashboard/settings/profile?page=business"
-                className={cn(btnBase, btnAction, "bg-orange-500 text-white shadow-lg shadow-orange-100 hover:bg-orange-600")}
+                className={cn(
+                  btnBase,
+                  btnAction,
+                  'bg-orange-500 text-white shadow-lg shadow-orange-100 hover:bg-orange-600',
+                )}
               >
                 <Settings size={20} strokeWidth={2.5} />
                 <span>Manage</span>
@@ -222,7 +231,11 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
             ) : (
               <Link
                 to="/dashboard/settings/profile?page=profile"
-                className={cn(btnBase, btnAction, "bg-orange-500 text-white shadow-lg shadow-orange-100 hover:bg-orange-600")}
+                className={cn(
+                  btnBase,
+                  btnAction,
+                  'bg-orange-500 text-white shadow-lg shadow-orange-100 hover:bg-orange-600',
+                )}
               >
                 <Pencil size={20} strokeWidth={2.5} />
                 <span>Edit</span>
@@ -231,21 +244,29 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
 
             {/* 2. SECONDARY ACTION: TOOLS (Personal) or ANALYTICS/INSIGHTS (Business) */}
             <Link
-              to={isBusinessRoute ? "/dashboard/business/insights" : "/dashboard/settings"}
-              className={cn(btnBase, btnAction, "bg-white text-gray-700 border-gray-200 hover:bg-gray-50")}
+              to={isBusinessRoute ? '/dashboard/business/insights' : '/dashboard/settings'}
+              className={cn(
+                btnBase,
+                btnAction,
+                'bg-white text-gray-700 border-gray-200 hover:bg-gray-50',
+              )}
             >
               {isBusinessRoute ? (
                 <BarChart3 size={20} className="text-gray-400" />
               ) : (
                 <PlusCircle size={20} className="text-gray-400" />
               )}
-              <span>{isBusinessRoute ? "Insights" : "Tools"}</span>
+              <span>{isBusinessRoute ? 'Insights' : 'Tools'}</span>
             </Link>
 
             {/* 3. SHARE (Always present for owners) */}
             <button
               onClick={handleShare}
-              className={cn(btnBase, btnAction, "bg-white text-gray-700 border-gray-200 hover:bg-gray-50")}
+              className={cn(
+                btnBase,
+                btnAction,
+                'bg-white text-gray-700 border-gray-200 hover:bg-gray-50',
+              )}
             >
               <Share2 size={20} className="text-orange-500" strokeWidth={2.5} />
               <span>Share</span>
@@ -258,15 +279,19 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
             <button
               onClick={handleFollowClick}
               className={cn(
-                btnBase, btnAction,
-                localIsFollowing ? "bg-gray-100 text-gray-800" : "bg-orange-500 text-white"
+                btnBase,
+                btnAction,
+                localIsFollowing ? 'bg-gray-100 text-gray-800' : 'bg-orange-500 text-white',
               )}
             >
               {localIsFollowing ? <UserCheck size={20} /> : <UserPlus size={20} />}
-              <span>{localIsFollowing ? "Following" : "Follow"}</span>
+              <span>{localIsFollowing ? 'Following' : 'Follow'}</span>
             </button>
             {/* 2. MESSAGE (Standard for everyone) */}
-            <button onClick={handleStartChat} className={cn(btnBase, btnAction, "bg-white text-gray-700 border-gray-200")}>
+            <button
+              onClick={handleStartChat}
+              className={cn(btnBase, btnAction, 'bg-white text-gray-700 border-gray-200')}
+            >
               <MessageCircle size={20} className="text-orange-500" />
               <span>Message</span>
             </button>
@@ -276,19 +301,23 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
               <button
                 onClick={handleBookmarkToggle}
                 className={cn(
-                  btnBase, btnAction,
-                  "bg-white text-gray-700 border-gray-200",
-                  localIsSaved && "bg-orange-50 border-orange-100"
+                  btnBase,
+                  btnAction,
+                  'bg-white text-gray-700 border-gray-200',
+                  localIsSaved && 'bg-orange-50 border-orange-100',
                 )}
               >
                 <Bookmark
                   size={20}
-                  className={localIsSaved ? "fill-orange-500 text-orange-500" : "text-gray-400"}
+                  className={localIsSaved ? 'fill-orange-500 text-orange-500' : 'text-gray-400'}
                 />
-                <span>{localIsSaved ? "Saved" : "Save"}</span>
+                <span>{localIsSaved ? 'Saved' : 'Save'}</span>
               </button>
             ) : (
-              <button onClick={handleShare} className={cn(btnBase, btnAction, "bg-white text-gray-700 border-gray-200")}>
+              <button
+                onClick={handleShare}
+                className={cn(btnBase, btnAction, 'bg-white text-gray-700 border-gray-200')}
+              >
                 <Share2 size={20} className="text-gray-400" />
                 <span>Share</span>
               </button>
@@ -306,7 +335,7 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
             className="flex items-center justify-center gap-2 py-3.5 bg-gray-50 text-gray-700 rounded-2xl text-xs font-bold border border-gray-100 hover:bg-gray-100 transition-colors"
           >
             <Briefcase size={16} />
-            {isMe ? "View My Business Page" : "View Business Page"}
+            {isMe ? 'View My Business Page' : 'View Business Page'}
           </Link>
         )}
 
@@ -316,18 +345,14 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
             className="flex items-center justify-center gap-2 py-3.5 bg-gray-50 text-gray-700 rounded-2xl text-xs font-bold border border-gray-100 hover:bg-gray-100 transition-colors"
           >
             <User size={16} />
-            {isMe ? "View My Personal Profile" : "View Owner Profile"}
+            {isMe ? 'View My Personal Profile' : 'View Owner Profile'}
           </Link>
         )}
       </div>
 
       {/* Contact Info (Only for Business) */}
 
-
-
-      {isBusinessRoute && business && (
-        <BusinessContactInfo business={business} />
-      )}
+      {isBusinessRoute && business && <BusinessContactInfo business={business} />}
 
       {/* Unfollow Confirmation */}
       <UnfollowDialog

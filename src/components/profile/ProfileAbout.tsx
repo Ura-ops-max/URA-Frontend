@@ -1,7 +1,6 @@
-
-import { MapPin, Phone, Globe, Clock, User, Store, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
+import { MapPin, Phone, Globe, Clock, User, Store, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 interface ProfileAboutProps {
   profile: any; // Using the ProfileResponse structure
@@ -22,7 +21,7 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile, isBusinessPage }) 
             <h3>Personal Bio</h3>
           </div>
           <p className="text-gray-600 leading-relaxed text-sm lg:text-base">
-            {user?.bio || "No bio added yet."}
+            {user?.bio || 'No bio added yet.'}
           </p>
         </section>
 
@@ -34,18 +33,17 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile, isBusinessPage }) 
                 <Store size={20} className="text-orange-600" />
               </div>
               <div>
-
-                <p className="text-[10px] font-black text-orange-400 uppercase tracking-tighter">View Official Business</p>
+                <p className="text-[10px] font-black text-orange-400 uppercase tracking-tighter">
+                  View Official Business
+                </p>
                 <p className="text-sm font-bold text-gray-900">{business.businessName}</p>
-
-
               </div>
             </div>
-            <Link
-              to={`/dashboard/profile/business/${business._id}`}
-            >
-              <ChevronRight size={18} className="text-orange-400 group-hover:translate-x-1 transition-transform" />
-
+            <Link to={`/dashboard/profile/business/${business._id}`}>
+              <ChevronRight
+                size={18}
+                className="text-orange-400 group-hover:translate-x-1 transition-transform"
+              />
             </Link>
           </button>
         )}
@@ -62,7 +60,7 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile, isBusinessPage }) 
           About the Business
         </h3>
         <p className="text-gray-700 leading-relaxed text-sm italic">
-          "{business?.about || "Welcome to our store. We provide quality service and products."}"
+          "{business?.about || 'Welcome to our store. We provide quality service and products.'}"
         </p>
       </section>
 
@@ -117,10 +115,18 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile, isBusinessPage }) 
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
             {business.operatingHours.map((slot: any) => (
-              <div key={slot._id} className="flex justify-between text-xs py-1 border-b border-gray-50 last:border-0">
+              <div
+                key={slot._id}
+                className="flex justify-between text-xs py-1 border-b border-gray-50 last:border-0"
+              >
                 <span className="font-medium text-gray-500">{slot.day}</span>
-                <span className={cn("font-bold", slot.open === "Closed" ? "text-red-400" : "text-gray-900")}>
-                  {slot.open === "Closed" ? "Closed" : `${slot.open} - ${slot.close}`}
+                <span
+                  className={cn(
+                    'font-bold',
+                    slot.open === 'Closed' ? 'text-red-400' : 'text-gray-900',
+                  )}
+                >
+                  {slot.open === 'Closed' ? 'Closed' : `${slot.open} - ${slot.close}`}
                 </span>
               </div>
             ))}
@@ -139,7 +145,7 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile, isBusinessPage }) 
               style={{ border: 0 }}
               referrerPolicy="no-referrer-when-downgrade"
               src={`https://www.google.com/maps?q=${encodeURIComponent(
-                business.address.fullAddress
+                business.address.fullAddress,
               )}&output=embed`}
               title="Business Location"
               className="grayscale hover:grayscale-0 transition-all duration-700 contrast-110"
@@ -158,8 +164,6 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile, isBusinessPage }) 
           </a>
         </div>
       )}
-
-
     </div>
   );
 };
@@ -171,7 +175,11 @@ const DetailItem = ({ icon, label, content, isLink, href }: any) => (
     <div className="overflow-hidden">
       <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">{label}</p>
       {isLink ? (
-        <a href={href} target="_blank" className="text-sm font-bold text-gray-900 hover:text-orange-600 truncate block">
+        <a
+          href={href}
+          target="_blank"
+          className="text-sm font-bold text-gray-900 hover:text-orange-600 truncate block"
+        >
           {content}
         </a>
       ) : (

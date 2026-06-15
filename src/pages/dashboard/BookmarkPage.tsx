@@ -19,11 +19,11 @@ const BookmarkPage = () => {
   const isDesktop = useIsDesktop();
   const [activeTab, setActiveTab] = useState<'posts' | 'businesses' | 'wishlist'>('posts');
 
- // API Hooks
+  // API Hooks
   const activeProfileId = user?._id;
   const {
     conversations,
-    isError: chatError // This maps the hook's isError to the name chatError
+    isError: chatError, // This maps the hook's isError to the name chatError
   } = useChat(activeProfileId!);
 
   const tabs = [
@@ -47,17 +47,13 @@ const BookmarkPage = () => {
             // Use subtle headers for the widgets
             className="bg-white/40 backdrop-blur-xl border-white/20 rounded-[24px] overflow-hidden"
           >
-            <ChatList
-              chatList={conversations}
-              activeProfileId={activeProfileId!}
-            />
+            <ChatList chatList={conversations} activeProfileId={activeProfileId!} />
           </SidebarWidget>
         </div>
       }
     >
       {/* INTERNAL MODULAR SPLIT */}
       <div className="flex flex-col lg:flex-row gap-8 min-h-[calc(100vh-120px)]">
-        
         {/* LEFT COMPONENT: Local Tab Navigation */}
         <div className="w-full lg:w-64 shrink-0">
           <div className="sticky top-8">
@@ -75,28 +71,45 @@ const BookmarkPage = () => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
                     className={cn(
-                      "flex flex-1 lg:flex-none items-center justify-between p-3 lg:p-4 rounded-2xl transition-all duration-200 group whitespace-nowrap lg:whitespace-normal",
-                      isActive 
-                        ? "bg-white lg:bg-slate-900 text-slate-900 lg:text-white shadow-sm lg:shadow-md" 
-                        : "text-slate-500 hover:bg-slate-100"
+                      'flex flex-1 lg:flex-none items-center justify-between p-3 lg:p-4 rounded-2xl transition-all duration-200 group whitespace-nowrap lg:whitespace-normal',
+                      isActive
+                        ? 'bg-white lg:bg-slate-900 text-slate-900 lg:text-white shadow-sm lg:shadow-md'
+                        : 'text-slate-500 hover:bg-slate-100',
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "p-2 rounded-lg transition-colors",
-                        isActive ? "bg-orange-600 text-white" : "bg-slate-200 text-slate-500 group-hover:bg-slate-300"
-                      )}>
+                      <div
+                        className={cn(
+                          'p-2 rounded-lg transition-colors',
+                          isActive
+                            ? 'bg-orange-600 text-white'
+                            : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300',
+                        )}
+                      >
                         <tab.icon size={18} />
                       </div>
                       <div className="text-left hidden lg:block">
                         <p className="text-sm font-bold leading-none">{tab.label}</p>
-                        <p className={cn("text-[10px] mt-1 font-medium", isActive ? "text-slate-300" : "text-slate-400")}>
+                        <p
+                          className={cn(
+                            'text-[10px] mt-1 font-medium',
+                            isActive ? 'text-slate-300' : 'text-slate-400',
+                          )}
+                        >
                           {tab.desc}
                         </p>
                       </div>
                       <span className="text-xs font-bold lg:hidden">{tab.label}</span>
                     </div>
-                    <ChevronRight size={16} className={cn("hidden lg:block transition-transform", isActive ? "translate-x-0" : "-translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0")} />
+                    <ChevronRight
+                      size={16}
+                      className={cn(
+                        'hidden lg:block transition-transform',
+                        isActive
+                          ? 'translate-x-0'
+                          : '-translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0',
+                      )}
+                    />
                   </button>
                 );
               })}
@@ -118,7 +131,6 @@ const BookmarkPage = () => {
             </div>
           </div>
         </div>
-
       </div>
     </DashboardContainer>
   );

@@ -7,15 +7,15 @@ export const useActivity = (options = {}) => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['activityList'],
     queryFn: async () => {
-      const response = await API.get('/log/activities');
+      const response = await API.get('/logs/activities');
       return response.data;
     },
     refetchInterval: 60000,
-    ...options
+    ...options,
   });
 
   const clearMutation = useMutation({
-    mutationFn: () => API.delete('/log/activities/clear-all'),
+    mutationFn: () => API.delete('/logs/activities/clear-all'),
     onSuccess: () => {
       // Refresh the list immediately
       queryClient.invalidateQueries({ queryKey: ['activityList'] });
@@ -27,6 +27,6 @@ export const useActivity = (options = {}) => {
     isLoading,
     isError,
     clearAll: clearMutation.mutate,
-    isClearing: clearMutation.isPending
+    isClearing: clearMutation.isPending,
   };
 };

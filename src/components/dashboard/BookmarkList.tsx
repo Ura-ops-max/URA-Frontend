@@ -1,11 +1,10 @@
-
-import { 
-  Bookmark as BookmarkIcon, 
-  ArrowRight, 
-  Image as ImageIcon, 
-  Briefcase, 
+import {
+  Bookmark as BookmarkIcon,
+  ArrowRight,
+  Image as ImageIcon,
+  Briefcase,
   Star,
-  Loader2 
+  Loader2,
 } from 'lucide-react';
 import { generateAvatarUrl } from '@/utils/avatar-generator';
 import { Link } from 'react-router-dom';
@@ -17,12 +16,13 @@ interface BookmarkListProps {
 }
 
 const BookmarkList: React.FC<BookmarkListProps> = ({ bookmarks, isLoading, isError }) => {
-  
   if (isLoading) {
     return (
       <div className="py-14 flex flex-col items-center justify-center opacity-40">
         <Loader2 className="h-6 w-6 animate-spin text-[#f97316] mb-2" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Loading saved items...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+          Loading saved items...
+        </p>
       </div>
     );
   }
@@ -56,19 +56,22 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ bookmarks, isLoading, isErr
         {bookmarks.length === 0 ? (
           <div className="py-14 flex flex-col items-center justify-center opacity-30">
             <BookmarkIcon strokeWidth={1.2} size={32} className="mb-2 text-slate-400" />
-            <p className="text-[11px] font-bold uppercase tracking-widest text-center">No bookmarks found</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-center">
+              No bookmarks found
+            </p>
           </div>
         ) : (
-          displayBookmarks.map((bm) => (
-            <BookmarkItem key={bm._id} item={bm} />
-          ))
+          displayBookmarks.map((bm) => <BookmarkItem key={bm._id} item={bm} />)
         )}
       </div>
 
       {/* View All Footer */}
       {hasMore && (
         <div className="pt-3 shrink-0">
-          <Link to="/dashboard/bookmarks" className="w-full py-3.5 rounded-[20px] border border-dashed border-slate-200 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-white/60 hover:text-[#f97316] hover:border-[#f97316]/40 transition-all flex items-center justify-center gap-2 group shadow-sm hover:shadow-md">
+          <Link
+            to="/dashboard/bookmarks"
+            className="w-full py-3.5 rounded-[20px] border border-dashed border-slate-200 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-white/60 hover:text-[#f97316] hover:border-[#f97316]/40 transition-all flex items-center justify-center gap-2 group shadow-sm hover:shadow-md"
+          >
             Manage all bookmarks
             <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
           </Link>
@@ -80,17 +83,17 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ bookmarks, isLoading, isErr
 
 const BookmarkItem = ({ item }: { item: any }) => {
   const isBusiness = !!item.businessName;
-  
-  const visualImage = isBusiness 
-    ? item.businessLogo 
-    : (item.media && item.media.length > 0 ? item.media[0] : (item.displayAvatar || generateAvatarUrl(`${item.displayName}`)));
 
-  const title = isBusiness 
-    ? item.businessName 
-    : (item.caption || "Untitled Post");
+  const visualImage = isBusiness
+    ? item.businessLogo
+    : item.media && item.media.length > 0
+      ? item.media[0]
+      : item.displayAvatar || generateAvatarUrl(`${item.displayName}`);
 
-  const subText = isBusiness 
-    ? (item.category || "Verified Business") 
+  const title = isBusiness ? item.businessName : item.caption || 'Untitled Post';
+
+  const subText = isBusiness
+    ? item.category || 'Verified Business'
     : `Shared by ${item.displayName || 'User'}`;
 
   return (
@@ -98,10 +101,10 @@ const BookmarkItem = ({ item }: { item: any }) => {
       <div className="relative shrink-0">
         <div className="w-10 h-10 rounded-[14px] overflow-hidden border-2 border-white shadow-sm bg-slate-100 ring-1 ring-slate-200/50">
           {visualImage ? (
-            <img 
-              src={visualImage} 
-              alt={title} 
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+            <img
+              src={visualImage}
+              alt={title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
@@ -109,7 +112,7 @@ const BookmarkItem = ({ item }: { item: any }) => {
             </div>
           )}
         </div>
-        
+
         <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm border border-slate-50">
           {isBusiness ? (
             <Briefcase size={9} className="text-[#f97316]" />

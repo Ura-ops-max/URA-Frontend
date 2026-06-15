@@ -24,7 +24,7 @@ export const useSearch = (query: string, searchType: string, filters: any) => {
         const response = await searchAPI.getGlobalSearch({
           q: query,
           type: searchType,
-          ...filters // Spreads city, category, rating, openNow, etc.
+          ...filters, // Spreads city, category, rating, openNow, etc.
         });
 
         // Our controller returns { success: true, data: { businesses: [], products: [] } }
@@ -32,7 +32,7 @@ export const useSearch = (query: string, searchType: string, filters: any) => {
         setResults(response.data.data);
       } catch (err: any) {
         setError(err.response?.data?.message || 'Search failed');
-        console.error("Search API Error:", err);
+        console.error('Search API Error:', err);
       } finally {
         setIsLoading(false);
       }
@@ -44,7 +44,6 @@ export const useSearch = (query: string, searchType: string, filters: any) => {
   return { results, isLoading, error };
 };
 
-
 export const useSearchHistory = () => {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +54,7 @@ export const useSearchHistory = () => {
       const res = await searchAPI.getRecentSearches();
       setHistory(res.data.data);
     } catch (err) {
-      console.error("Failed to fetch history");
+      console.error('Failed to fetch history');
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +62,7 @@ export const useSearchHistory = () => {
 
   const deleteItem = async (id: string) => {
     await searchAPI.deleteHistoryItem(id);
-    setHistory(prev => prev.filter((item: any) => item._id !== id));
+    setHistory((prev) => prev.filter((item: any) => item._id !== id));
   };
 
   const clearAll = async () => {

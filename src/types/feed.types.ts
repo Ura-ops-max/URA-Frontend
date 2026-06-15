@@ -1,8 +1,6 @@
-
 export type PostType = 'POST' | 'PRODUCT';
 export type AuthorType = 'User' | 'Business';
 export type PostContentType = 'POST' | 'PRODUCT';
-
 
 // 1. Shared fields found in every single feed item
 interface BasePost {
@@ -14,20 +12,20 @@ interface BasePost {
   displayAvatar: string | null;
   username: string | null;
   isVerified: boolean;
-  
+
   caption: string;
   media: string[];
   tags: string[];
-  
+
   createdAt: string;
   updatedAt: string;
-  
+
   // Engagement
   likesCount: number;
   commentsCount: number;
   isLiked: boolean;
   isBookmarked: boolean;
-  
+
   // Shop Ratings (Now part of the base because you want them everywhere)
   rating: number;
   reviewCount: number;
@@ -48,7 +46,7 @@ interface BasePost {
 // 2. Shape for a Social Post
 export interface SocialPostType extends BasePost {
   type: 'POST';
-  product?: never; 
+  product?: never;
 }
 
 // 3. Shape for a Product Post
@@ -63,13 +61,13 @@ export interface ProductPostType extends BasePost {
     description: string;
     size?: string;
     media: string[];
-    business: string; 
+    business: string;
     likes: [];
-    image_embedding?: number[]; 
+    image_embedding?: number[];
     embedding?: number[];
     averageRating?: number;
   };
-  productName?: string; 
+  productName?: string;
   category?: string;
   name?: string;
   price?: number;
@@ -80,7 +78,7 @@ export interface ProductPostType extends BasePost {
 export interface ProductType extends BasePost {
   type: 'PRODUCT';
   // Fallback for flat fields seen in your "Vintage Juice" example
-  productName: string; 
+  productName: string;
   category: string;
   name: string;
   price: number;
@@ -88,10 +86,7 @@ export interface ProductType extends BasePost {
   description: string;
   size?: string;
   media: string[];
-
 }
-
-
 
 // 4. Unified Types
 export type UnifiedPost = SocialPostType | ProductPostType;
@@ -101,7 +96,6 @@ export type FeedResponse = {
 };
 
 export interface CardProps<T> {
-    post: T;
-    onRequireAuth?: () => void;
+  post: T;
+  onRequireAuth?: () => void;
 }
-

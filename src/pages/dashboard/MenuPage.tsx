@@ -1,10 +1,17 @@
 // src/pages/dashboard/MenuPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {Tag,
-  Settings, LogOut, ChevronRight, Bookmark, Bell,
-  ShoppingCart, ShoppingBag, Store,
-  PlusCircle
+import {
+  Tag,
+  Settings,
+  LogOut,
+  ChevronRight,
+  Bookmark,
+  Bell,
+  ShoppingCart,
+  ShoppingBag,
+  Store,
+  PlusCircle,
 } from 'lucide-react';
 import { useAuthContext } from '@/context/auth-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,39 +24,44 @@ const MenuPage = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
-  const { totalItems: cartItem} = useCartContext();
+  const { totalItems: cartItem } = useCartContext();
 
-    const { unreadCount } = useNotificationContext();
+  const { unreadCount } = useNotificationContext();
   // Grouped Navigation Items
   const sections = [
     {
-      label: "General",
+      label: 'General',
       items: [
         // { title: 'Chat', icon: MessageCircle, path: '/dashboard/chat', badge: 5 },
-        { title: 'Notifications', icon: Bell, path: '/dashboard/notifications', badge: unreadCount },
+        {
+          title: 'Notifications',
+          icon: Bell,
+          path: '/dashboard/notifications',
+          badge: unreadCount,
+        },
         { title: 'Bookmarks', icon: Bookmark, path: '/dashboard/bookmarks' },
         // { title: 'Wallet & Payments', icon: Wallet, path: '/dashboard/wallet' },
-      ]
+      ],
     },
     {
-      label: "Shopping & Savings",
+      label: 'Shopping & Savings',
       items: [
         { title: 'My Cart', icon: ShoppingCart, path: '/dashboard/product/cart', badge: cartItem },
         { title: 'My Orders', icon: ShoppingBag, path: '/dashboard/my-orders' },
         { title: 'Deals & Offers', icon: Tag, path: '/dashboard/deal-offer' },
         // { title: 'Events', icon: Calendar, path: '/dashboard/events' },
-      ]
-    }
+      ],
+    },
   ];
 
   // Business Section (Conditional)
   const businessSection = {
-    label: "Business Tools",
+    label: 'Business Tools',
     items: [
       { title: 'List a Product', icon: PlusCircle, path: '/dashboard/post/create?type=product' },
       { title: 'Store Orders', icon: Store, path: '/dashboard/store-management', badge: 0 },
       // { title: 'Business Loan', icon: BadgePercent, path: '/dashboard/loans' },
-    ]
+    ],
   };
 
   return (
@@ -67,9 +79,14 @@ const MenuPage = () => {
         >
           <div className="flex items-center gap-4">
             <Avatar className="h-14 w-14 border-2 border-orange-100">
-              <AvatarImage src={user?.profilePicture  || generateAvatarUrl(`${user?.firstName} ${user?.lastName}`)} />
+              <AvatarImage
+                src={
+                  user?.profilePicture || generateAvatarUrl(`${user?.firstName} ${user?.lastName}`)
+                }
+              />
               <AvatarFallback className="bg-orange-500 text-white font-bold text-xl">
-                {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                {user?.firstName?.charAt(0)}
+                {user?.lastName?.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div>
@@ -95,8 +112,9 @@ const MenuPage = () => {
                 <button
                   key={iIdx}
                   onClick={() => navigate(item.path)}
-                  className={`w-full flex items-center justify-between p-4 active:bg-orange-50 transition-colors ${iIdx !== section.items.length - 1 ? 'border-b border-gray-50' : ''
-                    }`}
+                  className={`w-full flex items-center justify-between p-4 active:bg-orange-50 transition-colors ${
+                    iIdx !== section.items.length - 1 ? 'border-b border-gray-50' : ''
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-orange-50 rounded-lg">
@@ -120,7 +138,9 @@ const MenuPage = () => {
 
         {/* Support & Logout */}
         <div className="flex flex-col gap-2 mb-4">
-          <h3 className="px-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Settings</h3>
+          <h3 className="px-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+            Settings
+          </h3>
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             <button
               onClick={() => navigate('/dashboard/settings')}

@@ -1,10 +1,9 @@
-import React, { useState } from "react";
-import { Heart, ShoppingCart, Info, Star } from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useToggleLike } from "@/hooks/api/use-feed";
-import type { ProductType } from "@/types/feed.types";
-
+import React, { useState } from 'react';
+import { Heart, ShoppingCart, Info, Star } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { useToggleLike } from '@/hooks/api/use-feed';
+import type { ProductType } from '@/types/feed.types';
 
 // interface Product {
 //   _id: string;
@@ -26,7 +25,6 @@ interface ProductCardProps {
   className?: string;
 }
 
-
 export const ProductCard = ({
   product,
   isAuthenticated,
@@ -36,11 +34,11 @@ export const ProductCard = ({
   className,
 }: ProductCardProps) => {
   const [isWishlisted, setIsWishlisted] = useState(product.isLiked || false);
-  const { mutate: toggleLike } = useToggleLike(product._id, "product");
+  const { mutate: toggleLike } = useToggleLike(product._id, 'product');
 
-  const formattedPrice = new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
+  const formattedPrice = new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
     maximumFractionDigits: 0,
   }).format(product.price);
 
@@ -58,14 +56,14 @@ export const ProductCard = ({
   return (
     <div
       className={cn(
-        "group relative flex flex-col h-full bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-orange-100",
-        className
+        'group relative flex flex-col h-full bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-orange-100',
+        className,
       )}
     >
       {/* 1. IMAGE CONTAINER */}
       <div className="relative aspect-[4/5] overflow-hidden bg-gray-50 shrink-0">
         <img
-          src={product.media[0] || "/placeholder-product.png"}
+          src={product.media[0] || '/placeholder-product.png'}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
@@ -79,7 +77,10 @@ export const ProductCard = ({
             <motion.div animate={{ scale: isWishlisted ? [1, 1.4, 1] : 1 }}>
               <Heart
                 size={18}
-                className={cn("transition-colors", isWishlisted ? "fill-red-500 text-red-500" : "hover:text-red-400")}
+                className={cn(
+                  'transition-colors',
+                  isWishlisted ? 'fill-red-500 text-red-500' : 'hover:text-red-400',
+                )}
               />
             </motion.div>
           </button>
@@ -88,7 +89,9 @@ export const ProductCard = ({
         {/* Badge: Stock or Category */}
         <div className="absolute bottom-2 left-2 flex gap-1">
           {product.stock <= 0 ? (
-            <span className="bg-gray-900 text-white text-[9px] font-bold px-2 py-1 rounded-md uppercase">Sold Out</span>
+            <span className="bg-gray-900 text-white text-[9px] font-bold px-2 py-1 rounded-md uppercase">
+              Sold Out
+            </span>
           ) : product.stock < 5 ? (
             <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded-md uppercase animate-pulse">
               Low Stock
@@ -142,13 +145,13 @@ export const ProductCard = ({
               }}
               disabled={product.stock <= 0} // Disable if out of stock
               className={cn(
-                "flex-1 bg-gray-900 hover:bg-orange-600 text-white h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95",
-                product.stock <= 0 && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400"
+                'flex-1 bg-gray-900 hover:bg-orange-600 text-white h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95',
+                product.stock <= 0 && 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400',
               )}
             >
               <ShoppingCart size={16} />
               <span className="hidden sm:inline">
-                {product.stock <= 0 ? "Out of Stock" : "Add to Cart"}
+                {product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
               </span>
               <span className="sm:hidden">Add</span>
             </button>

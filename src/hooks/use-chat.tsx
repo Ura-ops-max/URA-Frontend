@@ -12,14 +12,14 @@ export const useChat = (activeProfileId: string | undefined) => {
 
   const fetchConversations = useCallback(async () => {
     if (!activeProfileId) return;
-    
+
     setIsLoading(true);
     setIsError(false);
     try {
       const { data } = await chatAPI.getConversations(activeProfileId);
       setConversations(data.data);
     } catch (error) {
-      console.error("Error fetching conversations:", error);
+      console.error('Error fetching conversations:', error);
       setIsError(true);
     } finally {
       setIsLoading(false);
@@ -27,34 +27,39 @@ export const useChat = (activeProfileId: string | undefined) => {
   }, [activeProfileId]);
 
   // NEW: Optimistic Unread Clear
-  const markAsRead = useCallback(async (convId: string) => {
-    if (!activeProfileId || !convId) return;
+  const markAsRead = useCallback(
+    async (convId: string) => {
+      if (!activeProfileId || !convId) return;
 
-    // 1. Update LOCAL state immediately (Optimistic UI)
-    setConversations(prev => prev.map(chat => {
-      if (chat._id === convId) {
-        return {
-          ...chat,
-          unreadCount: {
-            ...chat.unreadCount,
-            [activeProfileId]: 0 // Zero out unread for the current user
+      // 1. Update LOCAL state immediately (Optimistic UI)
+      setConversations((prev) =>
+        prev.map((chat) => {
+          if (chat._id === convId) {
+            return {
+              ...chat,
+              unreadCount: {
+                ...chat.unreadCount,
+                [activeProfileId]: 0, // Zero out unread for the current user
+              },
+            };
           }
-        };
-      }
-      return chat;
-    }));
+          return chat;
+        }),
+      );
 
-    try {
-      // 2. Tell the backend to clear it in the DB
-      // Note: Your getMessages controller already handles clearing unread count
-      await chatAPI.getMessages(convId, activeProfileId);
-      
-      // 3. Optional: Notify other user via socket that you've seen the messages
-      socketService.emit('mark_seen', { conversationId: convId, profileId: activeProfileId });
-    } catch (error) {
-      console.error("Failed to mark messages as read:", error);
-    }
-  }, [activeProfileId]);
+      try {
+        // 2. Tell the backend to clear it in the DB
+        // Note: Your getMessages controller already handles clearing unread count
+        await chatAPI.getMessages(convId, activeProfileId);
+
+        // 3. Optional: Notify other user via socket that you've seen the messages
+        socketService.emit('mark_seen', { conversationId: convId, profileId: activeProfileId });
+      } catch (error) {
+        console.error('Failed to mark messages as read:', error);
+      }
+    },
+    [activeProfileId],
+  );
 
   // EFFECT: Fetch conversations on mount or tab switch
   useEffect(() => {
@@ -72,14 +77,16 @@ export const useChat = (activeProfileId: string | undefined) => {
     };
 
     socketService.on('message:received', handleNewMessage);
-    
-    // Listen for global 'seen' updates if you want counts to clear when 
+
+    // Listen for global 'seen' updates if you want counts to clear when
     // you have the app open on two devices
     socketService.on('messages_seen', ({ conversationId: id, seenBy }) => {
       if (seenBy === activeProfileId) {
-        setConversations(prev => prev.map(c => 
-          c._id === id ? { ...c, unreadCount: { ...c.unreadCount, [seenBy]: 0 } } : c
-        ));
+        setConversations((prev) =>
+          prev.map((c) =>
+            c._id === id ? { ...c, unreadCount: { ...c.unreadCount, [seenBy]: 0 } } : c,
+          ),
+        );
       }
     });
 
@@ -99,12 +106,13 @@ export const useChat = (activeProfileId: string | undefined) => {
   const filteredConversations = useMemo(() => {
     return conversations.filter((chat) => {
       const otherParticipant = chat.participants.find(
-        (p: any) => (p.participantId?._id || p.participantId) !== activeProfileId
+        (p: any) => (p.participantId?._id || p.participantId) !== activeProfileId,
       );
       const details = otherParticipant?.participantId;
-      const name = otherParticipant?.participantModel === 'User'
-        ? `${details?.firstName} ${details?.lastName}`
-        : details?.businessName;
+      const name =
+        otherParticipant?.participantModel === 'User'
+          ? `${details?.firstName} ${details?.lastName}`
+          : details?.businessName;
 
       return name?.toLowerCase().includes(searchQuery.toLowerCase());
     });

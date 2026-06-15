@@ -61,8 +61,8 @@ API.interceptors.response.use(
 
     const { data, status } = error.response;
 
-    const isAuthRequest = originalRequest.url.includes('/auth/login') ||
-      originalRequest.url.includes('/auth/register');
+    const isAuthRequest =
+      originalRequest.url.includes('/auth/login') || originalRequest.url.includes('/auth/register');
 
     if (status === 401 && isAuthRequest) {
       return Promise.reject(error); // This lets your LoginPage handle the error

@@ -19,7 +19,6 @@ export interface ReviewDistribution {
   5: number;
 }
 
-
 export interface ReviewSummaryData {
   averageRating: number;
   totalReviews: number;

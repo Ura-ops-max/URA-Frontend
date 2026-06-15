@@ -1,6 +1,6 @@
 // src/components/feed/VideoPlayer.tsx
-import { useState, useRef } from "react";
-import { Play, Pause, Volume2, VolumeX, FastForward, Rewind } from "lucide-react";
+import { useState, useRef } from 'react';
+import { Play, Pause, Volume2, VolumeX, FastForward, Rewind } from 'lucide-react';
 
 export const VideoPlayer = ({ url, className }: { url: string; className: string }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -23,7 +23,7 @@ export const VideoPlayer = ({ url, className }: { url: string; className: string
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     const now = Date.now();
     const DOUBLE_CLICK_DELAY = 300;
-    const clickX = ('clientX' in e) ? e.clientX : (e as React.TouchEvent).touches[0].clientX;
+    const clickX = 'clientX' in e ? e.clientX : (e as React.TouchEvent).touches[0].clientX;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const x = clickX - rect.left;
 
@@ -60,17 +60,20 @@ export const VideoPlayer = ({ url, className }: { url: string; className: string
   };
 
   return (
-    <div className="relative w-full h-full group bg-black overflow-hidden cursor-pointer" onClick={handleInteraction}>
-      <video 
-        ref={videoRef} 
-        src={url} 
-        className={className} 
-        loop 
-        muted={isMuted} 
-        playsInline 
+    <div
+      className="relative w-full h-full group bg-black overflow-hidden cursor-pointer"
+      onClick={handleInteraction}
+    >
+      <video
+        ref={videoRef}
+        src={url}
+        className={className}
+        loop
+        muted={isMuted}
+        playsInline
         onTimeUpdate={handleTimeUpdate}
       />
-      
+
       {/* Feedback Icons */}
       {feedback && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
@@ -85,15 +88,18 @@ export const VideoPlayer = ({ url, className }: { url: string; className: string
 
       {/* Progress Bar Container */}
       <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20 z-30">
-        <div 
-          className="h-full bg-orange-500 transition-all duration-100 ease-linear" 
+        <div
+          className="h-full bg-orange-500 transition-all duration-100 ease-linear"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       {/* Mute Button */}
-      <button 
-        onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsMuted(!isMuted);
+        }}
         className="absolute bottom-4 right-4 p-2.5 bg-black/60 backdrop-blur-md rounded-full text-white z-40 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
       >
         {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}

@@ -1,5 +1,4 @@
-
-import { UserCheck } from "lucide-react";
+import { UserCheck } from 'lucide-react';
 
 interface UnfollowDialogProps {
   isOpen: boolean;
@@ -8,7 +7,12 @@ interface UnfollowDialogProps {
   displayName: string;
 }
 
-export const UnfollowDialog = ({ isOpen, onClose, onConfirm, displayName }: UnfollowDialogProps) => {
+export const UnfollowDialog = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  displayName,
+}: UnfollowDialogProps) => {
   if (!isOpen) return null;
 
   return (
@@ -31,8 +35,8 @@ export const UnfollowDialog = ({ isOpen, onClose, onConfirm, displayName }: Unfo
           >
             Yes, Unfollow
           </button>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="w-full py-4 text-gray-500 font-bold hover:text-gray-800 transition-colors"
           >
             Cancel

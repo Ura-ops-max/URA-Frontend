@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import PostCard from "./PostCard";
-import { getAllPosts } from "@/services/mock/post.ts";
+import { useEffect, useState } from 'react';
+import PostCard from './PostCard';
+import { getAllPosts } from '@/services/mock/post.ts';
 
 export default function PostFeed({ onRequireAuth }: { onRequireAuth?: () => void }) {
   const [posts, setPosts] = useState<any[]>([]);

@@ -1,14 +1,14 @@
 // src/components/profile/ProfileHeader.tsx
-import { generateAvatarUrl } from "@/utils/avatar-generator";
-import React from "react";
+import { generateAvatarUrl } from '@/utils/avatar-generator';
+import React from 'react';
 type Props = {
   profile: any;
   isBusiness: boolean;
 };
 
 const ProfileHeader: React.FC<Props> = ({ profile, isBusiness = false }) => {
-  const fallbackSeed = isBusiness 
-    ? (profile.business?.businessName || "Business") 
+  const fallbackSeed = isBusiness
+    ? profile.business?.businessName || 'Business'
     : `${profile.user.firstName} ${profile.user.lastName}`;
 
   const FALLBACK_PROFILE_URL = generateAvatarUrl(fallbackSeed);
@@ -18,11 +18,7 @@ const ProfileHeader: React.FC<Props> = ({ profile, isBusiness = false }) => {
       {/* Banner */}
       <div className="relative">
         <img
-          src={
-            isBusiness 
-              ? (profile.business?.businessCover) 
-              : (profile.user.coverPicture)
-          }
+          src={isBusiness ? profile.business?.businessCover : profile.user.coverPicture}
           alt="cover"
           className="w-full h-44 md:h-56 object-cover rounded-t-xl"
         />
@@ -31,8 +27,8 @@ const ProfileHeader: React.FC<Props> = ({ profile, isBusiness = false }) => {
         <div className="absolute left-12 -bottom-12">
           <img
             src={
-              isBusiness 
-                ? (profile.business?.businessLogo ?? FALLBACK_PROFILE_URL) 
+              isBusiness
+                ? (profile.business?.businessLogo ?? FALLBACK_PROFILE_URL)
                 : (profile.user.profilePicture ?? FALLBACK_PROFILE_URL)
             }
             alt="avatar"

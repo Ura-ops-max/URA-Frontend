@@ -14,8 +14,8 @@ const ReviewBar: React.FC<ReviewBarProps> = ({ stars, count, maxCount }) => {
     <div className="flex items-center space-x-2 text-sm text-gray-500">
       <span className="w-2">{stars}</span>
       <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-orange-500 rounded-full transition-all duration-500" 
+        <div
+          className="h-full bg-orange-500 rounded-full transition-all duration-500"
           style={{ width: `${widthPercentage}%` }}
         />
       </div>

@@ -1,6 +1,14 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-export const FormField = ({ label, error, children }: { label: string; error?: string; children: ReactNode }) => (
+export const FormField = ({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: ReactNode;
+}) => (
   <div className="w-full space-y-1.5">
     <label className="text-sm font-bold text-gray-700 ml-1">{label}</label>
     {children}

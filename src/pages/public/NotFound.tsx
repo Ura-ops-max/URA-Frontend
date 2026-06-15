@@ -1,4 +1,3 @@
-
 import { Link, useNavigate } from 'react-router-dom';
 import { Home, ArrowLeft, Search, Ghost } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ const NotFound = () => {
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center">
         {/* Animated Icon Container */}
-        <motion.div 
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
@@ -30,7 +29,8 @@ const NotFound = () => {
           Lost in the Marketplace?
         </h1>
         <p className="text-gray-500 mb-10 leading-relaxed font-medium">
-          We couldn't find the page you're looking for. It might have been moved, deleted, or perhaps it never existed in this dimension.
+          We couldn't find the page you're looking for. It might have been moved, deleted, or
+          perhaps it never existed in this dimension.
         </p>
 
         {/* Action Buttons */}
@@ -41,10 +41,10 @@ const NotFound = () => {
               Back to Home
             </Button>
           </Link>
-          
+
           <div className="flex gap-3">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => navigate(-1)}
               className="flex-1 h-12 rounded-xl border-gray-100 font-bold text-gray-600 gap-2"
             >
@@ -52,8 +52,8 @@ const NotFound = () => {
               Go Back
             </Button>
             <Link to="/dashboard/search" className="flex-1">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full h-12 rounded-xl border-gray-100 font-bold text-gray-600 gap-2"
               >
                 <Search size={16} />
@@ -65,7 +65,10 @@ const NotFound = () => {
 
         {/* Footer Support Link */}
         <p className="mt-12 text-[10px] font-black uppercase tracking-widest text-gray-300">
-          Think this is a mistake? <Link to="/support" className="text-orange-500 hover:underline">Contact Support</Link>
+          Think this is a mistake?{' '}
+          <Link to="/support" className="text-orange-500 hover:underline">
+            Contact Support
+          </Link>
         </p>
       </div>
     </div>

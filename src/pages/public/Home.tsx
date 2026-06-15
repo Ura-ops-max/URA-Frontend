@@ -3,8 +3,6 @@ import MarketplaceFeed from '@/components/homepage/MarketPlace';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
-
-
 function Home() {
   return (
     <main className="overflow-hidden [--color-primary-foreground:var(--color-white)] [--color-primary:var(--color-green-600)]">

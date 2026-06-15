@@ -64,34 +64,42 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
     /* Glass Effect: Light bg opacity, heavy blur, and very subtle shadow */
     <header className="sticky top-0 z-40 w-full bg-white/60 backdrop-blur-xl border-b border-white/20 h-16 transition-all duration-300">
       <div className="flex items-center justify-between h-full px-4 lg:px-10">
-
         {/* LEFT SECTION: Breadcrumbs & Trigger */}
         <div className="flex items-center gap-4">
           <div className="lg:hidden">
-            <Logo  url="/dashboard" />
+            <Logo url="/dashboard" />
           </div>
 
           <div className="hidden lg:flex items-center gap-4">
             <SidebarTrigger className="hover:bg-gray-100/50 rounded-full h-9 w-9 flex items-center justify-center transition-colors" />
             <Separator orientation="vertical" className="h-4 bg-gray-200" />
-            
+
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
                   {pageHeading ? (
                     <BreadcrumbLink asChild>
                       {/* Using text-[13px] and medium weight for a cleaner look */}
-                      <Link to="/dashboard" className="text-[13px] font-medium text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider">Dashboard</Link>
+                      <Link
+                        to="/dashboard"
+                        className="text-[13px] font-medium text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+                      >
+                        Dashboard
+                      </Link>
                     </BreadcrumbLink>
                   ) : (
-                    <BreadcrumbPage className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">Dashboard</BreadcrumbPage>
+                    <BreadcrumbPage className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">
+                      Dashboard
+                    </BreadcrumbPage>
                   )}
                 </BreadcrumbItem>
                 {pageHeading && (
                   <>
                     <BreadcrumbSeparator className="text-gray-300" />
                     <BreadcrumbItem>
-                      <BreadcrumbPage className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">{pageHeading}</BreadcrumbPage>
+                      <BreadcrumbPage className="text-[13px] font-bold text-gray-900 uppercase tracking-wider">
+                        {pageHeading}
+                      </BreadcrumbPage>
                     </BreadcrumbItem>
                   </>
                 )}
@@ -106,10 +114,10 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
             const isActive = pathname === item.to;
             const Icon = item.icon;
             const baseClass = cn(
-              "flex items-center gap-2 px-4 py-1.5 rounded-xl text-[13px] font-bold transition-all duration-200 relative",
-              isActive 
-                ? "bg-white text-black shadow-sm" 
-                : "text-gray-500 hover:text-black hover:bg-white/50"
+              'flex items-center gap-2 px-4 py-1.5 rounded-xl text-[13px] font-bold transition-all duration-200 relative',
+              isActive
+                ? 'bg-white text-black shadow-sm'
+                : 'text-gray-500 hover:text-black hover:bg-white/50',
             );
 
             return item.onClick ? (
@@ -118,7 +126,7 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
               </button>
             ) : (
               <Link key={item.name} to={item.to!} className={baseClass}>
-                <Icon size={16} strokeWidth={2.5} /> 
+                <Icon size={16} strokeWidth={2.5} />
                 <span>{item.name}</span>
                 {item.name === 'Cart' && cartItemCount > 0 && (
                   <span className="ml-1.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-[#f97316] text-[9px] font-black text-white">
@@ -132,9 +140,11 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
 
         {/* RIGHT SECTION: Icons & Avatar */}
         <div className="flex items-center gap-1.5 sm:gap-3">
-          
           {/* Mobile Cart */}
-          <Link to="/dashboard/product/cart" className="lg:hidden relative p-2.5 text-gray-600 hover:bg-gray-100/50 rounded-full transition-all">
+          <Link
+            to="/dashboard/product/cart"
+            className="lg:hidden relative p-2.5 text-gray-600 hover:bg-gray-100/50 rounded-full transition-all"
+          >
             <ShoppingCart size={20} />
             {cartItemCount > 0 && (
               <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#f97316] text-[9px] font-black text-white border-2 border-white shadow-sm">
@@ -148,8 +158,10 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
             <button
               onClick={() => setIsNotifOpen(!isNotifOpen)}
               className={cn(
-                "relative p-2.5 rounded-full transition-all duration-200",
-                isNotifOpen ? 'bg-gray-950 text-white shadow-lg shadow-gray-200' : 'text-gray-600 hover:bg-gray-100/50'
+                'relative p-2.5 rounded-full transition-all duration-200',
+                isNotifOpen
+                  ? 'bg-gray-950 text-white shadow-lg shadow-gray-200'
+                  : 'text-gray-600 hover:bg-gray-100/50',
               )}
             >
               <Bell size={20} strokeWidth={2} />

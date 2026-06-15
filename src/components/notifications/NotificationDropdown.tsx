@@ -1,4 +1,3 @@
-
 import { Bell, MessageCircle, Heart, Star, ShoppingBag } from 'lucide-react';
 import { useNotificationContext } from '@/context/notification-provider';
 import { formatDistanceToNow } from 'date-fns';
@@ -10,11 +9,16 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'MESSAGE': return <MessageCircle size={16} className="text-blue-500" />;
-      case 'SOCIAL': return <Heart size={16} className="text-red-500" />;
-      case 'REVIEW': return <Star size={16} className="text-yellow-500" />;
-      case 'ORDER': return <ShoppingBag size={16} className="text-green-500" />;
-      default: return <Bell size={16} className="text-gray-500" />;
+      case 'MESSAGE':
+        return <MessageCircle size={16} className="text-blue-500" />;
+      case 'SOCIAL':
+        return <Heart size={16} className="text-red-500" />;
+      case 'REVIEW':
+        return <Star size={16} className="text-yellow-500" />;
+      case 'ORDER':
+        return <ShoppingBag size={16} className="text-green-500" />;
+      default:
+        return <Bell size={16} className="text-gray-500" />;
     }
   };
 
@@ -32,11 +36,11 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
       <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
         {notifications.length > 0 ? (
           notifications.map((notif: any) => (
-            <div 
+            <div
               key={notif._id}
               onClick={() => {
                 markAsRead(notif._id);
-                if(notif.relatedId) navigate(`/dashboard/chat/${notif.relatedId}`);
+                if (notif.relatedId) navigate(`/dashboard/chat/${notif.relatedId}`);
                 onClose();
               }}
               className={`p-4 flex gap-3 border-b dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors ${!notif.isRead ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}
@@ -44,7 +48,9 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
               <div className="mt-1">{getIcon(notif.type)}</div>
               <div className="flex-1">
                 <p className="text-sm font-semibold dark:text-white">{notif.title}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">{notif.message}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">
+                  {notif.message}
+                </p>
                 <span className="text-[10px] text-slate-400 mt-2 block italic">
                   {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
                 </span>
@@ -60,8 +66,11 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
         )}
       </div>
 
-      <button 
-        onClick={() => { navigate('/dashboard/notifications'); onClose(); }}
+      <button
+        onClick={() => {
+          navigate('/dashboard/notifications');
+          onClose();
+        }}
         className="w-full p-3 text-center text-sm font-bold text-[#FF6B35] hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors border-t dark:border-slate-800"
       >
         View All Notifications

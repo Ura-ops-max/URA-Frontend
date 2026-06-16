@@ -316,7 +316,13 @@ export default function RegisterPage() {
             </svg>
             <span>Google</span>
           </Button>
-          <Button type="button" variant="outline">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              window.location.href = `${import.meta.env.VITE_API_ROOT_URL}/api/v1/auth/microsoft`;
+            }}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 256 256">
               <path fill="#f1511b" d="M121.666 121.666H0V0h121.666z"></path>
               <path fill="#80cc28" d="M256 121.666H134.335V0H256z"></path>

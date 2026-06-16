@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Landmark, Copy, Check, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -66,9 +66,16 @@ export default function FundWalletModal({ customerId, onClose }: FundWalletModal
     setTimeout(() => setCopied(null), 2000);
   };
 
-  if (!account && !isLoading) {
+  // Generate an account once when the modal opens. Using a ref guard prevents
+  // React StrictMode's double-invoke (and re-renders) from firing duplicate
+  // requests — the previous render-time call hammered the API on every render.
+  const didGenerate = useRef(false);
+  useEffect(() => {
+    if (didGenerate.current) return;
+    didGenerate.current = true;
     generateAccount();
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     // Click-outside overlay

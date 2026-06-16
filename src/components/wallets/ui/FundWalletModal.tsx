@@ -31,7 +31,26 @@ export default function FundWalletModal({ customerId, onClose }: FundWalletModal
       const { data } = await paylukAPI.post('/payment/virtual-account', null, {
         headers: { 'customer-id': customerId },
       });
-      setAccount(data?.data ?? data);
+
+      // Log raw payload so the exact Payluk shape is visible in the console.
+      console.log('[FundWallet] virtual-account response:', data);
+
+      // Payluk may wrap the account one or two levels deep and use different
+      // key casings — normalise all the likely shapes into our VirtualAccount.
+      const root = data?.data ?? data;
+      const a = root?.account ?? root?.virtualAccount ?? root?.virtual_account ?? root;
+
+      setAccount({
+        accountNumber:
+          a?.accountNumber ?? a?.account_number ?? a?.accountNo ?? a?.account_no ?? '',
+        accountName:
+          a?.accountName ?? a?.account_name ?? a?.accountTitle ?? a?.account_title ?? '',
+        bank: a?.bank ?? a?.bankName ?? a?.bank_name ?? '',
+        bankCode: a?.bankCode ?? a?.bank_code ?? '',
+        amount: a?.amount ?? 0,
+        expiresIn:
+          a?.expiresIn ?? a?.expiresAt ?? a?.expires_at ?? a?.expiry ?? a?.expiryDate ?? '',
+      });
     } catch (err: any) {
       const message = err?.response?.data?.message ?? 'Failed to generate account. Try again.';
       toast.error(message);

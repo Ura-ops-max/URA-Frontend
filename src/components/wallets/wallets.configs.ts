@@ -1,7 +1,6 @@
 import {
   Activity,
   History,
-  CreditCard,
   Grid,
   ShoppingBag,
   BadgeCheck,

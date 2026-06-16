@@ -169,13 +169,21 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
     }
   }, [isSearchOpen]);
 
+  const handleClose = useCallback(() => {
+    setQuery('');
+    setResults([]);
+    setHasSearched(false);
+    setError(null);
+    onClose();
+  }, [onClose]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose();
     };
     if (isSearchOpen) document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [isSearchOpen]);
+  }, [isSearchOpen, handleClose]);
 
   useEffect(() => {
     document.body.style.overflow = isSearchOpen ? 'hidden' : '';
@@ -224,34 +232,6 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
       setUserCoords(null);
     }
   };
-
-  const runSearch = useCallback(
-    async (q: string) => {
-      if (!q.trim()) {
-        setResults([]);
-        setHasSearched(false);
-        return;
-      }
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await aiSearchService.textSearch({
-          q,
-          ...(useGeo && userCoords
-            ? { lat: userCoords.lat, lng: userCoords.lng, radius_km: 10 }
-            : {}),
-        });
-        setResults(flattenResults(res.results));
-        setHasSearched(true);
-      } catch {
-        setError('Search failed. Please try again.');
-        setHasSearched(true);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [useGeo, userCoords],
-  );
 
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;

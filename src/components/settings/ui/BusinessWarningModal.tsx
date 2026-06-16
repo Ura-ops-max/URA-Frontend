@@ -17,7 +17,7 @@ const BusinessWarningModal = ({ onClose }: { onClose: () => void }) => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      return await API.post('/user/convert-to-business');
+      return await API.post('/users/me/convert-to-business');
     },
     onSuccess: () => {
       toast.success('Welcome to Business Mode!');

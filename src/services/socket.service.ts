@@ -10,7 +10,10 @@ class SocketService {
       this.socket = io(SOCKET_URL, {
         reconnectionAttempts: Infinity,
         reconnectionDelay: 1000,
-        transports: ['websocket'],
+        // Prefer WebSocket but fall back to HTTP long-polling. Without the
+        // fallback, presence/realtime silently die if the proxy in front of
+        // the API doesn't forward WebSocket upgrades.
+        transports: ['websocket', 'polling'],
       });
 
       this.socket.on('connect', () => {

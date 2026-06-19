@@ -3,6 +3,7 @@ import { AUTH_ROUTES, BASE_ROUTE, PROTECTED_ROUTES } from './routePaths';
 import Home from '@/pages/public/Home';
 import GoogleOAuthFailure from '@/pages/auth/GoogleOAuthFailure';
 import OAuthSuccessPage from '@/pages/auth/OAuthSuccessPage';
+import VerifyEmail from '@/pages/auth/VerifyEmail';
 import Dashboard from '@/pages/dashboard/Dashboard';
 import SettingsPage from '@/pages/dashboard/Settings';
 import ForgotPasswordPage from '@/pages/auth/ForgetPassword';
@@ -118,6 +119,9 @@ export const protectedRoutePaths = [
 export const baseRoutePaths = [
   { path: BASE_ROUTE.HOME, element: <Home /> },
   { path: BASE_ROUTE.ABOUT, element: <AboutPage /> },
+  // Public so the email link works whether or not the user is logged in,
+  // and so the "Verify Now" banner isn't bounced by the auth-redirect guard.
+  { path: AUTH_ROUTES.VERIFY_EMAIL, element: <VerifyEmail /> },
 ];
 
 // --- Utility ---

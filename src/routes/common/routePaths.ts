@@ -36,6 +36,7 @@ export const PROTECTED_ROUTES = {
 export const BASE_ROUTE = {
   HOME: '/',
   ABOUT: '/about',
+  CONTACT: '/contact',
   INVITE_URL: '/invite/workspace/:inviteCode/join',
   PAYLUK_PAYMENT_COMPLETE: '/payments/complete',
 } as const;

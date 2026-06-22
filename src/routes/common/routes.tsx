@@ -28,6 +28,7 @@ import BookmarkPage from '@/pages/dashboard/BookmarkPage';
 import PasswordSecurity from '@/components/settings/pages/Password&Security';
 import NotificationsPage from '@/components/settings/pages/NotificationLog';
 import AboutPage from '@/pages/public/About';
+import ContactPage from '@/pages/public/Contact';
 import PaylukSetupPage from '@/pages/dashboard/PaylukSetupPage.tsx';
 import { ImageSearch } from '@/pages/dashboard/ImageSearch';
 import PaymentCompletePage from '@/pages/dashboard/PaymentCompletePage.tsx';
@@ -119,6 +120,7 @@ export const protectedRoutePaths = [
 export const baseRoutePaths = [
   { path: BASE_ROUTE.HOME, element: <Home /> },
   { path: BASE_ROUTE.ABOUT, element: <AboutPage /> },
+  { path: BASE_ROUTE.CONTACT, element: <ContactPage /> },
   // Public so the email link works whether or not the user is logged in,
   // and so the "Verify Now" banner isn't bounced by the auth-redirect guard.
   { path: AUTH_ROUTES.VERIFY_EMAIL, element: <VerifyEmail /> },

@@ -3,7 +3,7 @@ import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
-const SUPPORT_EMAIL = 'support@ura.com.ng';
+const SUPPORT_EMAIL = 'info@URA.com.ng';
 
 const ContactPage = () => {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
@@ -56,13 +56,13 @@ const ContactPage = () => {
             <ContactCard
               icon={<Phone className="h-5 w-5" />}
               title="Call us"
-              lines={['+234 800 000 0000']}
+              lines={['+234 8152345755']}
               href="tel:+2348000000000"
             />
             <ContactCard
               icon={<MapPin className="h-5 w-5" />}
               title="Visit us"
-              lines={['Lagos, Nigeria']}
+              lines={['Abuja, Nigeria']}
             />
           </div>
 

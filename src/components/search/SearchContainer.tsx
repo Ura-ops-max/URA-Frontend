@@ -14,35 +14,98 @@ import {
   Sparkles,
   Star,
   CheckCircle,
+  User,
+  FileText,
 } from 'lucide-react';
-import type { AxiosError } from 'axios';
-import { aiSearchService, flattenResults } from '@/lib/ai-search.service';
-import type { AISearchResult } from '@/lib/ai-search.service';
+import { searchAPI } from '@/lib/api';
 
 interface SearchContainerProps {
   isSearchOpen: boolean;
   onClose: () => void;
 }
 
-// ─── Local storage ────────────────────────────────────────────────────────────
+// ─── Result type ──────────────────────────────────────────────────────────────
 
-const RECENT_KEY = 'ura_recent_searches';
-const MAX_RECENT = 6;
+interface SearchResult {
+  id: string;
+  type: 'business' | 'product' | 'user' | 'post';
+  name: string;
+  subtitle: string;
+  image: string | null;
+  price: number | null;
+  rating: number | null;
+  location: string | null;
+  inStock: boolean | null;
+  url: string;
+}
 
-const getRecentSearches = (): string[] => {
-  try {
-    return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
-  } catch {
-    return [];
+function flattenBackendResults(data: any): SearchResult[] {
+  const flat: SearchResult[] = [];
+
+  for (const biz of data?.businesses ?? []) {
+    flat.push({
+      id: biz._id,
+      type: 'business',
+      name: biz.businessName ?? 'Unnamed Business',
+      subtitle: biz.category ?? '',
+      image: biz.businessLogo ?? null,
+      price: null,
+      rating: biz.averageRating ?? null,
+      location: biz.address?.fullAddress ?? biz.address?.city ?? null,
+      inStock: null,
+      url: `/dashboard/profile/business/${biz._id}`,
+    });
   }
-};
-const saveRecentSearch = (q: string) => {
-  const prev = getRecentSearches().filter((s) => s !== q);
-  localStorage.setItem(RECENT_KEY, JSON.stringify([q, ...prev].slice(0, MAX_RECENT)));
-};
-const removeRecentSearch = (q: string) => {
-  localStorage.setItem(RECENT_KEY, JSON.stringify(getRecentSearches().filter((s) => s !== q)));
-};
+
+  for (const user of data?.users ?? []) {
+    flat.push({
+      id: user._id,
+      type: 'user',
+      name: user.fullName ?? user.username ?? 'Unknown User',
+      subtitle: `@${user.username ?? ''}`,
+      image: user.profilePicture ?? null,
+      price: null,
+      rating: null,
+      location: null,
+      inStock: null,
+      url: `/dashboard/profile/user/${user._id}`,
+    });
+  }
+
+  for (const prod of data?.products ?? []) {
+    const img = Array.isArray(prod.media) ? prod.media[0] : null;
+    flat.push({
+      id: prod._id,
+      type: 'product',
+      name: prod.name ?? 'Unnamed Product',
+      subtitle: prod.category ?? '',
+      image: img ?? null,
+      price: prod.price ?? null,
+      rating: prod.averageRating ?? null,
+      location: null,
+      inStock: typeof prod.stock === 'number' ? prod.stock > 0 : null,
+      url: `/dashboard/deal-offer/${prod._id}`,
+    });
+  }
+
+  for (const post of data?.posts ?? []) {
+    const img = Array.isArray(post.media) ? post.media[0] : null;
+    flat.push({
+      id: post._id,
+      type: 'post',
+      name: post.caption ?? 'Post',
+      subtitle: post.author?.username ? `@${post.author.username}` : '',
+      image: img ?? null,
+      price: null,
+      rating: null,
+      location: null,
+      inStock: null,
+      url: `/dashboard/post/${post._id}`,
+    });
+  }
+
+  return flat;
+}
 
 const TRENDING = [
   'Fresh groceries',
@@ -52,16 +115,28 @@ const TRENDING = [
   'Clothing',
 ];
 
+const TYPE_META: Record<string, { label: string; badgeCls: string }> = {
+  business: { label: 'Business', badgeCls: 'bg-violet-100 text-violet-600' },
+  product:  { label: 'Product',  badgeCls: 'bg-emerald-100 text-emerald-600' },
+  user:     { label: 'User',     badgeCls: 'bg-sky-100 text-sky-600' },
+  post:     { label: 'Post',     badgeCls: 'bg-rose-100 text-rose-600' },
+};
+
+const TypeIcon = ({ type }: { type: string }) => {
+  if (type === 'business') return <Building2 className="w-5 h-5 text-gray-300" />;
+  if (type === 'user')     return <User       className="w-5 h-5 text-gray-300" />;
+  if (type === 'post')     return <FileText   className="w-5 h-5 text-gray-300" />;
+  return <Package className="w-5 h-5 text-gray-300" />;
+};
+
 const ResultCard = ({
   result,
   onSelect,
 }: {
-  result: AISearchResult;
-  onSelect: (r: AISearchResult) => void;
+  result: SearchResult;
+  onSelect: (r: SearchResult) => void;
 }) => {
-  const isBusiness = result.type === 'business';
-
-  console.log(result);
+  const meta = TYPE_META[result.type] ?? TYPE_META.product;
 
   return (
     <div className="border-b border-gray-50 last:border-0">
@@ -69,45 +144,32 @@ const ResultCard = ({
         onClick={() => onSelect(result)}
         className="group w-full flex items-center gap-3 px-4 py-3 hover:bg-orange-50/60 transition-colors duration-150 text-left"
       >
-        {/* Thumbnail */}
         <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-100 flex items-center justify-center">
           {result.image ? (
             <img
               src={result.image}
               alt={result.name}
               className="w-full h-full object-cover"
-              onError={(e) => {
-                const t = e.target as HTMLImageElement;
-                t.style.display = 'none';
-              }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
-          ) : isBusiness ? (
-            <Building2 className="w-5 h-5 text-gray-300" />
           ) : (
-            <Package className="w-5 h-5 text-gray-300" />
+            <TypeIcon type={result.type} />
           )}
         </div>
 
-        {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors">
               {result.name}
             </span>
-            <span
-              className={`flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wide ${
-                isBusiness ? 'bg-violet-100 text-violet-600' : 'bg-emerald-100 text-emerald-600'
-              }`}
-            >
-              {isBusiness ? 'Business' : 'Product'}
+            <span className={`flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wide ${meta.badgeCls}`}>
+              {meta.label}
             </span>
           </div>
 
           <div className="flex items-center gap-3 mt-0.5 flex-wrap">
             {result.subtitle && (
-              <span className="text-xs text-gray-400 truncate max-w-[160px]">
-                {isBusiness ? result.subtitle : `by ${result.subtitle}`}
-              </span>
+              <span className="text-xs text-gray-400 truncate max-w-[160px]">{result.subtitle}</span>
             )}
             {result.price !== null && (
               <span className="text-xs font-semibold text-orange-500">
@@ -127,11 +189,7 @@ const ResultCard = ({
               </span>
             )}
             {result.inStock !== null && (
-              <span
-                className={`flex items-center gap-0.5 text-[10px] font-semibold ${
-                  result.inStock ? 'text-green-500' : 'text-red-400'
-                }`}
-              >
+              <span className={`flex items-center gap-0.5 text-[10px] font-semibold ${result.inStock ? 'text-green-500' : 'text-red-400'}`}>
                 <CheckCircle className="w-3 h-3" />
                 {result.inStock ? 'In stock' : 'Out of stock'}
               </span>
@@ -154,20 +212,35 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<AISearchResult[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [useGeo, setUseGeo] = useState(false);
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [recentSearches, setRecentSearches] = useState<{ _id: string; query: string }[]>([]);
+
+  const handleClose = () => {
+    setQuery('');
+    setResults([]);
+    setHasSearched(false);
+    setError(null);
+    onClose();
+  };
+
+  const fetchRecentSearches = useCallback(async () => {
+    try {
+      const res = await searchAPI.getRecentSearches();
+      setRecentSearches(res.data.data ?? []);
+    } catch {
+      // ignore — history is non-critical
+    }
+  }, []);
 
   useEffect(() => {
     if (isSearchOpen) {
-      setRecentSearches(getRecentSearches());
+      fetchRecentSearches();
       setTimeout(() => inputRef.current?.focus(), 80);
     }
-  }, [isSearchOpen]);
+  }, [isSearchOpen, fetchRecentSearches]);
 
   const handleClose = useCallback(() => {
     setQuery('');
@@ -187,51 +260,24 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
 
   useEffect(() => {
     document.body.style.overflow = isSearchOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
+    return () => { document.body.style.overflow = ''; };
   }, [isSearchOpen]);
 
-    const runSearch = useCallback(async (q: string) => {
-        if (!q.trim()) { setResults([]); setHasSearched(false); return; }
-        setIsLoading(true);
-        setError(null);
-        try {
-            const res = await aiSearchService.textSearch({
-                q,
-                ...(useGeo && userCoords ? { lat: userCoords.lat, lng: userCoords.lng, radius_km: 10 } : {}),
-            });
-            setResults(flattenResults(res.results));
-            setHasSearched(true);
-        } catch (err) {
-            console.error('AI search request failed:', err);
-            const axiosErr = err as AxiosError;
-            if (!axiosErr.response) {
-                // No HTTP response: network error, CORS block, or unreachable service
-                setError('Cannot reach the search service. Please check your connection and try again.');
-            } else {
-                setError('Search failed. Please try again.');
-            }
-            setHasSearched(true);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [useGeo, userCoords]);
-
-  const toggleGeo = () => {
-    if (!useGeo) {
-      navigator.geolocation?.getCurrentPosition(
-        (pos) => {
-          setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          setUseGeo(true);
-        },
-        () => setUseGeo(false),
-      );
-    } else {
-      setUseGeo(false);
-      setUserCoords(null);
+  const runSearch = useCallback(async (q: string) => {
+    if (!q.trim()) { setResults([]); setHasSearched(false); return; }
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await searchAPI.getGlobalSearch({ q });
+      setResults(flattenBackendResults(res.data.data));
+      setHasSearched(true);
+    } catch {
+      setError('Search failed. Please try again.');
+      setHasSearched(true);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, []);
 
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -244,27 +290,21 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
     e.preventDefault();
     if (!query.trim()) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    saveRecentSearch(query.trim());
-    setRecentSearches(getRecentSearches());
+    searchAPI.saveToHistory(query.trim()).then(fetchRecentSearches).catch(() => {});
     runSearch(query.trim());
   };
 
   const handleSuggestionClick = (q: string) => {
     setQuery(q);
-    saveRecentSearch(q);
-    setRecentSearches(getRecentSearches());
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    searchAPI.saveToHistory(q).then(fetchRecentSearches).catch(() => {});
     runSearch(q);
   };
 
-  const handleResultSelect = (result: AISearchResult) => {
-    if (query.trim()) saveRecentSearch(query.trim());
+  const handleResultSelect = (result: SearchResult) => {
+    if (query.trim()) searchAPI.saveToHistory(query.trim()).catch(() => {});
     handleClose();
-    navigate(
-      result.type === 'business'
-        ? `/dashboard/profile/business/${result.id}`
-        : `/dashboard/deal-offer/${result.id}`,
-    );
+    navigate(result.url);
   };
 
   const clearQuery = () => {
@@ -275,10 +315,14 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
     inputRef.current?.focus();
   };
 
-  const handleRemoveRecent = (e: React.MouseEvent, q: string) => {
+  const handleRemoveRecent = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    removeRecentSearch(q);
-    setRecentSearches(getRecentSearches());
+    try {
+      await searchAPI.deleteHistoryItem(id);
+      setRecentSearches((prev) => prev.filter((r) => r._id !== id));
+    } catch {
+      // ignore
+    }
   };
 
   if (!isSearchOpen) return null;
@@ -321,13 +365,6 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
             spellCheck={false}
           />
           <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={toggleGeo}
-              className={`p-2 rounded-lg transition-colors ${useGeo ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
-            >
-              <MapPin className="w-4 h-4" />
-            </button>
             {query && (
               <button
                 type="button"
@@ -347,15 +384,6 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
           </div>
         </form>
 
-        {useGeo && userCoords && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-100">
-            <MapPin className="w-3.5 h-3.5 text-blue-500" />
-            <span className="text-xs text-blue-600 font-medium">
-              Searching within 10 km of your location
-            </span>
-          </div>
-        )}
-
         {/* ── Body ─────────────────────────────────────────────── */}
         <div className="flex-1 overflow-y-auto overscroll-contain">
           {error && (
@@ -374,8 +402,8 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
                       Recent
                     </span>
                     <button
-                      onClick={() => {
-                        localStorage.removeItem(RECENT_KEY);
+                      onClick={async () => {
+                        try { await searchAPI.clearAllHistory(); } catch { /* ignore */ }
                         setRecentSearches([]);
                       }}
                       className="text-[11px] text-gray-400 hover:text-gray-700 transition-colors"
@@ -383,18 +411,18 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
                       Clear all
                     </button>
                   </div>
-                  {recentSearches.map((q) => (
+                  {recentSearches.map((item) => (
                     <button
-                      key={q}
-                      onClick={() => handleSuggestionClick(q)}
+                      key={item._id}
+                      onClick={() => handleSuggestionClick(item.query)}
                       className="group w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors"
                     >
                       <Clock className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                      <span className="flex-1 text-sm text-gray-600 text-left truncate">{q}</span>
+                      <span className="flex-1 text-sm text-gray-600 text-left truncate">{item.query}</span>
                       <span
                         role="button"
                         tabIndex={0}
-                        onClick={(e) => handleRemoveRecent(e, q)}
+                        onClick={(e) => handleRemoveRecent(e, item._id)}
                         className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-200 transition-all"
                       >
                         <X className="w-3 h-3 text-gray-400" />
@@ -442,7 +470,7 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
               <div className="flex items-center gap-2 px-4 pt-2 pb-2">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                  {results.length} AI Result{results.length !== 1 ? 's' : ''}
+                  {results.length} Result{results.length !== 1 ? 's' : ''}
                 </span>
               </div>
               <div>

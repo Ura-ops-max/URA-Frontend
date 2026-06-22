@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   Store,
   PlusCircle,
+  Wallet,
 } from 'lucide-react';
 import { useAuthContext } from '@/context/auth-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -40,7 +41,7 @@ const MenuPage = () => {
           badge: unreadCount,
         },
         { title: 'Bookmarks', icon: Bookmark, path: '/dashboard/bookmarks' },
-        // { title: 'Wallet & Payments', icon: Wallet, path: '/dashboard/wallet' },
+        { title: 'Wallet & Payments', icon: Wallet, path: '/dashboard/wallet' },
       ],
     },
     {

@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuthContext } from '@/context/auth-provider';
 import { useIsDesktop } from '@/hooks/use-is-desktop';
-import { useActivity } from '@/hooks/api/use-activity';
+// import { useActivity } from '@/hooks/api/use-activity'; // Recent Activity hidden per request
 import { useBookmarkedItems } from '@/hooks/api/use-bookmark';
 
 import DashboardContainer from '@/layout/DashboardContainer';
@@ -11,7 +11,7 @@ import ProfileCard from '@/components/dashboard/ProfileCard';
 import ChatList from '@/components/dashboard/ChatList';
 import ShareBox from '@/components/dashboard/ShareBox';
 import AllFeed from '@/components/feed/AllFeed';
-import ActivityPanel from '@/components/dashboard/ActivityPanel';
+// import ActivityPanel from '@/components/dashboard/ActivityPanel'; // Recent Activity hidden per request
 import BookmarkList from '@/components/dashboard/BookmarkList';
 import { useChat } from '@/hooks/use-chat';
 import React from 'react';
@@ -28,11 +28,12 @@ const Dashboard = () => {
     isError: chatError, // This maps the hook's isError to the name chatError
   } = useChat(activeProfileId!);
 
-  const {
-    activities,
-    isError: isActivityError,
-    clearAll,
-  } = useActivity(isDesktop ? { enabled: true } : { enabled: false });
+  // Recent Activity hidden per request
+  // const {
+  //   activities,
+  //   isError: isActivityError,
+  //   clearAll,
+  // } = useActivity(isDesktop ? { enabled: true } : { enabled: false });
 
   const {
     data: posts,
@@ -83,6 +84,7 @@ const Dashboard = () => {
       // --- RIGHT SIDE ---
       rightColumn={
         <div className="flex flex-col gap-6">
+          {/* Recent Activity hidden per request
           <SidebarWidget
             isDesktop={isDesktop}
             isError={isActivityError}
@@ -95,6 +97,7 @@ const Dashboard = () => {
               onClearAll={clearAll}
             />
           </SidebarWidget>
+          */}
 
           <SidebarWidget
             isDesktop={isDesktop}

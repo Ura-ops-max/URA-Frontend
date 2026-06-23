@@ -7,10 +7,10 @@ import {
   Share2,
   Bookmark,
   UserCheck,
-  PlusCircle,
+  // PlusCircle, // unused — Insights/Tools action commented out
   User,
   Settings,
-  BarChart3,
+  // BarChart3, // unused — Insights/Tools action commented out
   Star,
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -243,6 +243,7 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
             )}
 
             {/* 2. SECONDARY ACTION: TOOLS (Personal) or ANALYTICS/INSIGHTS (Business) */}
+            {/* Insights/Tools action hidden per request
             <Link
               to={isBusinessRoute ? '/dashboard/business/insights' : '/dashboard/settings'}
               className={cn(
@@ -258,6 +259,7 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
               )}
               <span>{isBusinessRoute ? 'Insights' : 'Tools'}</span>
             </Link>
+            */}
 
             {/* 3. SHARE (Always present for owners) */}
             <button

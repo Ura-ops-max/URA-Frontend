@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Phone, CreditCard, Loader2, ArrowRight, X, User, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ interface Props {
 export default function PaylukOnboardingModal({ onSuccess, onDismiss }: Props) {
   const { user } = useAuthContext();
 
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState((user as any)?.phone || '');
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [email, setEmail] = useState((user as any)?.email || '');
@@ -71,6 +71,21 @@ export default function PaylukOnboardingModal({ onSuccess, onDismiss }: Props) {
   };
 
   const hasMissingFields = needsFirstName || needsLastName || needsEmail;
+
+  // Auto-activate: if the user already has a valid phone on file (and no other
+  // required fields are missing), create the payment profile automatically so
+  // funding "just works" — no manual step. Falls back to the form if it fails.
+  const autoTried = useRef(false);
+  useEffect(() => {
+    if (autoTried.current) return;
+    const existingPhone = ((user as any)?.phone || '').trim();
+    const phoneValid = /^0[789][01]\d{8}$/.test(existingPhone);
+    if (phoneValid && !hasMissingFields) {
+      autoTried.current = true;
+      handleSubmit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EscrowOverview } from '../ui/EscrowOverview';
@@ -13,11 +13,8 @@ const WalletOverviewPage = () => {
   const { showModal, onModalSuccess, onModalDismiss, guard } = usePaylukGuard();
   const [showFundModal, setShowFundModal] = useState(false);
 
-  useEffect(() => {
-    if (user && !user.paylukCustomerId) {
-      guard(() => {});
-    }
-  }, [user?.paylukCustomerId]);
+  // No on-load prompt: the payment profile is set up silently when the user
+  // actually clicks "Fund Wallet" (see handleFundWallet / usePaylukGuard).
 
   const handleFundWallet = () => {
     guard(() => setShowFundModal(true));

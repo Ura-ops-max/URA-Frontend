@@ -218,14 +218,6 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
   const [hasSearched, setHasSearched] = useState(false);
   const [recentSearches, setRecentSearches] = useState<{ _id: string; query: string }[]>([]);
 
-  const handleClose = () => {
-    setQuery('');
-    setResults([]);
-    setHasSearched(false);
-    setError(null);
-    onClose();
-  };
-
   const fetchRecentSearches = useCallback(async () => {
     try {
       const res = await searchAPI.getRecentSearches();

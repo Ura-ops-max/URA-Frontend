@@ -198,6 +198,11 @@ export const postService = {
   },
 };
 
+export const getSinglePostQueryFn = async (postId: string) => {
+  const { data } = await API.get(`/posts/${postId}`);
+  return data.post;
+};
+
 export const createPostMutationFn = async ({ data, files }: { data: any; files: File[] }) => {
   // 1. Upload media only if files exist
   let mediaUrls: string[] = [];

@@ -21,8 +21,13 @@ const BusinessWarningModal = ({ onClose }: { onClose: () => void }) => {
     },
     onSuccess: () => {
       toast.success('Welcome to Business Mode!');
+      // Refetch the auth user so isBusinessOwner flips to true immediately —
+      // this is the query that gates the "Convert to Business" UI. Invalidating
+      // 'user-profile'/'currentUser' alone left the auth context stale, so the
+      // button kept showing and re-clicking hit "already a business".
+      queryClient.invalidateQueries({ queryKey: ['authUser'] });
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      refetchAuth();
       onClose();
     },
     onError: (error: any) => {

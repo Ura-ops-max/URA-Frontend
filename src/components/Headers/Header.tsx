@@ -141,6 +141,13 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
         {/* RIGHT SECTION: Icons & Avatar */}
         <div className="flex items-center gap-1.5 sm:gap-3">
           {/* Mobile Cart */}
+           {/* Image Search */}
+          <Link
+            to='/dashboard/search/image'
+            className="lg:hidden relative p-2.5 text-gray-600 hover:bg-gray-100/50 rounded-full transition-all"
+          >
+            <ImageIcon size={20} />
+          </Link>
           <Link
             to="/dashboard/product/cart"
             className="lg:hidden relative p-2.5 text-gray-600 hover:bg-gray-100/50 rounded-full transition-all"
@@ -155,6 +162,7 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
 
           {/* Notifications */}
           <div className="relative" ref={dropdownRef}>
+           
             <button
               onClick={() => setIsNotifOpen(!isNotifOpen)}
               className={cn(

@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { forgotPasswordMutationFn } from '@/lib/api';
 
 export default function ForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -22,12 +24,13 @@ export default function ForgotPasswordPage() {
   const onSubmit = async (data: { email: string }) => {
     setIsLoading(true);
     try {
-      // Logic for your reset password mutation goes here
-      console.log('Reset link sent to:', data.email);
-      // await mutateAsync(data);
+      await forgotPasswordMutationFn(data.email);
       setIsSubmitted(true);
     } catch (error) {
-      console.error(error);
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Something went wrong. Please try again.';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

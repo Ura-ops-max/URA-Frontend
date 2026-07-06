@@ -5,6 +5,7 @@ export const AUTH_ROUTES = {
   OAUTH_SUCCESS: '/auth/oauth/success',
   VERIFY_EMAIL: '/auth/verify-email',
   FORGET_PASSWORD: '/auth/forget-password',
+  RESET_PASSWORD: '/auth/reset-password',
 };
 
 export const PROTECTED_ROUTES = {
@@ -37,6 +38,9 @@ export const BASE_ROUTE = {
   HOME: '/',
   ABOUT: '/about',
   CONTACT: '/contact',
+  TERMS: '/terms',
+  PRIVACY: '/privacy',
+  FAQ: '/faq',
   INVITE_URL: '/invite/workspace/:inviteCode/join',
   PAYLUK_PAYMENT_COMPLETE: '/payments/complete',
 } as const;

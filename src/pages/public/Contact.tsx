@@ -56,8 +56,8 @@ const ContactPage = () => {
             <ContactCard
               icon={<Phone className="h-5 w-5" />}
               title="Call us"
-              lines={['+234 8152345755']}
-              href="tel:+2348000000000"
+              lines={['+234 815 234 5755']}
+              href="tel:+2348152345755"
             />
             <ContactCard
               icon={<MapPin className="h-5 w-5" />}

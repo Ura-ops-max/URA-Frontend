@@ -76,7 +76,6 @@ export const aiSearchService = {
             product_limit: params.product_limit ?? 10,
         });
 
-    console.log(`Data from aiSearch service: ${data.results}`);
     return data;
   },
 

@@ -198,6 +198,16 @@ export const postService = {
   },
 };
 
+export const forgotPasswordMutationFn = async (email: string) => {
+  const { data } = await API.post('/auth/forgot-password', { email });
+  return data;
+};
+
+export const resetPasswordMutationFn = async ({ token, password }: { token: string; password: string }) => {
+  const { data } = await API.post('/auth/reset-password', { token, password });
+  return data;
+};
+
 export const getSinglePostQueryFn = async (postId: string) => {
   const { data } = await API.get(`/posts/${postId}`);
   return data.post;

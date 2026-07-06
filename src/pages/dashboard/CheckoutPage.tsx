@@ -33,8 +33,10 @@ const shippingSchema = z.object({
     .string()
     .min(1, 'Phone number is required')
     .regex(/^\+?[0-9]{10,15}$/, 'Enter a valid phone number (e.g. +2348012345678)'),
-  city: z.string().min(2, 'City is required').max(100, 'City name is too long'),
-  fullAddress: z.string().min(5, 'Street address is required').max(200, 'Address is too long'),
+  // City & street address are temporarily hidden — kept optional so the form
+  // still submits. Re-enable the fields + these validations to bring them back.
+  city: z.string().max(100, 'City name is too long').optional().or(z.literal('')),
+  fullAddress: z.string().max(200, 'Address is too long').optional().or(z.literal('')),
 });
 
 type ShippingFormValues = z.infer<typeof shippingSchema>;
@@ -285,7 +287,10 @@ const CheckoutPage = () => {
                     )}
                   </div>
 
-                  {/* City */}
+                  {/* City & Street Address temporarily hidden.
+                      To re-enable, uncomment these blocks and restore the
+                      required validations in shippingSchema above. */}
+                  {/* City
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
                       City
@@ -303,8 +308,9 @@ const CheckoutPage = () => {
                       </p>
                     )}
                   </div>
+                  */}
 
-                  {/* Street address */}
+                  {/* Street address
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
                       Street Address
@@ -322,6 +328,7 @@ const CheckoutPage = () => {
                       </p>
                     )}
                   </div>
+                  */}
                 </div>
               </section>
 

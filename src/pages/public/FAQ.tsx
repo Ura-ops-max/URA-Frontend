@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ChevronDown, HelpCircle, MessageCircle, Search } from 'lucide-react';
 
 const FAQS = [
   {
@@ -36,56 +37,116 @@ const FAQS = [
   },
 ];
 
-const FAQItem = ({ q, a, open, onToggle }: { q: string; a: string; open: boolean; onToggle: () => void }) => (
-  <div className="border-b border-slate-100">
-    <button
-      onClick={onToggle}
-      className="flex w-full items-center justify-between gap-4 py-5 text-left"
-    >
+const FAQItem = ({
+  q,
+  a,
+  open,
+  onToggle,
+}: {
+  q: string;
+  a: string;
+  open: boolean;
+  onToggle: () => void;
+}) => (
+  <div
+    className={`rounded-2xl border transition-all ${
+      open ? 'border-amber-200 bg-amber-50/40 shadow-sm' : 'border-slate-100 bg-white hover:border-slate-200'
+    }`}
+  >
+    <button onClick={onToggle} className="flex w-full items-center justify-between gap-4 p-5 text-left">
       <span className="text-base font-semibold text-slate-900">{q}</span>
-      <ChevronDown
-        className={`h-5 w-5 flex-shrink-0 text-amber-500 transition-transform ${open ? 'rotate-180' : ''}`}
-      />
+      <span
+        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition ${
+          open ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-500'
+        }`}
+      >
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </span>
     </button>
-    <div className={`overflow-hidden transition-all ${open ? 'max-h-96 pb-5' : 'max-h-0'}`}>
-      <p className="leading-relaxed text-slate-600">{a}</p>
+    <div className={`grid transition-all duration-300 ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+      <div className="overflow-hidden">
+        <p className="px-5 pb-5 leading-relaxed text-slate-600">{a}</p>
+      </div>
     </div>
   </div>
 );
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [query, setQuery] = useState('');
+
+  const filtered = FAQS.filter(
+    (f) => f.q.toLowerCase().includes(query.toLowerCase()) || f.a.toLowerCase().includes(query.toLowerCase()),
+  );
 
   return (
     <main className="bg-white">
-      <section className="mx-auto max-w-3xl px-6 py-16 md:py-24">
-        <p className="text-xs font-black uppercase tracking-widest text-amber-500">Help Center</p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
-          Frequently Asked Questions
-        </h1>
-        <p className="mt-6 text-lg leading-relaxed text-slate-600">
-          Everything you need to know about buying, selling, and paying on URA.
-        </p>
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-slate-100 bg-slate-50">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_55%)]" />
+        <div className="relative mx-auto max-w-3xl px-6 py-16 text-center md:py-24">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-500 shadow-sm ring-1 ring-slate-100">
+            <HelpCircle className="h-3.5 w-3.5" /> Help Center
+          </span>
+          <h1 className="mt-5 text-4xl font-bold tracking-tight text-slate-900 md:text-6xl">
+            How can we help?
+          </h1>
+          <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-slate-600">
+            Everything you need to know about buying, selling, and paying on URA.
+          </p>
 
-        <div className="mt-10">
-          {FAQS.map((item, i) => (
-            <FAQItem
-              key={i}
-              q={item.q}
-              a={item.a}
-              open={openIndex === i}
-              onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+          {/* Search */}
+          <div className="relative mx-auto mt-8 max-w-md">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search questions…"
+              className="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm shadow-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
             />
-          ))}
+          </div>
         </div>
+      </section>
 
-        <p className="mt-12 rounded-2xl bg-amber-50 p-6 text-sm text-slate-600">
-          Still have questions?{' '}
-          <a href="/contact" className="font-semibold text-amber-600 hover:underline">
-            Contact our team
-          </a>{' '}
-          and we&apos;ll be happy to help.
-        </p>
+      {/* List */}
+      <section className="mx-auto max-w-3xl px-6 py-16">
+        {filtered.length > 0 ? (
+          <div className="space-y-3">
+            {filtered.map((item) => {
+              const realIndex = FAQS.indexOf(item);
+              return (
+                <FAQItem
+                  key={item.q}
+                  q={item.q}
+                  a={item.a}
+                  open={openIndex === realIndex}
+                  onToggle={() => setOpenIndex(openIndex === realIndex ? null : realIndex)}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <p className="py-10 text-center text-slate-400">No questions match “{query}”.</p>
+        )}
+
+        {/* CTA */}
+        <div className="mt-12 flex flex-col items-center gap-4 rounded-3xl bg-slate-900 p-8 text-center text-white sm:flex-row sm:justify-between sm:text-left">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500">
+              <MessageCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-lg font-bold">Still have questions?</p>
+              <p className="text-sm text-slate-300">Our team is here to help you out.</p>
+            </div>
+          </div>
+          <Link
+            to="/contact"
+            className="rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-amber-600"
+          >
+            Contact Support
+          </Link>
+        </div>
       </section>
     </main>
   );

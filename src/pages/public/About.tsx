@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Users, ShoppingBag, TrendingUp, ShieldCheck } from 'lucide-react';
+import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
 
 const AboutPage = () => {
   return (
@@ -8,7 +9,7 @@ const AboutPage = () => {
       {/* --- Hero Section --- */}
       <section className="relative pb-16 pt-12 md:pb-24 lg:pt-32">
         <div className="max-w-6xl mx-auto px-6 flex flex-col lg:flex-row items-center gap-12">
-          <div className="flex-1 text-center lg:text-left">
+          <FadeIn className="flex-1 text-center lg:text-left">
             <h1 className="text-4xl md:text-6xl font-medium tracking-tight">
               More than a <span className="text-amber-500">Marketplace</span>. It's a Community.
             </h1>
@@ -22,7 +23,7 @@ const AboutPage = () => {
                 <Link to="/auth/register">Start Selling</Link>
               </Button>
             </div>
-          </div>
+          </FadeIn>
           <div className="flex-1 w-full flex justify-center">
             <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl rotate-3 border-8 border-white dark:border-slate-900">
               <img
@@ -65,7 +66,7 @@ const AboutPage = () => {
               Built for the <span className="text-green-600">Naija</span> Way
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
                 icon: <ShoppingBag className="text-amber-500" />,
@@ -88,22 +89,22 @@ const AboutPage = () => {
                 desc: 'Scale from a local street shop to a national brand.',
               },
             ].map((pillar, idx) => (
-              <div
+              <FadeItem
                 key={idx}
                 className="p-8 rounded-3xl border border-slate-100 dark:border-slate-800 hover:shadow-lg transition-all"
               >
                 <div className="mb-4">{pillar.icon}</div>
                 <h3 className="font-bold mb-2">{pillar.title}</h3>
                 <p className="text-sm text-slate-500">{pillar.desc}</p>
-              </div>
+              </FadeItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       {/* --- Call to Action --- */}
       <section className="pb-24 px-6">
-        <div className="max-w-5xl mx-auto bg-green-600 rounded-[3rem] p-12 text-center text-white relative overflow-hidden">
+        <FadeIn className="max-w-5xl mx-auto bg-green-600 rounded-[3rem] p-12 text-center text-white relative overflow-hidden">
           <div className="relative z-10">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
               Ready to join the future of Nigerian Commerce?
@@ -126,7 +127,7 @@ const AboutPage = () => {
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-white rounded-full blur-3xl" />
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-amber-500 rounded-full blur-3xl" />
           </div>
-        </div>
+        </FadeIn>
       </section>
     </main>
   );

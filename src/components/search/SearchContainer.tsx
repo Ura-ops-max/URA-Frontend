@@ -84,7 +84,7 @@ function flattenBackendResults(data: any): SearchResult[] {
       rating: prod.averageRating ?? null,
       location: null,
       inStock: typeof prod.stock === 'number' ? prod.stock > 0 : null,
-      url: `/dashboard/deal-offer/${prod._id}`,
+      url: `/dashboard/product/${prod._id}`,
     });
   }
 
@@ -100,7 +100,7 @@ function flattenBackendResults(data: any): SearchResult[] {
       rating: null,
       location: null,
       inStock: null,
-      url: `/dashboard/post/${post._id}`,
+      url: `/posts/${post._id}`,
     });
   }
 

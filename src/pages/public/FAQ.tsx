@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, HelpCircle, MessageCircle, Search } from 'lucide-react';
+import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
 
 const FAQS = [
   {
@@ -84,7 +85,7 @@ const FAQ = () => {
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-slate-100 bg-slate-50">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_55%)]" />
-        <div className="relative mx-auto max-w-3xl px-6 py-16 text-center md:py-24">
+        <FadeIn className="relative mx-auto max-w-3xl px-6 py-16 text-center md:py-24">
           <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-500 shadow-sm ring-1 ring-slate-100">
             <HelpCircle className="h-3.5 w-3.5" /> Help Center
           </span>
@@ -105,26 +106,27 @@ const FAQ = () => {
               className="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm shadow-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
             />
           </div>
-        </div>
+        </FadeIn>
       </section>
 
       {/* List */}
       <section className="mx-auto max-w-3xl px-6 py-16">
         {filtered.length > 0 ? (
-          <div className="space-y-3">
+          <Stagger className="space-y-3">
             {filtered.map((item) => {
               const realIndex = FAQS.indexOf(item);
               return (
-                <FAQItem
-                  key={item.q}
-                  q={item.q}
-                  a={item.a}
-                  open={openIndex === realIndex}
-                  onToggle={() => setOpenIndex(openIndex === realIndex ? null : realIndex)}
-                />
+                <FadeItem key={item.q}>
+                  <FAQItem
+                    q={item.q}
+                    a={item.a}
+                    open={openIndex === realIndex}
+                    onToggle={() => setOpenIndex(openIndex === realIndex ? null : realIndex)}
+                  />
+                </FadeItem>
               );
             })}
-          </div>
+          </Stagger>
         ) : (
           <p className="py-10 text-center text-slate-400">No questions match “{query}”.</p>
         )}

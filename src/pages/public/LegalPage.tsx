@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { ArrowUp, Mail, ShieldCheck } from 'lucide-react';
+import { FadeIn } from '@/components/shared/Motion';
 
 interface Section {
   heading: string;
@@ -48,14 +49,14 @@ const LegalPage = ({ title, updated, intro, sections }: LegalPageProps) => {
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-slate-100 bg-slate-50">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.12),transparent_55%)]" />
-        <div className="relative mx-auto max-w-5xl px-6 py-16 md:py-24">
+        <FadeIn className="relative mx-auto max-w-5xl px-6 py-16 md:py-24">
           <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-500 shadow-sm ring-1 ring-slate-100">
             <ShieldCheck className="h-3.5 w-3.5" /> Legal
           </span>
           <h1 className="mt-5 text-4xl font-bold tracking-tight text-slate-900 md:text-6xl">{title}</h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-slate-600">{intro}</p>
           <p className="mt-6 text-sm text-slate-400">Last updated: {updated}</p>
-        </div>
+        </FadeIn>
       </section>
 
       {/* Body + sticky TOC */}
@@ -91,13 +92,15 @@ const LegalPage = ({ title, updated, intro, sections }: LegalPageProps) => {
           <div className="space-y-12">
             {sections.map((s, i) => (
               <div key={i} id={slug(s.heading)} className="scroll-mt-28">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-sm font-black text-amber-500">
-                    {i + 1}
-                  </span>
-                  <h2 className="text-xl font-bold text-slate-900">{s.heading}</h2>
-                </div>
-                <div className="mt-3 space-y-3 pl-11 leading-relaxed text-slate-600">{s.body}</div>
+                <FadeIn>
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-sm font-black text-amber-500">
+                      {i + 1}
+                    </span>
+                    <h2 className="text-xl font-bold text-slate-900">{s.heading}</h2>
+                  </div>
+                  <div className="mt-3 space-y-3 pl-11 leading-relaxed text-slate-600">{s.body}</div>
+                </FadeIn>
               </div>
             ))}
 

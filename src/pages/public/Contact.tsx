@@ -40,7 +40,7 @@ const ContactPage = () => {
             Get in <span className="text-amber-500">Touch</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-slate-600">
-            Have a question, partnership idea, or need a hand? We&apos;d love to hear from you — our team
+            Have a question, partnership idea, or need a hand? We&apos;d love to hear from you, our team
             usually replies within a few hours.
           </p>
         </FadeIn>

@@ -3,6 +3,7 @@ import { MessageCircle, Send, X, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { assistantChatFn } from '@/lib/api';
 
 type Message = { from: 'bot' | 'user'; text: string; time: string };
 
@@ -82,7 +83,7 @@ function getBotResponse(text: string): { text: string; navigateTo?: string } {
   }
   if (CONTACT_KEYS.some((k) => q.includes(k))) {
     return {
-      text: 'Sure — you can reach our team via the Contact page or email info@ura.com.ng. Opening the contact page for you now.',
+      text: 'Sure you can reach our team via the Contact page or email info@ura.com.ng. Opening the contact page for you now.',
       navigateTo: '/contact',
     };
   }
@@ -116,21 +117,33 @@ const ChatBot: React.FC = () => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const sendMessage = (text?: string) => {
+  const sendMessage = async (text?: string) => {
     const messageText = (text ?? input).trim();
     if (!messageText || isTyping) return;
+
+    // Build the conversation history for the AI (before adding the new turn).
+    const history = messages.map((m) => ({
+      role: m.from === 'user' ? ('user' as const) : ('assistant' as const),
+      content: m.text,
+    }));
+    history.push({ role: 'user', content: messageText });
 
     setMessages((prev) => [...prev, { from: 'user', text: messageText, time: now() }]);
     setInput('');
     setIsTyping(true);
 
-    const { text: reply, navigateTo } = getBotResponse(messageText);
-    // Small delay to feel natural.
-    window.setTimeout(() => {
+    try {
+      // Ask the AI assistant (Claude, via our backend).
+      const reply = await assistantChatFn(history);
       setMessages((prev) => [...prev, { from: 'bot', text: reply, time: now() }]);
-      setIsTyping(false);
+    } catch {
+      // Fall back to the built-in rule-based answers if the AI is unavailable.
+      const { text: reply, navigateTo } = getBotResponse(messageText);
+      setMessages((prev) => [...prev, { from: 'bot', text: reply, time: now() }]);
       if (navigateTo) window.setTimeout(() => navigate(navigateTo), 800);
-    }, 700);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const resetChat = () => {

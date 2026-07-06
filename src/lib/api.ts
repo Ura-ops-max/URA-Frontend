@@ -208,6 +208,13 @@ export const resetPasswordMutationFn = async ({ token, password }: { token: stri
   return data;
 };
 
+export const assistantChatFn = async (
+  messages: { role: 'user' | 'assistant'; content: string }[],
+): Promise<string> => {
+  const { data } = await API.post('/assistant/chat', { messages });
+  return data.reply as string;
+};
+
 export const getSinglePostQueryFn = async (postId: string) => {
   const { data } = await API.get(`/posts/${postId}`);
   return data.post;

@@ -18,7 +18,7 @@ const FEATURES = [
   {
     icon: ShieldCheck,
     title: 'Secure Escrow Payments',
-    desc: 'Your money is held safely and only released to the seller once you confirm your order — full buyer protection.',
+    desc: 'Your money is held safely and only released to the seller once you confirm your order full buyer protection.',
   },
   {
     icon: Search,
@@ -107,7 +107,7 @@ function Home() {
               Everything you need to buy &amp; sell with confidence
             </h2>
             <p className="mt-4 text-slate-600">
-              A marketplace built for local businesses — secure, simple, and made for growth.
+              A marketplace built for local businesses secure, simple, and made for growth.
             </p>
           </FadeIn>
 

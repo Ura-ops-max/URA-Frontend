@@ -17,8 +17,17 @@ import { Separator } from '@/components/ui/separator';
 import { useAuthContext } from '@/context/auth-provider';
 import { toast } from 'sonner';
 import API from '@/lib/axios-client';
-import { useState } from 'react';
+import { getDeliveryCost } from '@/lib/delivery.service';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+
+const NIGERIAN_STATES = [
+  'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno',
+  'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'FCT', 'Gombe', 'Imo',
+  'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi', 'Kogi', 'Kwara', 'Lagos', 'Nasarawa',
+  'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba',
+  'Yobe', 'Zamfara',
+];
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEscrowCheckout } from 'payluk-escrow-inline-checkout/react';
@@ -35,6 +44,7 @@ const shippingSchema = z.object({
     .regex(/^\+?[0-9]{10,15}$/, 'Enter a valid phone number (e.g. +2348012345678)'),
   // City & street address are temporarily hidden — kept optional so the form
   // still submits. Re-enable the fields + these validations to bring them back.
+  state: z.string().min(1, 'Please select your state'),
   city: z.string().max(100, 'City name is too long').optional().or(z.literal('')),
   fullAddress: z.string().max(200, 'Address is too long').optional().or(z.literal('')),
 });
@@ -59,15 +69,47 @@ const CheckoutPage = () => {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ShippingFormValues>({
     resolver: zodResolver(shippingSchema),
     defaultValues: {
       phone: user?.shippingAddress?.phone ?? user?.phone ?? '',
+      state: '',
       city: user?.shippingAddress?.city ?? '',
       fullAddress: user?.shippingAddress?.fullAddress ?? '',
     },
   });
+
+  // Live Fez delivery quote for the selected destination state.
+  const selectedState = watch('state');
+  const [deliveryFee, setDeliveryFee] = useState<number | null>(null);
+  const [deliveryLoading, setDeliveryLoading] = useState(false);
+
+  useEffect(() => {
+    if (!selectedState) {
+      setDeliveryFee(null);
+      return;
+    }
+    let active = true;
+    setDeliveryLoading(true);
+    getDeliveryCost({ state: selectedState })
+      .then((quote) => {
+        if (active) setDeliveryFee(quote.totalCost ?? quote.cost ?? 0);
+      })
+      .catch(() => {
+        // Fez unavailable / not configured — treat as free rather than blocking checkout.
+        if (active) setDeliveryFee(null);
+      })
+      .finally(() => {
+        if (active) setDeliveryLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [selectedState]);
+
+  const orderTotal = totalPrice + (deliveryFee ?? 0);
 
   const formattedPrice = (price: number) =>
     new Intl.NumberFormat('en-NG', {
@@ -91,8 +133,10 @@ const CheckoutPage = () => {
         shippingAddress: {
           fullAddress: formData.fullAddress,
           city: formData.city,
+          state: formData.state,
           phone: formData.phone,
         },
+        deliveryFee: deliveryFee ?? 0,
         paymentMethod: 'card',
       });
 
@@ -172,8 +216,10 @@ const CheckoutPage = () => {
         shippingAddress: {
           fullAddress: formData.fullAddress,
           city: formData.city,
+          state: formData.state,
           phone: formData.phone,
         },
+        deliveryFee: deliveryFee ?? 0,
         paymentMethod: 'escrow',
       });
 
@@ -287,6 +333,31 @@ const CheckoutPage = () => {
                     )}
                   </div>
 
+                  {/* State (used for delivery quote) */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
+                      State
+                    </label>
+                    <select
+                      {...register('state')}
+                      className={`h-12 w-full rounded-xl border bg-gray-50 px-3 text-sm focus:bg-white ${
+                        errors.state ? 'border-red-400' : 'border-gray-100'
+                      }`}
+                    >
+                      <option value="">Select your state…</option>
+                      {NIGERIAN_STATES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.state && (
+                      <p className="text-[11px] text-red-500 font-semibold ml-1">
+                        {errors.state.message}
+                      </p>
+                    )}
+                  </div>
+
                   {/* City & Street Address temporarily hidden.
                       To re-enable, uncomment these blocks and restore the
                       required validations in shippingSchema above. */}
@@ -392,15 +463,23 @@ const CheckoutPage = () => {
                     <span>{formattedPrice(totalPrice)}</span>
                   </div>
                   <div className="flex justify-between text-sm font-bold text-gray-500">
-                    <span>Delivery</span>
-                    <span className="text-green-600">FREE</span>
+                    <span>Delivery{selectedState ? ` · ${selectedState}` : ''}</span>
+                    {deliveryLoading ? (
+                      <span className="text-gray-400">Calculating…</span>
+                    ) : deliveryFee != null && deliveryFee > 0 ? (
+                      <span>{formattedPrice(deliveryFee)}</span>
+                    ) : selectedState ? (
+                      <span className="text-green-600">FREE</span>
+                    ) : (
+                      <span className="text-gray-400">Select state</span>
+                    )}
                   </div>
                   <div className="flex justify-between items-baseline pt-4">
                     <span className="text-base font-black text-gray-900 uppercase">
                       Total Amount
                     </span>
                     <span className="text-3xl font-black text-orange-600">
-                      {formattedPrice(totalPrice)}
+                      {formattedPrice(orderTotal)}
                     </span>
                   </div>
                 </div>

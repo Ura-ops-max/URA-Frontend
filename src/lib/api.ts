@@ -208,6 +208,11 @@ export const resetPasswordMutationFn = async ({ token, password }: { token: stri
   return data;
 };
 
+export const getPublicProductsFn = async (page = 1) => {
+  const { data } = await API.get('/products', { params: { page } });
+  return data.posts as Record<string, unknown>[];
+};
+
 export const assistantChatFn = async (
   messages: { role: 'user' | 'assistant'; content: string }[],
 ): Promise<string> => {

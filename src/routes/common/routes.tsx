@@ -6,6 +6,7 @@ import OAuthSuccessPage from '@/pages/auth/OAuthSuccessPage';
 import VerifyEmail from '@/pages/auth/VerifyEmail';
 import ResetPassword from '@/pages/auth/ResetPassword';
 import PostDetail from '@/pages/public/PostDetail';
+import ProductsPage from '@/pages/public/Products';
 import TermsOfService from '@/pages/public/TermsOfService';
 import PrivacyPolicy from '@/pages/public/PrivacyPolicy';
 import FAQ from '@/pages/public/FAQ';
@@ -131,6 +132,8 @@ export const baseRoutePaths = [
   { path: BASE_ROUTE.FAQ, element: <FAQ /> },
   // Public post permalink so shared links resolve (and work for logged-out users).
   { path: '/posts/:id', element: <PostDetail /> },
+  // Public marketplace so visitors can browse products before signing in.
+  { path: '/products', element: <ProductsPage /> },
   // Public so the email link works whether or not the user is logged in,
   // and so the "Verify Now" banner isn't bounced by the auth-redirect guard.
   { path: AUTH_ROUTES.VERIFY_EMAIL, element: <VerifyEmail /> },

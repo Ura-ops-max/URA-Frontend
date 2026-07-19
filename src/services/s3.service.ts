@@ -11,7 +11,22 @@ interface PresignResponse {
 // 1. Ask the backend for a short-lived presigned PUT URL.
 // 2. PUT the file straight to S3 (no AWS credentials in the browser).
 // 3. Return the public URL to store/send to the backend.
+// Size ceilings (mirror the backend's FILE_LIMITS) so oversized files fail
+// fast with a clear message instead of a long upload that S3 rejects.
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // 100MB
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
+
 const uploadToS3 = async (file: File, folder: string): Promise<string> => {
+  const isVideo = file.type.startsWith("video");
+  const limit = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+  if (file.size > limit) {
+    throw new Error(
+      `${isVideo ? "Video" : "Image"} is too large (${(file.size / 1024 / 1024).toFixed(
+        1,
+      )}MB). Maximum is ${limit / 1024 / 1024}MB.`,
+    );
+  }
+
   const { data } = await API.post("/upload/presign", {
     fileName: file.name,
     contentType: file.type,
@@ -27,7 +42,14 @@ const uploadToS3 = async (file: File, folder: string): Promise<string> => {
     headers: { "Content-Type": file.type },
   });
 
-  if (!response.ok) throw new Error("S3 upload failed");
+  if (!response.ok) {
+    // 403 here usually means the presigned URL expired mid-upload.
+    throw new Error(
+      response.status === 403
+        ? "Upload link expired before the file finished uploading. Please try again."
+        : `Upload failed (${response.status}). Please try again.`,
+    );
+  }
 
   return fileUrl;
 };

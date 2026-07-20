@@ -7,7 +7,7 @@ import {
   Lock,
   Loader2,
   AlertCircle,
-  Shield,
+  Wallet,
 } from 'lucide-react';
 import paylukAPI from '@/lib/payluk-axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -18,6 +18,7 @@ import { useAuthContext } from '@/context/auth-provider';
 import { toast } from 'sonner';
 import API from '@/lib/axios-client';
 import { getDeliveryCost } from '@/lib/delivery.service';
+import { useWalletBalance } from '@/hooks/api/use-wallet-balance';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -36,7 +37,7 @@ import { BASE_ROUTE } from '@/routes/common/routePaths.ts';
 import { usePaylukGuard } from '@/hooks/use-payluk-guard';
 import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
 
-// ── Validation schema ───────────────────────────────────────────────────────
+// ── Validation schema ───────────────────────────────
 const shippingSchema = z.object({
   phone: z
     .string()
@@ -51,10 +52,12 @@ const shippingSchema = z.object({
 
 type ShippingFormValues = z.infer<typeof shippingSchema>;
 
-// ───────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────
 const CheckoutPage = () => {
   const { cart, totalPrice } = useCartContext();
-  const { user } = useAuthContext();
+  const { user, related } = useAuthContext();
+  // Shown during checkout so the buyer can see what they have to pay with.
+  const { data: wallet, isLoading: walletLoading } = useWalletBalance(user?.paylukCustomerId);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isEscrowLoading, setIsEscrowLoading] = useState(false);
@@ -70,16 +73,31 @@ const CheckoutPage = () => {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm<ShippingFormValues>({
     resolver: zodResolver(shippingSchema),
-    defaultValues: {
-      phone: user?.shippingAddress?.phone ?? user?.phone ?? '',
-      state: '',
-      city: user?.shippingAddress?.city ?? '',
-      fullAddress: user?.shippingAddress?.fullAddress ?? '',
-    },
+    defaultValues: { phone: '', state: '', city: '', fullAddress: '' },
   });
+
+  // ── Auto-fill from saved profile data ────────────────────────────────────
+  // Prefer the buyer's own saved shipping address; fall back to their business
+  // account's address/contact. `user` loads async, so reset() once it arrives.
+  const business = (related as any)?.businesses?.[0];
+
+  useEffect(() => {
+    if (!user) return;
+    const ship = (user as any)?.shippingAddress ?? {};
+    const bizAddr = business?.address ?? {};
+    const bizContact = business?.contact ?? {};
+
+    reset({
+      phone: ship.phone || (user as any)?.phone || bizContact.phone || '',
+      state: ship.state || bizAddr.state || '',
+      city: ship.city || bizAddr.city || '',
+      fullAddress: ship.fullAddress || bizAddr.street || bizAddr.fullAddress || '',
+    });
+  }, [user, business, reset]);
 
   // Live Fez delivery quote for the selected destination state.
   const selectedState = watch('state');
@@ -130,10 +148,10 @@ const CheckoutPage = () => {
   // handleSubmit from react-hook-form validates before this runs
   const onSubmit = (formData: ShippingFormValues) => {
     // Guard: user must have a Payluk payment profile before checking out
-    guard(() => processCheckout(formData));
+    guard(() => processCheckout(formData, true));
   };
 
-  const processCheckout = async (formData: ShippingFormValues) => {
+  const processCheckout = async (formData: ShippingFormValues, withDelivery: boolean) => {
     setIsLoading(true);
     try {
       // Step 1: Create order on backend
@@ -145,7 +163,9 @@ const CheckoutPage = () => {
           state: formData.state,
           phone: formData.phone,
         },
-        deliveryFee: deliveryFee ?? 0,
+        // Direct payment excludes shipping; only the delivery option charges it.
+        deliveryFee: withDelivery ? (deliveryFee ?? 0) : 0,
+        deliveryMethod: withDelivery ? 'delivery' : 'pickup',
         paymentMethod: 'card',
       });
 
@@ -160,6 +180,7 @@ const CheckoutPage = () => {
       // Persist shipping address back to user profile (fire-and-forget)
       API.patch('/users/me/shipping', {
         phone: formData.phone,
+        state: formData.state,
         city: formData.city,
         fullAddress: formData.fullAddress,
       }).catch((e) => console.warn('[checkout] shipping save failed:', e));
@@ -215,10 +236,15 @@ const CheckoutPage = () => {
   };
 
   const onEscrowSubmit = (formData: ShippingFormValues) => {
-    guard(() => processEscrowCheckout(formData));
+    guard(() => processEscrowCheckout(formData, true));
   };
 
-  const processEscrowCheckout = async (formData: ShippingFormValues) => {
+  // Direct payment: no shipping charged, funds settle straight from the wallet.
+  const onDirectPaySubmit = (formData: ShippingFormValues) => {
+    guard(() => processEscrowCheckout(formData, false));
+  };
+
+  const processEscrowCheckout = async (formData: ShippingFormValues, withDelivery: boolean) => {
     setIsEscrowLoading(true);
     try {
       const response = await API.post('/orders', {
@@ -228,7 +254,9 @@ const CheckoutPage = () => {
           state: formData.state,
           phone: formData.phone,
         },
-        deliveryFee: deliveryFee ?? 0,
+        // Direct payment excludes shipping; only the delivery option charges it.
+        deliveryFee: withDelivery ? (deliveryFee ?? 0) : 0,
+        deliveryMethod: withDelivery ? 'delivery' : 'pickup',
         paymentMethod: 'escrow',
       });
 
@@ -242,6 +270,7 @@ const CheckoutPage = () => {
 
       API.patch('/users/me/shipping', {
         phone: formData.phone,
+        state: formData.state,
         city: formData.city,
         fullAddress: formData.fullAddress,
       }).catch((e) => console.warn('[checkout] shipping save failed:', e));
@@ -496,37 +525,71 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
-                {/* type="submit" triggers handleSubmit → zod validation → onSubmit */}
-                <Button
-                  type="submit"
-                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
-                  className="w-full h-16 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-lg gap-3 transition-all active:scale-95 shadow-2xl shadow-gray-200 group"
-                >
-                  {isLoading ? (
-                    <Loader2 className="animate-spin" />
+                {/* Wallet balance — so the buyer sees what they can pay with */}
+                <div className="mb-4 flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-3">
+                  <span className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-500">
+                    <Wallet size={16} className="text-orange-500" />
+                    Wallet balance
+                  </span>
+                  {walletLoading ? (
+                    <span className="text-sm text-gray-400">Loading…</span>
                   ) : (
-                    <>
-                      <Lock
-                        size={20}
-                        className="text-orange-400 group-hover:text-white transition-colors"
-                      />
-                      Pay with SDK
-                    </>
+                    <span className="text-sm font-black text-gray-900">
+                      {formattedPrice(wallet?.mainBalance ?? 0)}
+                    </span>
                   )}
-                </Button>
+                </div>
 
+                {/* Option 1 — Delivery: shipping is included in the amount */}
                 <Button
                   type="button"
                   onClick={handleSubmit(onEscrowSubmit)}
                   disabled={isLoading || isEscrowLoading || !cart?.items?.length}
-                  className="w-full h-14 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-base gap-3 transition-all active:scale-95 mt-3"
+                  className="w-full h-16 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-base gap-3 transition-all active:scale-95 shadow-xl shadow-orange-200"
                 >
                   {isEscrowLoading ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     <>
-                      <Shield size={18} />
-                      Pay with Escrow
+                      <Truck size={18} />
+                      Pay with Delivery · {formattedPrice(orderTotal)}
+                    </>
+                  )}
+                </Button>
+
+                {/* Option 2 — Direct payment: excludes shipping, settles from wallet */}
+                <Button
+                  type="button"
+                  onClick={handleSubmit(onDirectPaySubmit)}
+                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
+                  className="mt-3 w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-black text-base gap-3 transition-all active:scale-95"
+                >
+                  {isEscrowLoading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <>
+                      <Wallet size={18} className="text-orange-400" />
+                      Pay Now (no delivery) · {formattedPrice(totalPrice)}
+                    </>
+                  )}
+                </Button>
+                <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
+                  Direct payment excludes shipping and is settled from your wallet.
+                </p>
+
+                {/* Card / SDK checkout kept as a secondary option */}
+                <Button
+                  type="submit"
+                  variant="outline"
+                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
+                  className="mt-3 w-full h-12 rounded-2xl border-gray-200 font-bold text-sm gap-2"
+                >
+                  {isLoading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <>
+                      <Lock size={16} className="text-orange-500" />
+                      Pay by card instead
                     </>
                   )}
                 </Button>

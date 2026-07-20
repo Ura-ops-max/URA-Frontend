@@ -15,7 +15,7 @@ const GREETING: Message = {
   time: now(),
 };
 
-// ─── Knowledge base ───────────────────────────────────────────────────────────
+// ─── Knowledge base ───
 // Each intent matches on keywords and returns a helpful answer.
 const KB: { keywords: string[]; answer: string }[] = [
   {

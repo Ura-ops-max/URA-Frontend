@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuthContext } from '@/context/auth-provider';
+import { NIGERIAN_STATES } from '@/lib/nigerian-states';
 import { useUserProfile } from '@/hooks/api/use-user-profile';
 import { useUpdateBusiness } from '@/hooks/api/use-user-profile';
 
@@ -104,6 +105,9 @@ const BusinessInfoForm: React.FC = () => {
       phone: data.phone as string,
       website: data.website as string,
       fullAddress: data.fullAddress as string,
+      // State/city drive the delivery (Fez) pickup location for this seller.
+      state: data.state as string,
+      city: data.city as string,
       operatingHours: formattedHours,
     };
 
@@ -291,6 +295,40 @@ const BusinessInfoForm: React.FC = () => {
               type="text"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none"
               defaultValue={business?.address?.fullAddress}
+            />
+          </div>
+
+          {/* State is required to price delivery from this seller's location. */}
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+              <MapPin size={14} className="text-orange-500" /> State
+            </label>
+            <select
+              name="state"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none bg-white"
+              defaultValue={business?.address?.state ?? ''}
+            >
+              <option value="">Select your state</option>
+              {NIGERIAN_STATES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-400">
+              Used to calculate delivery fees for your buyers.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+              <MapPin size={14} className="text-orange-500" /> City
+            </label>
+            <input
+              name="city"
+              type="text"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none"
+              defaultValue={business?.address?.city}
             />
           </div>
         </div>

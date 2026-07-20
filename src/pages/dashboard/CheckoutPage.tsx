@@ -22,13 +22,7 @@ import { useWalletBalance } from '@/hooks/api/use-wallet-balance';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
-const NIGERIAN_STATES = [
-  'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno',
-  'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'FCT', 'Gombe', 'Imo',
-  'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi', 'Kogi', 'Kwara', 'Lagos', 'Nasarawa',
-  'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba',
-  'Yobe', 'Zamfara',
-];
+import { NIGERIAN_STATES } from '@/lib/nigerian-states';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEscrowCheckout } from 'payluk-escrow-inline-checkout/react';

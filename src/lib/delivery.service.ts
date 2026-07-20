@@ -12,7 +12,12 @@ export interface DeliveryCost {
  * `pickUpState` defaults to the seller/warehouse state on the backend.
  */
 export const getDeliveryCost = async (params: {
+  /** Buyer's destination state. */
   state: string;
+  /** Identifies the seller — the backend reads their business profile for the pickup state. */
+  productId?: string;
+  businessId?: string;
+  /** Explicit override; normally derived from the seller's profile. */
   pickUpState?: string;
   weight?: number;
 }): Promise<DeliveryCost> => {

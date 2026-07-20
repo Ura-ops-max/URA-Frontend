@@ -85,21 +85,30 @@ const CheckoutPage = () => {
   const selectedState = watch('state');
   const [deliveryFee, setDeliveryFee] = useState<number | null>(null);
   const [deliveryLoading, setDeliveryLoading] = useState(false);
+  const [deliveryError, setDeliveryError] = useState<string | null>(null);
+
+  // The seller is resolved from the product — the backend reads their business
+  // profile address to use as the Fez pickup state.
+  const firstProductId = cart?.items?.[0]?.product?._id;
 
   useEffect(() => {
-    if (!selectedState) {
+    if (!selectedState || !firstProductId) {
       setDeliveryFee(null);
+      setDeliveryError(null);
       return;
     }
     let active = true;
     setDeliveryLoading(true);
-    getDeliveryCost({ state: selectedState })
+    setDeliveryError(null);
+    getDeliveryCost({ state: selectedState, productId: firstProductId })
       .then((quote) => {
         if (active) setDeliveryFee(quote.totalCost ?? quote.cost ?? 0);
       })
-      .catch(() => {
-        // Fez unavailable / not configured — treat as free rather than blocking checkout.
-        if (active) setDeliveryFee(null);
+      .catch((err) => {
+        if (!active) return;
+        setDeliveryFee(null);
+        const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        setDeliveryError(msg || 'Delivery fee unavailable right now.');
       })
       .finally(() => {
         if (active) setDeliveryLoading(false);
@@ -107,7 +116,7 @@ const CheckoutPage = () => {
     return () => {
       active = false;
     };
-  }, [selectedState]);
+  }, [selectedState, firstProductId]);
 
   const orderTotal = totalPrice + (deliveryFee ?? 0);
 
@@ -466,14 +475,17 @@ const CheckoutPage = () => {
                     <span>Delivery{selectedState ? ` · ${selectedState}` : ''}</span>
                     {deliveryLoading ? (
                       <span className="text-gray-400">Calculating…</span>
-                    ) : deliveryFee != null && deliveryFee > 0 ? (
+                    ) : deliveryFee != null ? (
                       <span>{formattedPrice(deliveryFee)}</span>
-                    ) : selectedState ? (
-                      <span className="text-green-600">FREE</span>
+                    ) : deliveryError ? (
+                      <span className="text-amber-600">Unavailable</span>
                     ) : (
                       <span className="text-gray-400">Select state</span>
                     )}
                   </div>
+                  {deliveryError && (
+                    <p className="text-xs leading-relaxed text-amber-600">{deliveryError}</p>
+                  )}
                   <div className="flex justify-between items-baseline pt-4">
                     <span className="text-base font-black text-gray-900 uppercase">
                       Total Amount

@@ -44,6 +44,9 @@ export const useUpdateProfile = () => {
     onSuccess: (_data) => {
       toast.success('Profile updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      // 'authUser' backs the app-wide user object (and checkout's auto-fill),
+      // so it must be refreshed or saved details won't show up anywhere.
+      queryClient.invalidateQueries({ queryKey: ['authUser'] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Update failed');
@@ -59,6 +62,9 @@ export const useUpdateBusiness = () => {
     onSuccess: () => {
       toast.success('Business details saved!');
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      // Refresh the auth payload so the saved business address (state/city)
+      // is available to checkout for delivery pricing.
+      queryClient.invalidateQueries({ queryKey: ['authUser'] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Business update failed');
@@ -113,11 +119,12 @@ export const useUpdateShippingAddress = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { phone?: string; city?: string; fullAddress?: string }) =>
+    mutationFn: (data: { phone?: string; state?: string; city?: string; fullAddress?: string }) =>
       API.patch('/users/me/shipping', data),
     onSuccess: () => {
       toast.success('Shipping address saved!');
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      // 'currentUser' isn't the auth query key — 'authUser' is.
+      queryClient.invalidateQueries({ queryKey: ['authUser'] });
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Failed to save shipping address');

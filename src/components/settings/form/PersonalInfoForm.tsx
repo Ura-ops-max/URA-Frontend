@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Camera, Image as ImageIcon, Save, Loader2, User, Lock, MapPin } from 'lucide-react';
 import { useAuthContext } from '@/context/auth-provider';
 import BusinessWarningModal from '../ui/BusinessWarningModal';
@@ -34,6 +34,7 @@ const PersonalInfoForm: React.FC = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -48,6 +49,7 @@ const PersonalInfoForm: React.FC = () => {
   const {
     register: registerShipping,
     handleSubmit: handleShippingSubmit,
+    reset: resetShipping,
     formState: { errors: shippingErrors },
   } = useForm<ShippingFormValues>({
     resolver: zodResolver(shippingSchema),
@@ -57,6 +59,23 @@ const PersonalInfoForm: React.FC = () => {
       shippingFullAddress: user?.shippingAddress?.fullAddress ?? '',
     },
   });
+
+  // `defaultValues` are only read once, but `user` arrives asynchronously — so
+  // without this the form stays on the empty initial values and edits look
+  // like they never saved. Re-sync whenever the user data changes.
+  useEffect(() => {
+    if (!user) return;
+    reset({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      bio: user.bio || '',
+    });
+    resetShipping({
+      shippingPhone: user.shippingAddress?.phone ?? user.phone ?? '',
+      shippingCity: user.shippingAddress?.city ?? '',
+      shippingFullAddress: user.shippingAddress?.fullAddress ?? '',
+    });
+  }, [user, reset, resetShipping]);
 
   const onShippingSubmit = (data: ShippingFormValues) => {
     saveShipping({

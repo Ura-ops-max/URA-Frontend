@@ -27,7 +27,7 @@ import { Button } from '../ui/button';
 import { EditItemModal } from './EditItemModal';
 
 export default function ProductPostCard({ post, onRequireAuth }: CardProps<ProductPostType>) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, related } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const cart = useCartContext();
@@ -44,11 +44,15 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
   const location = useLocation();
   const isPublicPath = location.pathname === '/';
 
-  console.log('Rendering ProductPostCard with product:', product);
-  console.log('Post data:', post);
-  console.log('User data:', user);
-
-  const isOwner = user?._id === post.authorId || user?._id === post.product?.business;
+  // Products posted by a business carry the BUSINESS id in `authorId` /
+  // `product.business`, so comparing only against `user._id` never matched and
+  // sellers never saw Edit/Delete on their own products. Also match the id of
+  // the business this user owns.
+  const myBusinessId = (related as { business_id?: string } | undefined)?.business_id;
+  const ownerIds = [user?._id, myBusinessId].filter(Boolean);
+  const isOwner =
+    ownerIds.includes(post.authorId) ||
+    ownerIds.includes(post.product?.business as unknown as string);
 
   const deleteMutation = useDeletePost(post._id, 'product');
 

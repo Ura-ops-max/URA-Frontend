@@ -1,4 +1,6 @@
 import axios from 'axios';
+import API from '@/lib/axios-client';
+import { uploadMediaToS3 } from '@/services/s3.service';
 
 const AI_SEARCH_BASE_URL = import.meta.env.VITE_AI_SEARCH_BASE_URL || '/prod';
 
@@ -104,6 +106,29 @@ export const aiSearchService = {
     }
   },
 };
+
+// ─── Product image search (our own backend + Atlas vector search) ────────────
+// Uploads the query image to S3, then asks the backend for visually similar
+// products. Returns results already in AISearchResult shape.
+export async function productImageSearch(file: File): Promise<AISearchResult[]> {
+  const imageUrl = await uploadMediaToS3(file);
+  const { data } = await API.post('/products/image-search', { imageUrl });
+  const products = (data?.products ?? []) as Record<string, any>[];
+  return products.map((p) => ({
+    id: p._id,
+    type: 'product' as const,
+    name: p.name ?? 'Product',
+    description: p.description ?? '',
+    subtitle: p.category ?? '',
+    image: Array.isArray(p.media) ? p.media[0] ?? null : null,
+    price: typeof p.price === 'number' ? p.price : null,
+    rating: typeof p.averageRating === 'number' ? p.averageRating : null,
+    location: null,
+    inStock: typeof p.stock === 'number' ? p.stock > 0 : null,
+    score: typeof p.score === 'number' ? p.score : 0,
+    raw: p,
+  }));
+}
 
 // ─── flatten ─────────────────────────────────────────────────────────────────
 export function flattenResults(results: Record<string, unknown>): AISearchResult[] {

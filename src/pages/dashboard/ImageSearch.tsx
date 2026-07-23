@@ -9,11 +9,10 @@ import {
   Building2,
   Package,
 } from 'lucide-react';
-import { aiSearchService, flattenResults } from '@/lib/ai-search.service';
+import { aiSearchService, flattenResults, productImageSearch } from '@/lib/ai-search.service';
 import type {
   AISearchResult,
   AISearchResponse,
-  ImageSearchResponse,
 } from '@/lib/ai-search.service';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -231,16 +230,15 @@ export const ImageSearch = () => {
     }));
 
     try {
-      const res: ImageSearchResponse = await aiSearchService.imageSearch(
-        file,
-        state.useGeo && state.userCoords ? state.userCoords : undefined,
-      );
+      // Use our own backend image search (Atlas vector search over indexed
+      // product images) so posted products actually surface as matches.
+      const results = await productImageSearch(file);
 
       setState((s) => ({
         ...s,
-        results: flattenResults(res.results),
-        total: res.total,
-        geoActive: res.geo_active,
+        results,
+        total: results.length,
+        geoActive: false,
         hasSearched: true,
         isLoading: false,
       }));

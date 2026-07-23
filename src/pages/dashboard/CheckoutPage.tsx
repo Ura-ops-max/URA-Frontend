@@ -112,9 +112,26 @@ const CheckoutPage = () => {
     let active = true;
     setDeliveryLoading(true);
     setDeliveryError(null);
+    setDeliveryFee(null);
+
+    // Hard safety net: never let the row hang on "Calculating…" — if the quote
+    // hasn't resolved in 15s, show an error instead.
+    const timeout = setTimeout(() => {
+      if (!active) return;
+      active = false;
+      setDeliveryLoading(false);
+      setDeliveryError('Delivery quote timed out. Please try again.');
+    }, 15000);
+
     getDeliveryCost({ state: selectedState, productId: firstProductId })
       .then((quote) => {
-        if (active) setDeliveryFee(quote.totalCost ?? quote.cost ?? 0);
+        if (!active) return;
+        const fee = quote?.totalCost ?? quote?.cost;
+        if (fee != null && fee > 0) {
+          setDeliveryFee(fee);
+        } else {
+          setDeliveryError(`Delivery to ${selectedState} isn't available right now.`);
+        }
       })
       .catch((err) => {
         if (!active) return;
@@ -124,9 +141,11 @@ const CheckoutPage = () => {
       })
       .finally(() => {
         if (active) setDeliveryLoading(false);
+        clearTimeout(timeout);
       });
     return () => {
       active = false;
+      clearTimeout(timeout);
     };
   }, [selectedState, firstProductId]);
 

@@ -264,7 +264,10 @@ const PersonalInfoForm: React.FC = () => {
         <p className="text-xs text-gray-400 mb-6">
           This will be pre-filled at checkout. You can always edit it before placing an order.
         </p>
-        <form onSubmit={handleShippingSubmit(onShippingSubmit)} className="space-y-4">
+        {/* NOTE: not a <form> — this block is rendered inside the profile <form>,
+            and nested forms are invalid HTML (the inner one is dropped, so the
+            save never fired). The button submits via onClick instead. */}
+        <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700">Phone Number</label>
@@ -308,7 +311,8 @@ const PersonalInfoForm: React.FC = () => {
           </div>
           <div className="flex justify-end">
             <button
-              type="submit"
+              type="button"
+              onClick={handleShippingSubmit(onShippingSubmit)}
               disabled={isSavingShipping}
               className="bg-orange-500 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-orange-600 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait text-sm"
             >
@@ -323,7 +327,7 @@ const PersonalInfoForm: React.FC = () => {
               )}
             </button>
           </div>
-        </form>
+        </div>
       </div>
 
       {/* Read-Only Account Section */}

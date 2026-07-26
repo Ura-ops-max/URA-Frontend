@@ -8,8 +8,8 @@ import {
   Loader2,
   AlertCircle,
   Wallet,
+  Landmark,
 } from 'lucide-react';
-import paylukAPI from '@/lib/payluk-axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,7 @@ import { EscrowCheckoutError } from 'payluk-escrow-inline-checkout';
 import { BASE_ROUTE } from '@/routes/common/routePaths.ts';
 import { usePaylukGuard } from '@/hooks/use-payluk-guard';
 import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
+import CheckoutBankTransferModal from '@/components/checkout/CheckoutBankTransferModal';
 
 // ── Validation schema ───────────────────────────────
 const shippingSchema = z.object({
@@ -54,7 +55,15 @@ const CheckoutPage = () => {
   const { data: wallet, isLoading: walletLoading } = useWalletBalance(user?.paylukCustomerId);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [isEscrowLoading, setIsEscrowLoading] = useState(false);
+  // Bank-transfer flow: once the order/escrow is created we hold its details
+  // here and open the modal that shows the account number to pay into.
+  const [transfer, setTransfer] = useState<{
+    customerId: string;
+    escrowId: string;
+    amount: number;
+    orderId: string;
+    orderNumber?: string;
+  } | null>(null);
   const { pay } = useEscrowCheckout();
   const { guard, showModal, onModalSuccess, onModalDismiss } = usePaylukGuard();
   const hasShippingAddress = !!(
@@ -248,17 +257,22 @@ const CheckoutPage = () => {
     }
   };
 
+  // Both buttons go through the Payluk inline checkout (card / bank transfer /
+  // USSD) — the wallet-gateway path required a pre-funded wallet and failed for
+  // buyers with a ₦0 balance. Delivery includes shipping; direct excludes it.
   const onEscrowSubmit = (formData: ShippingFormValues) => {
-    guard(() => processEscrowCheckout(formData, true));
+    guard(() => processCheckout(formData, true));
   };
 
-  // Direct payment: no shipping charged, funds settle straight from the wallet.
   const onDirectPaySubmit = (formData: ShippingFormValues) => {
-    guard(() => processEscrowCheckout(formData, false));
+    guard(() => processCheckout(formData, false));
   };
 
-  const processEscrowCheckout = async (formData: ShippingFormValues, withDelivery: boolean) => {
-    setIsEscrowLoading(true);
+  // Bank transfer: create the order/escrow, then open the modal that shows the
+  // account number to pay into. The wallet is funded by the transfer and the
+  // modal settles the escrow from it. Delivery is included in the amount.
+  const startBankTransfer = async (formData: ShippingFormValues) => {
+    setIsLoading(true);
     try {
       const response = await API.post('/orders', {
         shippingAddress: {
@@ -267,20 +281,21 @@ const CheckoutPage = () => {
           state: formData.state,
           phone: formData.phone,
         },
-        // Direct payment excludes shipping; only the delivery option charges it.
-        deliveryFee: withDelivery ? (deliveryFee ?? 0) : 0,
-        deliveryMethod: withDelivery ? 'delivery' : 'pickup',
-        paymentMethod: 'escrow',
+        deliveryFee: deliveryFee ?? 0,
+        deliveryMethod: 'delivery',
+        paymentMethod: 'transfer',
       });
 
-      const { escrowId, payableAmount } = response.data?.payluk || {};
+      const { escrowId, customerId, payableAmount } = response.data?.payluk || {};
       const order = response.data?.order;
+      const buyerCustomerId = user?.paylukCustomerId ?? customerId;
 
-      if (!escrowId) {
-        toast.error('This product is not set up for escrow payment.');
+      if (!escrowId || !buyerCustomerId) {
+        toast.error('Could not start bank transfer. Please try again.');
         return;
       }
 
+      // Persist shipping address for next time (fire-and-forget).
       API.patch('/users/me/shipping', {
         phone: formData.phone,
         state: formData.state,
@@ -288,30 +303,32 @@ const CheckoutPage = () => {
         fullAddress: formData.fullAddress,
       }).catch((e) => console.warn('[checkout] shipping save failed:', e));
 
-      const reference = `esc-${order._id}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-
-      const { data } = await paylukAPI.post(
-        '/payment/escrow',
-        {
-          amount: payableAmount ?? order.totalAmount,
-          reference,
-          gateway: 'wallet',
-          transactionType: 'escrow',
-          escrowDetails: { escrowId: [escrowId] },
-        },
-        {
-          headers: { 'customer-id': user?.paylukCustomerId },
-        },
-      );
-
-      toast.success(data?.message ?? 'Escrow payment initiated successfully!');
-      navigate('/dashboard/orders');
+      setTransfer({
+        customerId: buyerCustomerId,
+        escrowId,
+        amount: payableAmount ?? orderTotal,
+        orderId: order._id,
+        orderNumber: order.orderNumber,
+      });
     } catch (error: any) {
-      console.error('Escrow checkout error:', error?.response?.data ?? error);
-      toast.error(error?.response?.data?.message || 'Escrow checkout failed. Please try again.');
+      const code = error?.response?.data?.code;
+      if (code === 'PAYLUK_PROFILE_REQUIRED') {
+        onModalDismiss();
+        guard(() => {});
+        return;
+      }
+      if (code === 'PRODUCT_NOT_AVAILABLE' || code === 'PAYLUK_SETUP_REQUIRED') {
+        toast.info('This product is not yet available for purchase.');
+        return;
+      }
+      toast.error(error?.response?.data?.message || 'Checkout failed. Please try again.');
     } finally {
-      setIsEscrowLoading(false);
+      setIsLoading(false);
     }
+  };
+
+  const onBankTransferSubmit = (formData: ShippingFormValues) => {
+    guard(() => startBankTransfer(formData));
   };
 
   return (
@@ -557,10 +574,10 @@ const CheckoutPage = () => {
                 <Button
                   type="button"
                   onClick={handleSubmit(onEscrowSubmit)}
-                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
+                  disabled={isLoading || !cart?.items?.length}
                   className="w-full h-16 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-base gap-3 transition-all active:scale-95 shadow-xl shadow-orange-200"
                 >
-                  {isEscrowLoading ? (
+                  {isLoading ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     <>
@@ -570,14 +587,31 @@ const CheckoutPage = () => {
                   )}
                 </Button>
 
+                {/* Pay by bank transfer — shows an account number to pay into */}
+                <Button
+                  type="button"
+                  onClick={handleSubmit(onBankTransferSubmit)}
+                  disabled={isLoading || !cart?.items?.length}
+                  className="mt-3 w-full h-14 bg-white hover:bg-orange-50 text-orange-600 border-2 border-orange-500 rounded-2xl font-black text-base gap-3 transition-all active:scale-95"
+                >
+                  {isLoading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <>
+                      <Landmark size={18} />
+                      Pay by Bank Transfer · {formattedPrice(orderTotal)}
+                    </>
+                  )}
+                </Button>
+
                 {/* Option 2 — Direct payment: excludes shipping, settles from wallet */}
                 <Button
                   type="button"
                   onClick={handleSubmit(onDirectPaySubmit)}
-                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
+                  disabled={isLoading || !cart?.items?.length}
                   className="mt-3 w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-black text-base gap-3 transition-all active:scale-95"
                 >
-                  {isEscrowLoading ? (
+                  {isLoading ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     <>
@@ -594,7 +628,7 @@ const CheckoutPage = () => {
                 <Button
                   type="submit"
                   variant="outline"
-                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
+                  disabled={isLoading || !cart?.items?.length}
                   className="mt-3 w-full h-12 rounded-2xl border-gray-200 font-bold text-sm gap-2"
                 >
                   {isLoading ? (
@@ -628,6 +662,21 @@ const CheckoutPage = () => {
       </div>
 
       {showModal && <PaylukOnboardingModal onSuccess={onModalSuccess} onDismiss={onModalDismiss} />}
+
+      {transfer && (
+        <CheckoutBankTransferModal
+          customerId={transfer.customerId}
+          escrowId={transfer.escrowId}
+          amount={transfer.amount}
+          orderId={transfer.orderId}
+          orderNumber={transfer.orderNumber}
+          onClose={() => setTransfer(null)}
+          onPaid={() => {
+            setTransfer(null);
+            navigate('/dashboard/orders');
+          }}
+        />
+      )}
     </>
   );
 };

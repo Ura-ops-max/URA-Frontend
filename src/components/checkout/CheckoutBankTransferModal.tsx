@@ -176,10 +176,10 @@ export default function CheckoutBankTransferModal({
       onClick={busy ? undefined : onClose}
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-[28px] shadow-2xl overflow-hidden"
+        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="h-1.5 bg-gradient-to-r from-orange-500 to-orange-400" />
+        <div className="sticky top-0 h-1.5 bg-linear-to-r from-orange-500 to-orange-400" />
 
         {!busy && (
           <button
@@ -190,7 +190,7 @@ export default function CheckoutBankTransferModal({
           </button>
         )}
 
-        <div className="p-8">
+        <div className="p-6 sm:p-8">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center shrink-0">
               <Landmark className="w-6 h-6 text-orange-500" />

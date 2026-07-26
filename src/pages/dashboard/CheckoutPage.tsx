@@ -403,14 +403,14 @@ const CheckoutPage = () => {
           >
             <ChevronLeft size={16} /> Back to Cart
           </Link>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Finalize Order</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Finalize Order</h1>
         </div>
 
         {/* handleSubmit wraps the entire layout so the Pay button submits the form */}
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
             {/* LEFT COLUMN */}
-            <div className="lg:col-span-7 space-y-12">
+            <div className="lg:col-span-7 space-y-8 lg:space-y-12">
               {/* Shipping */}
               <section className="space-y-6">
                 <div className="flex items-center gap-3">
@@ -554,7 +554,7 @@ const CheckoutPage = () => {
 
             {/* RIGHT COLUMN: ORDER SUMMARY */}
             <div className="lg:col-span-5">
-              <div className="sticky top-24 bg-gray-50 rounded-[32px] p-8 border border-gray-100">
+              <div className="lg:sticky lg:top-24 bg-gray-50 rounded-3xl sm:rounded-4xl p-6 sm:p-8 border border-gray-100">
                 <h3 className="text-lg font-black text-gray-900 mb-6 uppercase tracking-tight">
                   In Your Bag
                 </h3>
@@ -610,7 +610,7 @@ const CheckoutPage = () => {
                     <span className="text-base font-black text-gray-900 uppercase">
                       Total Amount
                     </span>
-                    <span className="text-3xl font-black text-orange-600">
+                    <span className="text-2xl sm:text-3xl font-black text-orange-600">
                       {formattedPrice(orderTotal)}
                     </span>
                   </div>
@@ -636,7 +636,7 @@ const CheckoutPage = () => {
                   type="button"
                   onClick={handleSubmit(onSdkSubmit)}
                   disabled={isLoading || isEscrowLoading || !cart?.items?.length}
-                  className="w-full h-16 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-base gap-3 transition-all active:scale-95 shadow-xl shadow-orange-200"
+                  className="w-full h-16 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-sm sm:text-base gap-2 sm:gap-3 px-3 transition-all active:scale-95 shadow-xl shadow-orange-200"
                 >
                   {isLoading ? (
                     <Loader2 className="animate-spin" />
@@ -653,7 +653,7 @@ const CheckoutPage = () => {
                   type="button"
                   onClick={handleSubmit(onBankTransferSubmit)}
                   disabled={isLoading || isEscrowLoading || !cart?.items?.length}
-                  className="mt-3 w-full h-14 bg-white hover:bg-orange-50 text-orange-600 border-2 border-orange-500 rounded-2xl font-black text-base gap-3 transition-all active:scale-95"
+                  className="mt-3 w-full h-14 bg-white hover:bg-orange-50 text-orange-600 border-2 border-orange-500 rounded-2xl font-black text-sm sm:text-base gap-2 sm:gap-3 px-3 transition-all active:scale-95"
                 >
                   {isLoading ? (
                     <Loader2 className="animate-spin" />
@@ -670,7 +670,7 @@ const CheckoutPage = () => {
                   type="button"
                   onClick={handleSubmit(onEscrowSubmit)}
                   disabled={isLoading || isEscrowLoading || !cart?.items?.length}
-                  className="mt-3 w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-black text-base gap-3 transition-all active:scale-95"
+                  className="mt-3 w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-black text-sm sm:text-base gap-2 sm:gap-3 px-3 transition-all active:scale-95"
                 >
                   {isEscrowLoading ? (
                     <Loader2 className="animate-spin" />

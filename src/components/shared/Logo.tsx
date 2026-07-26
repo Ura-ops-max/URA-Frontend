@@ -47,7 +47,7 @@ const Logo = forwardRef<HTMLAnchorElement, LogoProps>(
   (
     {
       url = '/',
-      imgSrc = '/images/logo.png',
+      imgSrc = '/images/newlogo.png',
       alt = 'Ura Logo',
       size = 'md',
       showText = false,

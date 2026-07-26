@@ -67,35 +67,77 @@ function Home() {
               transition={{ duration: 0.6, ease: 'easeOut' }}
             >
               <h1 className="mt-8 max-w-2xl text-balance text-4xl font-medium sm:text-5xl md:text-6xl lg:mt-16 xl:text-7xl">
-                <span className="text-amber-500">Ura</span>, Scale your local Business
+                Buy and sell across <span className="text-amber-500">Nigeria</span> with ease.
               </h1>
               <p className="mt-6 max-w-2xl text-pretty text-lg text-slate-600">
-                Connect, showcase, and grow your business in Nigeria&apos;s vibrant marketplace community.
+                URA verifies who you&apos;re dealing with and protects your money until the deal is
+                done. We make buying and selling across Nigeria easy and reliable.
               </p>
 
               <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
                 <Button asChild size="lg" variant="brand" className="px-8 text-base">
                   <Link to="/auth/login">
-                    <span className="text-nowrap">Explore Business</span>
+                    <span className="text-nowrap">Find a Vendor You Can Trust</span>
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="brandSecondary" className="px-14 text-base">
+                <Button asChild size="lg" variant="brandSecondary" className="px-8 text-base">
                   <Link to="/auth/register">
-                    <span className="text-nowrap">Join Now</span>
+                    <span className="text-nowrap">Start Selling on URA</span>
                   </Link>
                 </Button>
               </div>
             </motion.div>
             <motion.img
-              className="h-56 w-full flex-1 object-cover sm:h-96 lg:h-max lg:object-contain"
-              src="/heroImg.svg"
-              alt="URA marketplace"
+              className="h-56 w-full flex-1 rounded-3xl object-cover sm:h-96 lg:h-max lg:max-h-135"
+              src="/images/newurahero.jpeg"
+              alt="Buyers and vendors trading on URA"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
             />
           </div>
         </div>
+      </section>
+
+      {/* For Buyers / For Vendors */}
+      <section className="px-6 pb-4">
+        <Stagger className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2">
+          <FadeItem className="flex flex-col rounded-3xl border border-slate-100 bg-white p-8 transition hover:shadow-lg hover:shadow-slate-100">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+              <Search className="h-6 w-6" />
+            </div>
+            <h3 className="mt-5 text-xl font-bold text-slate-900">For Buyers</h3>
+            <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-500">
+              Shop without the fear. Every vendor is verified, your money is secured until your order
+              arrives, and our search tools find exactly what you need, where you need it.
+            </p>
+            <Button asChild size="lg" variant="brand" className="mt-6 self-start px-8 text-base">
+              <Link to="/auth/login">
+                <span className="text-nowrap">Find a Vendor You Can Trust</span>
+              </Link>
+            </Button>
+          </FadeItem>
+
+          <FadeItem className="flex flex-col rounded-3xl border border-slate-100 bg-white p-8 transition hover:shadow-lg hover:shadow-slate-100">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+              <Store className="h-6 w-6" />
+            </div>
+            <h3 className="mt-5 text-xl font-bold text-slate-900">For Vendors</h3>
+            <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-500">
+              Sell without any hassle. Get paid on time, and reach buyers who are ready to buy.
+            </p>
+            <Button
+              asChild
+              size="lg"
+              variant="brandSecondary"
+              className="mt-6 self-start px-8 text-base"
+            >
+              <Link to="/auth/register">
+                <span className="text-nowrap">Start Selling on URA</span>
+              </Link>
+            </Button>
+          </FadeItem>
+        </Stagger>
       </section>
 
       {/* Features */}

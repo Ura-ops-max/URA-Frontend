@@ -43,12 +43,9 @@ const Footer = () => {
         <div className="grid grid-cols-2 gap-10 md:grid-cols-5">
           {/* Brand */}
           <div className="col-span-2">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 font-black text-white">
-                U
-              </div>
-              <span className="text-xl font-bold text-white">URA</span>
-            </div>
+            <Link to="/" className="inline-flex items-center">
+              <img src="/images/ura-footer.png" alt="URA" className="h-9 w-auto" />
+            </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
               Discover businesses, buy and sell products, and pay securely with buyer protection.
             </p>

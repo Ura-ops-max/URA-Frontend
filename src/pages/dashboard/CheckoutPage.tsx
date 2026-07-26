@@ -31,6 +31,7 @@ import { BASE_ROUTE } from '@/routes/common/routePaths.ts';
 import { usePaylukGuard } from '@/hooks/use-payluk-guard';
 import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
 import CheckoutBankTransferModal from '@/components/checkout/CheckoutBankTransferModal';
+import paylukAPI from '@/lib/payluk-axios';
 
 // ── Validation schema ───────────────────────────────
 const shippingSchema = z.object({
@@ -55,6 +56,7 @@ const CheckoutPage = () => {
   const { data: wallet, isLoading: walletLoading } = useWalletBalance(user?.paylukCustomerId);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isEscrowLoading, setIsEscrowLoading] = useState(false);
   // Bank-transfer flow: once the order/escrow is created we hold its details
   // here and open the modal that shows the account number to pay into.
   const [transfer, setTransfer] = useState<{
@@ -257,15 +259,74 @@ const CheckoutPage = () => {
     }
   };
 
-  // Both buttons go through the Payluk inline checkout (card / bank transfer /
-  // USSD) — the wallet-gateway path required a pre-funded wallet and failed for
-  // buyers with a ₦0 balance. Delivery includes shipping; direct excludes it.
-  const onEscrowSubmit = (formData: ShippingFormValues) => {
+  // Pay with SDK: opens the Payluk inline widget (card / bank transfer / USSD).
+  const onSdkSubmit = (formData: ShippingFormValues) => {
     guard(() => processCheckout(formData, true));
   };
 
-  const onDirectPaySubmit = (formData: ShippingFormValues) => {
-    guard(() => processCheckout(formData, false));
+  // Pay with Escrow: settles straight from the buyer's Payluk wallet. Needs a
+  // funded wallet — buyers can top it up first via the Bank Transfer option.
+  const onEscrowSubmit = (formData: ShippingFormValues) => {
+    guard(() => processEscrowCheckout(formData, true));
+  };
+
+  const processEscrowCheckout = async (formData: ShippingFormValues, withDelivery: boolean) => {
+    setIsEscrowLoading(true);
+    try {
+      const response = await API.post('/orders', {
+        shippingAddress: {
+          fullAddress: formData.fullAddress,
+          city: formData.city,
+          state: formData.state,
+          phone: formData.phone,
+        },
+        deliveryFee: withDelivery ? (deliveryFee ?? 0) : 0,
+        deliveryMethod: withDelivery ? 'delivery' : 'pickup',
+        paymentMethod: 'escrow',
+      });
+
+      const { escrowId, payableAmount } = response.data?.payluk || {};
+      const order = response.data?.order;
+
+      if (!escrowId) {
+        toast.error('This product is not set up for escrow payment.');
+        return;
+      }
+
+      API.patch('/users/me/shipping', {
+        phone: formData.phone,
+        state: formData.state,
+        city: formData.city,
+        fullAddress: formData.fullAddress,
+      }).catch((e) => console.warn('[checkout] shipping save failed:', e));
+
+      const reference = `esc-${order._id}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+
+      const { data } = await paylukAPI.post(
+        '/payment/escrow',
+        {
+          amount: payableAmount ?? order.totalAmount,
+          reference,
+          gateway: 'wallet',
+          transactionType: 'escrow',
+          escrowDetails: { escrowId: [escrowId] },
+        },
+        { headers: { 'customer-id': user?.paylukCustomerId } },
+      );
+
+      toast.success(data?.message ?? 'Escrow payment initiated successfully!');
+      navigate('/dashboard/orders');
+    } catch (error: any) {
+      console.error('Escrow checkout error:', error?.response?.data ?? error);
+      const msg = error?.response?.data?.message || '';
+      toast.error(
+        /insufficient|balance/i.test(msg)
+          ? 'Not enough wallet balance. Top up with the Bank Transfer option first.'
+          : msg || 'Escrow checkout failed. Please try again.',
+      );
+    } finally {
+      setIsEscrowLoading(false);
+    }
   };
 
   // Bank transfer: create the order/escrow, then open the modal that shows the
@@ -570,19 +631,19 @@ const CheckoutPage = () => {
                   )}
                 </div>
 
-                {/* Option 1 — Delivery: shipping is included in the amount */}
+                {/* Pay with SDK — opens the Payluk inline widget (card / bank / USSD) */}
                 <Button
                   type="button"
-                  onClick={handleSubmit(onEscrowSubmit)}
-                  disabled={isLoading || !cart?.items?.length}
+                  onClick={handleSubmit(onSdkSubmit)}
+                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
                   className="w-full h-16 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-base gap-3 transition-all active:scale-95 shadow-xl shadow-orange-200"
                 >
                   {isLoading ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     <>
-                      <Truck size={18} />
-                      Pay with Delivery · {formattedPrice(orderTotal)}
+                      <Lock size={18} />
+                      Pay with SDK · {formattedPrice(orderTotal)}
                     </>
                   )}
                 </Button>
@@ -591,7 +652,7 @@ const CheckoutPage = () => {
                 <Button
                   type="button"
                   onClick={handleSubmit(onBankTransferSubmit)}
-                  disabled={isLoading || !cart?.items?.length}
+                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
                   className="mt-3 w-full h-14 bg-white hover:bg-orange-50 text-orange-600 border-2 border-orange-500 rounded-2xl font-black text-base gap-3 transition-all active:scale-95"
                 >
                   {isLoading ? (
@@ -604,42 +665,25 @@ const CheckoutPage = () => {
                   )}
                 </Button>
 
-                {/* Option 2 — Direct payment: excludes shipping, settles from wallet */}
+                {/* Pay with Escrow — settles straight from the Payluk wallet */}
                 <Button
                   type="button"
-                  onClick={handleSubmit(onDirectPaySubmit)}
-                  disabled={isLoading || !cart?.items?.length}
+                  onClick={handleSubmit(onEscrowSubmit)}
+                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
                   className="mt-3 w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-black text-base gap-3 transition-all active:scale-95"
                 >
-                  {isLoading ? (
+                  {isEscrowLoading ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     <>
-                      <Wallet size={18} className="text-orange-400" />
-                      Pay Now (no delivery) · {formattedPrice(totalPrice)}
+                      <ShieldCheck size={18} className="text-orange-400" />
+                      Pay with Escrow · {formattedPrice(orderTotal)}
                     </>
                   )}
                 </Button>
                 <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
-                  Direct payment excludes shipping and is settled from your wallet.
+                  Escrow settles from your wallet — top up with Bank Transfer if your balance is low.
                 </p>
-
-                {/* Card / SDK checkout kept as a secondary option */}
-                <Button
-                  type="submit"
-                  variant="outline"
-                  disabled={isLoading || !cart?.items?.length}
-                  className="mt-3 w-full h-12 rounded-2xl border-gray-200 font-bold text-sm gap-2"
-                >
-                  {isLoading ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    <>
-                      <Lock size={16} className="text-orange-500" />
-                      Pay by card instead
-                    </>
-                  )}
-                </Button>
 
                 <div className="mt-8 grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-2 p-3 bg-white rounded-xl border border-gray-100">

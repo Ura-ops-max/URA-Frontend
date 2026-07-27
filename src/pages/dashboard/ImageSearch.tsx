@@ -9,8 +9,13 @@ import {
   Building2,
   Package,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { productAndBusinessTextSearch, productImageSearch } from '@/lib/ai-search.service';
 import type { AISearchResult } from '@/lib/ai-search.service';
+
+/** Build the destination route for a search result. */
+const resultUrl = (r: AISearchResult): string =>
+  r.type === 'business' ? `/dashboard/profile/business/${r.id}` : `/dashboard/product/${r.id}`;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,13 +36,22 @@ interface SearchState {
   hasSearched: boolean;
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Sub-components ───────────────────────────────────────────────
 
-const ResultCard = ({ result }: { result: AISearchResult }) => {
+const ResultCard = ({
+  result,
+  onSelect,
+}: {
+  result: AISearchResult;
+  onSelect: (r: AISearchResult) => void;
+}) => {
   const isBusiness = result.type === 'business';
 
   return (
-    <div className="group flex gap-3 p-3 rounded-xl border border-gray-100 hover:border-blue-100 hover:bg-blue-50/30 transition-all duration-200 cursor-pointer">
+    <div
+      onClick={() => onSelect(result)}
+      className="group flex gap-3 p-3 rounded-xl border border-gray-100 hover:border-blue-100 hover:bg-blue-50/30 transition-all duration-200 cursor-pointer"
+    >
       {/* Thumbnail */}
       <div className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
         {result.image ? (
@@ -135,9 +149,15 @@ export const ImageSearch = () => {
     hasSearched: false,
   });
 
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clicking a result opens the product (or business) page.
+  const handleResultSelect = (result: AISearchResult) => {
+    navigate(resultUrl(result));
+  };
 
   // ─── Geo ────────────────────────────────────────────────────────────────────
 
@@ -450,7 +470,7 @@ export const ImageSearch = () => {
             {/* Result cards */}
             <div className="flex flex-col gap-2">
               {state.results.map((result) => (
-                <ResultCard key={result.id} result={result} />
+                <ResultCard key={result.id} result={result} onSelect={handleResultSelect} />
               ))}
             </div>
           </>

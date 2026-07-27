@@ -271,8 +271,8 @@ const CheckoutPage = () => {
                   <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
                     <AlertCircle size={16} className="text-amber-500 mt-0.5 shrink-0" />
                     <p className="text-xs font-semibold text-amber-700">
-                      No saved shipping address found. Please fill in your delivery details below —
-                      they'll be saved for next time.
+                      Add your delivery details below and we'll save them, so next time checkout is
+                      one tap.
                     </p>
                   </div>
                 )}

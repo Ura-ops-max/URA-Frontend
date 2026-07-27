@@ -8,7 +8,6 @@ import {
   Loader2,
   AlertCircle,
   Wallet,
-  Landmark,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,13 +24,10 @@ import { useForm } from 'react-hook-form';
 import { NIGERIAN_STATES } from '@/lib/nigerian-states';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useEscrowCheckout } from 'payluk-escrow-inline-checkout/react';
-import { EscrowCheckoutError } from 'payluk-escrow-inline-checkout';
-import { BASE_ROUTE } from '@/routes/common/routePaths.ts';
 import { usePaylukGuard } from '@/hooks/use-payluk-guard';
 import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
-import CheckoutBankTransferModal from '@/components/checkout/CheckoutBankTransferModal';
-import paylukAPI from '@/lib/payluk-axios';
+import DeliverySelectionModal from '@/components/checkout/DeliverySelectionModal';
+import CheckoutPaymentModal from '@/components/checkout/CheckoutPaymentModal';
 
 // ── Validation schema ───────────────────────────────
 const shippingSchema = z.object({
@@ -56,9 +52,11 @@ const CheckoutPage = () => {
   const { data: wallet, isLoading: walletLoading } = useWalletBalance(user?.paylukCustomerId);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [isEscrowLoading, setIsEscrowLoading] = useState(false);
-  // Bank-transfer flow: once the order/escrow is created we hold its details
-  // here and open the modal that shows the account number to pay into.
+  // Flow: "Proceed to Pay" → stash the validated form + open the delivery
+  // chooser → create the escrow order for the chosen total → open the payment
+  // modal (wallet or bank transfer).
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [pendingForm, setPendingForm] = useState<ShippingFormValues | null>(null);
   const [transfer, setTransfer] = useState<{
     customerId: string;
     escrowId: string;
@@ -66,7 +64,6 @@ const CheckoutPage = () => {
     orderId: string;
     orderNumber?: string;
   } | null>(null);
-  const { pay } = useEscrowCheckout();
   const { guard, showModal, onModalSuccess, onModalDismiss } = usePaylukGuard();
   const hasShippingAddress = !!(
     user?.shippingAddress?.fullAddress &&
@@ -169,17 +166,20 @@ const CheckoutPage = () => {
       maximumFractionDigits: 0,
     }).format(price);
 
-  // handleSubmit from react-hook-form validates before this runs
-  const onSubmit = (formData: ShippingFormValues) => {
-    // Guard: user must have a Payluk payment profile before checking out
-    guard(() => processCheckout(formData, true));
+  // Step 1 — "Proceed to Pay": validate the form, ensure the buyer has a Payluk
+  // profile, then prompt for the fulfilment method (delivery vs pickup).
+  const onProceed = (formData: ShippingFormValues) => {
+    guard(() => {
+      setPendingForm(formData);
+      setShowDeliveryModal(true);
+    });
   };
 
-  const processCheckout = async (formData: ShippingFormValues, withDelivery: boolean) => {
+  // Step 2 — after the buyer picks delivery/pickup: create the escrow order for
+  // the chosen total, then open the payment modal (wallet or bank transfer).
+  const createOrderAndPay = async (formData: ShippingFormValues, withDelivery: boolean) => {
     setIsLoading(true);
     try {
-      // Step 1: Create order on backend
-      // Returns the product's pre-generated paymentToken and the SELLER's customerId
       const response = await API.post('/orders', {
         shippingAddress: {
           fullAddress: formData.fullAddress,
@@ -187,164 +187,10 @@ const CheckoutPage = () => {
           state: formData.state,
           phone: formData.phone,
         },
-        // Direct payment excludes shipping; only the delivery option charges it.
-        deliveryFee: withDelivery ? (deliveryFee ?? 0) : 0,
-        deliveryMethod: withDelivery ? 'delivery' : 'pickup',
-        paymentMethod: 'card',
-      });
-
-      const { paymentToken, customerId } = response.data?.payluk || {};
-      const order = response.data?.order;
-
-      if (!paymentToken) {
-        toast.error('Could not get payment token. Please try again.');
-        return;
-      }
-
-      // Persist shipping address back to user profile (fire-and-forget)
-      API.patch('/users/me/shipping', {
-        phone: formData.phone,
-        state: formData.state,
-        city: formData.city,
-        fullAddress: formData.fullAddress,
-      }).catch((e) => console.warn('[checkout] shipping save failed:', e));
-
-      // Generate a unique reference for this payment attempt
-      const reference = `${order._id}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-
-      await pay({
-        paymentToken,
-        reference,
-        redirectUrl: `${window.location.origin}${BASE_ROUTE.PAYLUK_PAYMENT_COMPLETE}`,
-        brand: import.meta.env.VITE_APP_NAME ?? 'Marketplace',
-        customerId: user?.paylukCustomerId ?? customerId ?? undefined,
-        callback: (result: any) => {
-          console.log('✅ Payluk payment result:', result);
-          toast.success('Payment successful! Your order is being processed.');
-          navigate(
-            `${BASE_ROUTE.PAYLUK_PAYMENT_COMPLETE}?paymentId=${encodeURIComponent(result.paymentId)}`,
-          );
-        },
-        onClose: () => {
-          toast.info(
-            'Payment cancelled. Your order has been saved — you can retry from your orders.',
-          );
-          navigate('/dashboard/orders');
-        },
-      });
-    } catch (error: any) {
-      console.error('Checkout error:', error);
-      const code = error?.response?.data?.code;
-
-      if (code === 'PAYLUK_PROFILE_REQUIRED') {
-        // Backend guard triggered — open the onboarding modal
-        onModalDismiss(); // reset any existing modal state
-        guard(() => {}); // triggers the modal via the hook
-        return;
-      }
-
-      if (code === 'PRODUCT_NOT_AVAILABLE' || code === 'PAYLUK_SETUP_REQUIRED') {
-        toast.info('This product is not yet available for purchase.');
-        return;
-      }
-
-      if (error instanceof EscrowCheckoutError) {
-        toast.error(error.message || 'Payment gateway error. Please try again.');
-        return;
-      }
-
-      toast.error(error?.response?.data?.message || 'Checkout failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Pay with SDK: opens the Payluk inline widget (card / bank transfer / USSD).
-  const onSdkSubmit = (formData: ShippingFormValues) => {
-    guard(() => processCheckout(formData, true));
-  };
-
-  // Pay with Escrow: settles straight from the buyer's Payluk wallet. Needs a
-  // funded wallet — buyers can top it up first via the Bank Transfer option.
-  const onEscrowSubmit = (formData: ShippingFormValues) => {
-    guard(() => processEscrowCheckout(formData, true));
-  };
-
-  const processEscrowCheckout = async (formData: ShippingFormValues, withDelivery: boolean) => {
-    setIsEscrowLoading(true);
-    try {
-      const response = await API.post('/orders', {
-        shippingAddress: {
-          fullAddress: formData.fullAddress,
-          city: formData.city,
-          state: formData.state,
-          phone: formData.phone,
-        },
+        // With delivery adds the Fez fee; without delivery charges product only.
         deliveryFee: withDelivery ? (deliveryFee ?? 0) : 0,
         deliveryMethod: withDelivery ? 'delivery' : 'pickup',
         paymentMethod: 'escrow',
-      });
-
-      const { escrowId, payableAmount } = response.data?.payluk || {};
-      const order = response.data?.order;
-
-      if (!escrowId) {
-        toast.error('This product is not set up for escrow payment.');
-        return;
-      }
-
-      API.patch('/users/me/shipping', {
-        phone: formData.phone,
-        state: formData.state,
-        city: formData.city,
-        fullAddress: formData.fullAddress,
-      }).catch((e) => console.warn('[checkout] shipping save failed:', e));
-
-      const reference = `esc-${order._id}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-
-      const { data } = await paylukAPI.post(
-        '/payment/escrow',
-        {
-          amount: payableAmount ?? order.totalAmount,
-          reference,
-          gateway: 'wallet',
-          transactionType: 'escrow',
-          escrowDetails: { escrowId: [escrowId] },
-        },
-        { headers: { 'customer-id': user?.paylukCustomerId } },
-      );
-
-      toast.success(data?.message ?? 'Escrow payment initiated successfully!');
-      navigate('/dashboard/orders');
-    } catch (error: any) {
-      console.error('Escrow checkout error:', error?.response?.data ?? error);
-      const msg = error?.response?.data?.message || '';
-      toast.error(
-        /insufficient|balance/i.test(msg)
-          ? 'Not enough wallet balance. Top up with the Bank Transfer option first.'
-          : msg || 'Escrow checkout failed. Please try again.',
-      );
-    } finally {
-      setIsEscrowLoading(false);
-    }
-  };
-
-  // Bank transfer: create the order/escrow, then open the modal that shows the
-  // account number to pay into. The wallet is funded by the transfer and the
-  // modal settles the escrow from it. Delivery is included in the amount.
-  const startBankTransfer = async (formData: ShippingFormValues) => {
-    setIsLoading(true);
-    try {
-      const response = await API.post('/orders', {
-        shippingAddress: {
-          fullAddress: formData.fullAddress,
-          city: formData.city,
-          state: formData.state,
-          phone: formData.phone,
-        },
-        deliveryFee: deliveryFee ?? 0,
-        deliveryMethod: 'delivery',
-        paymentMethod: 'transfer',
       });
 
       const { escrowId, customerId, payableAmount } = response.data?.payluk || {};
@@ -352,7 +198,7 @@ const CheckoutPage = () => {
       const buyerCustomerId = user?.paylukCustomerId ?? customerId;
 
       if (!escrowId || !buyerCustomerId) {
-        toast.error('Could not start bank transfer. Please try again.');
+        toast.error('Could not start payment. Please try again.');
         return;
       }
 
@@ -367,7 +213,7 @@ const CheckoutPage = () => {
       setTransfer({
         customerId: buyerCustomerId,
         escrowId,
-        amount: payableAmount ?? orderTotal,
+        amount: payableAmount ?? (withDelivery ? orderTotal : totalPrice),
         orderId: order._id,
         orderNumber: order.orderNumber,
       });
@@ -388,8 +234,9 @@ const CheckoutPage = () => {
     }
   };
 
-  const onBankTransferSubmit = (formData: ShippingFormValues) => {
-    guard(() => startBankTransfer(formData));
+  const handleDeliveryChoice = (withDelivery: boolean) => {
+    setShowDeliveryModal(false);
+    if (pendingForm) createOrderAndPay(pendingForm, withDelivery);
   };
 
   return (
@@ -407,7 +254,7 @@ const CheckoutPage = () => {
         </div>
 
         {/* handleSubmit wraps the entire layout so the Pay button submits the form */}
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onProceed)}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
             {/* LEFT COLUMN */}
             <div className="lg:col-span-7 space-y-8 lg:space-y-12">
@@ -631,58 +478,24 @@ const CheckoutPage = () => {
                   )}
                 </div>
 
-                {/* Pay with SDK — opens the Payluk inline widget (card / bank / USSD) */}
+                {/* Proceed to Pay — prompts for delivery choice, then payment */}
                 <Button
                   type="button"
-                  onClick={handleSubmit(onSdkSubmit)}
-                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
-                  className="w-full h-16 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-sm sm:text-base gap-2 sm:gap-3 px-3 transition-all active:scale-95 shadow-xl shadow-orange-200"
+                  onClick={handleSubmit(onProceed)}
+                  disabled={isLoading || !cart?.items?.length}
+                  className="w-full h-16 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-base gap-3 px-3 transition-all active:scale-95 shadow-xl shadow-orange-200"
                 >
                   {isLoading ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     <>
                       <Lock size={18} />
-                      Pay with SDK · {formattedPrice(orderTotal)}
-                    </>
-                  )}
-                </Button>
-
-                {/* Pay by bank transfer — shows an account number to pay into */}
-                <Button
-                  type="button"
-                  onClick={handleSubmit(onBankTransferSubmit)}
-                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
-                  className="mt-3 w-full h-14 bg-white hover:bg-orange-50 text-orange-600 border-2 border-orange-500 rounded-2xl font-black text-sm sm:text-base gap-2 sm:gap-3 px-3 transition-all active:scale-95"
-                >
-                  {isLoading ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    <>
-                      <Landmark size={18} />
-                      Pay by Bank Transfer · {formattedPrice(orderTotal)}
-                    </>
-                  )}
-                </Button>
-
-                {/* Pay with Escrow — settles straight from the Payluk wallet */}
-                <Button
-                  type="button"
-                  onClick={handleSubmit(onEscrowSubmit)}
-                  disabled={isLoading || isEscrowLoading || !cart?.items?.length}
-                  className="mt-3 w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-black text-sm sm:text-base gap-2 sm:gap-3 px-3 transition-all active:scale-95"
-                >
-                  {isEscrowLoading ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    <>
-                      <ShieldCheck size={18} className="text-orange-400" />
-                      Pay with Escrow · {formattedPrice(orderTotal)}
+                      Proceed to Pay
                     </>
                   )}
                 </Button>
                 <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
-                  Escrow settles from your wallet — top up with Bank Transfer if your balance is low.
+                  Choose delivery next, then pay from your wallet or by bank transfer.
                 </p>
 
                 <div className="mt-8 grid grid-cols-2 gap-4">
@@ -707,8 +520,19 @@ const CheckoutPage = () => {
 
       {showModal && <PaylukOnboardingModal onSuccess={onModalSuccess} onDismiss={onModalDismiss} />}
 
+      {showDeliveryModal && (
+        <DeliverySelectionModal
+          productTotal={totalPrice}
+          deliveryFee={deliveryFee}
+          deliveryLoading={deliveryLoading}
+          deliveryError={deliveryError}
+          onSelect={handleDeliveryChoice}
+          onClose={() => setShowDeliveryModal(false)}
+        />
+      )}
+
       {transfer && (
-        <CheckoutBankTransferModal
+        <CheckoutPaymentModal
           customerId={transfer.customerId}
           escrowId={transfer.escrowId}
           amount={transfer.amount}

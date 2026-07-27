@@ -14,10 +14,44 @@ import {
   PackageCheck,
   Check,
   Sparkles,
+  Shirt,
+  Smartphone,
+  Laptop,
+  House,
+  ShoppingBasket,
+  HelpCircle,
 } from 'lucide-react';
 
 const BUYER_POINTS = ['Every vendor is verified', 'Money secured until delivery', 'AI-powered product search'];
 const VENDOR_POINTS = ['Get paid on time', 'Reach buyers ready to buy', 'List your products in minutes'];
+
+const CATEGORIES = [
+  { icon: Shirt, name: 'Fashion' },
+  { icon: Smartphone, name: 'Phones' },
+  { icon: Laptop, name: 'Electronics' },
+  { icon: Sparkles, name: 'Beauty & Care' },
+  { icon: House, name: 'Home & Living' },
+  { icon: ShoppingBasket, name: 'Groceries' },
+];
+
+const FAQS = [
+  {
+    q: 'How does escrow protect me?',
+    a: "Your payment is held safely by URA and only released to the seller after you confirm your order arrived. If something goes wrong, your money is protected.",
+  },
+  {
+    q: 'Do I need to fund a wallet before buying?',
+    a: 'No. You can pay by bank transfer straight from any bank app at checkout, with no wallet top-up needed. Or pay from your URA wallet if you have a balance.',
+  },
+  {
+    q: 'How much does delivery cost?',
+    a: "Delivery is calculated live at checkout based on the seller's location and your destination. You can also choose pickup to skip delivery fees entirely.",
+  },
+  {
+    q: 'How do I start selling?',
+    a: 'Create an account, set up your business profile, and list your products. You can start receiving payments the same day.',
+  },
+];
 
 const FEATURES = [
   {
@@ -248,6 +282,79 @@ function Home() {
               </FadeItem>
             ))}
           </Stagger>
+        </div>
+      </section>
+
+      {/* Popular categories */}
+      <section className="bg-slate-50 py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <FadeIn className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-black uppercase tracking-widest text-amber-500">Explore</p>
+            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+              Shop by category
+            </h2>
+            <p className="mt-4 text-slate-600">
+              From fashion to phones, find trusted vendors across every category.
+            </p>
+          </FadeIn>
+
+          <Stagger className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {CATEGORIES.map(({ icon: Icon, name }) => (
+              <FadeItem key={name}>
+                <Link
+                  to="/products"
+                  className="group flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-white p-6 transition hover:-translate-y-1 hover:border-amber-200 hover:shadow-lg hover:shadow-slate-100"
+                >
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 transition group-hover:bg-amber-500 group-hover:text-white">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <span className="text-sm font-bold text-slate-700">{name}</span>
+                </Link>
+              </FadeItem>
+            ))}
+          </Stagger>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-20">
+        <div className="mx-auto max-w-3xl px-6">
+          <FadeIn className="text-center">
+            <p className="text-xs font-black uppercase tracking-widest text-amber-500">
+              Good to know
+            </p>
+            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+              Frequently asked questions
+            </h2>
+          </FadeIn>
+
+          <Stagger className="mt-12 space-y-4">
+            {FAQS.map(({ q, a }) => (
+              <FadeItem
+                key={q}
+                className="rounded-2xl border border-slate-100 bg-white p-6 transition hover:shadow-lg hover:shadow-slate-100"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-500">
+                    <HelpCircle className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900">{q}</h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{a}</p>
+                  </div>
+                </div>
+              </FadeItem>
+            ))}
+          </Stagger>
+
+          <FadeIn className="mt-10 text-center">
+            <p className="text-sm text-slate-500">
+              Still have questions?{' '}
+              <Link to="/contact" className="font-bold text-amber-600 hover:underline">
+                Contact us
+              </Link>
+            </p>
+          </FadeIn>
         </div>
       </section>
 

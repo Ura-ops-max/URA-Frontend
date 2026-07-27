@@ -25,7 +25,7 @@ const ProductDetailsPage = () => {
   const product = data?.product;
   const relatedProducts = data?.relatedProducts;
 
-  const { addItem } = useCartContext();
+  const { addItem, isUpdating } = useCartContext();
   const { isAuthenticated } = useAuthContext();
 
   const [isLiked, setIsLiked] = useState(false);
@@ -40,6 +40,18 @@ const ProductDetailsPage = () => {
     const prev = isLiked;
     setIsLiked(!prev);
     toggleLike(undefined, { onError: () => setIsLiked(prev) });
+  };
+
+  const handleAddToCart = () => {
+    if (!isAuthenticated) return navigate('/login');
+    if (!product?._id) return;
+    addItem(product._id, 1);
+  };
+
+  const handleViewStore = () => {
+    const businessId = product?.business?._id;
+    if (!businessId) return;
+    navigate(`/dashboard/profile/business/${businessId}`);
   };
 
   if (isLoading)
@@ -179,6 +191,8 @@ const ProductDetailsPage = () => {
             </div>
             <Button
               variant="outline"
+              onClick={handleViewStore}
+              disabled={!product.business?._id}
               className="rounded-xl border-orange-200 text-orange-600 font-bold text-xs"
             >
               View Store
@@ -188,12 +202,16 @@ const ProductDetailsPage = () => {
           {/* ACTION BUTTONS */}
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-100 lg:relative lg:bg-transparent lg:border-none lg:p-0 flex gap-4">
             <Button
-              onClick={() => addItem(product._id, 1)}
-              disabled={product.stock <= 0}
-              className="flex-1 h-16 bg-gray-900 hover:bg-black text-white rounded-2xl font-black text-lg gap-3 transition-all active:scale-95 shadow-xl"
+              onClick={handleAddToCart}
+              disabled={product.stock <= 0 || isUpdating}
+              className="flex-1 h-16 bg-gray-900 hover:bg-black text-white rounded-2xl font-black text-lg gap-3 transition-all active:scale-95 shadow-xl disabled:opacity-60"
             >
-              <ShoppingCart size={22} />
-              ADD TO CART
+              {isUpdating ? (
+                <Loader2 size={22} className="animate-spin" />
+              ) : (
+                <ShoppingCart size={22} />
+              )}
+              {product.stock <= 0 ? 'OUT OF STOCK' : isUpdating ? 'ADDING…' : 'ADD TO CART'}
             </Button>
           </div>
 

@@ -17,7 +17,7 @@ import {
   User,
   FileText,
 } from 'lucide-react';
-import { searchAPI } from '@/lib/api';
+import { searchAPI, fetchProductCategories } from '@/lib/api';
 
 interface SearchContainerProps {
   isSearchOpen: boolean;
@@ -217,6 +217,9 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [recentSearches, setRecentSearches] = useState<{ _id: string; query: string }[]>([]);
+  // Trending = real product categories that actually have items, so clicking one
+  // always returns results. Falls back to the static list if none load.
+  const [trending, setTrending] = useState<string[]>(TRENDING);
 
   const fetchRecentSearches = useCallback(async () => {
     try {
@@ -227,12 +230,24 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
     }
   }, []);
 
+  const fetchTrending = useCallback(async () => {
+    try {
+      const categories = await fetchProductCategories();
+      if (Array.isArray(categories) && categories.length) {
+        setTrending(categories.filter(Boolean).slice(0, 6));
+      }
+    } catch {
+      // keep the static fallback
+    }
+  }, []);
+
   useEffect(() => {
     if (isSearchOpen) {
       fetchRecentSearches();
+      fetchTrending();
       setTimeout(() => inputRef.current?.focus(), 80);
     }
-  }, [isSearchOpen, fetchRecentSearches]);
+  }, [isSearchOpen, fetchRecentSearches, fetchTrending]);
 
   const handleClose = useCallback(() => {
     setQuery('');
@@ -429,7 +444,7 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
                     Trending
                   </span>
                 </div>
-                {TRENDING.map((q) => (
+                {trending.map((q) => (
                   <button
                     key={q}
                     onClick={() => handleSuggestionClick(q)}

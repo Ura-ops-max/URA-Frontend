@@ -2,34 +2,80 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Favicons / app icons (desktop + mobile + home screen) -->
     <link rel="icon" type="image/png" href="/images/newlogo.png" />
-    <link rel="apple-touch-icon" href="/images/newlogo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>URA</title>
+    <link rel="shortcut icon" type="image/png" href="/images/newlogo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/newlogo.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#f97316" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="URA" />
+
+    <!-- Primary SEO -->
+    <title>URA — Buy &amp; Sell Securely Across Nigeria | Verified Vendors &amp; Escrow</title>
     <meta
       name="description"
-      content="URA — Nigeria's hybrid social-commerce platform. Discover businesses, shop products, and pay securely with escrow."
+      content="URA is Nigeria's trusted marketplace. Buy and sell across Nigeria with verified vendors, escrow-protected payments, AI-powered search, and fast delivery. Shop safely or start selling today."
     />
+    <meta
+      name="keywords"
+      content="Nigeria marketplace, buy and sell Nigeria, online shopping Nigeria, verified vendors, escrow payment Nigeria, sell online Nigeria, social commerce, secure marketplace"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="URA" />
+    <link rel="canonical" href="https://ura.com.ng/" />
 
     <!-- Open Graph (link previews for WhatsApp, Facebook, LinkedIn, etc.) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="URA" />
-    <meta property="og:title" content="URA — Social Commerce for Nigeria" />
+    <meta property="og:locale" content="en_NG" />
+    <meta property="og:title" content="URA — Buy &amp; Sell Securely Across Nigeria" />
     <meta
       property="og:description"
-      content="Discover businesses, shop products, and pay securely with escrow on URA."
+      content="Buy and sell across Nigeria with verified vendors, escrow-protected payments, and fast delivery."
     />
-    <meta property="og:url" content="https://ura.com.ng" />
-    <meta property="og:image" content="https://ura.com.ng/images/hero-image.jpg" />
+    <meta property="og:url" content="https://ura.com.ng/" />
+    <meta property="og:image" content="https://ura.com.ng/images/newurahero.jpeg" />
+    <meta property="og:image:alt" content="Buyers and vendors trading on URA" />
 
     <!-- Twitter / X card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="URA — Social Commerce for Nigeria" />
+    <meta name="twitter:title" content="URA — Buy &amp; Sell Securely Across Nigeria" />
     <meta
       name="twitter:description"
-      content="Discover businesses, shop products, and pay securely with escrow on URA."
+      content="Buy and sell across Nigeria with verified vendors, escrow-protected payments, and fast delivery."
     />
-    <meta name="twitter:image" content="https://ura.com.ng/images/hero-image.jpg" />
+    <meta name="twitter:image" content="https://ura.com.ng/images/newurahero.jpeg" />
+
+    <!-- Structured data: Organization + Website (helps Google understand the brand + sitelinks search) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "URA",
+            "url": "https://ura.com.ng/",
+            "logo": "https://ura.com.ng/images/newlogo.png",
+            "description": "Nigeria's trusted marketplace for buying and selling with verified vendors and escrow-protected payments."
+          },
+          {
+            "@type": "WebSite",
+            "name": "URA",
+            "url": "https://ura.com.ng/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://ura.com.ng/products?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]
+      }
+    </script>
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.payluk.ng https://js.paystack.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://paystack.com; font-src 'self' https://fonts.gstatic.com; frame-src 'self' https://checkout.payluk.ng https://js.paystack.co https://live.payluk.ng https://staging.live.payluk.ng; connect-src 'self' https://api.ura.com.ng wss://api.ura.com.ng https://*.amazonaws.com https://checkout.payluk.ng https://api.payluk.ng https://live.payluk.ng https://staging.api.payluk.ng https://staging.live.payluk.ng http://localhost:* ws://localhost:*; img-src 'self' data: blob: https:; media-src 'self' blob: https:;"

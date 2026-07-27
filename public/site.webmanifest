@@ -1,0 +1,25 @@
+{
+  "name": "URA — Buy & Sell Securely Across Nigeria",
+  "short_name": "URA",
+  "description": "Buy and sell across Nigeria with verified vendors, escrow-protected payments, and fast delivery.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "icons": [
+    {
+      "src": "/images/newlogo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/newlogo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

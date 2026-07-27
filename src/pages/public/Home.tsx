@@ -125,12 +125,17 @@ function Home() {
               </p>
 
               <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
-                <Button asChild size="lg" variant="brand" className="px-8 text-base">
+                <Button asChild size="lg" variant="brand" className="w-full sm:w-auto px-8 text-base">
                   <Link to="/auth/login">
                     <span className="text-nowrap">Find a Vendor You Can Trust</span>
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="brandSecondary" className="px-8 text-base">
+                <Button
+                  asChild
+                  size="lg"
+                  variant="brandSecondary"
+                  className="w-full sm:w-auto px-8 text-base"
+                >
                   <Link to="/auth/register">
                     <span className="text-nowrap">Start Selling on URA</span>
                   </Link>
@@ -191,7 +196,7 @@ function Home() {
                 </li>
               ))}
             </ul>
-            <Button asChild size="lg" variant="brand" className="mt-7 self-start px-8 text-base">
+            <Button asChild size="lg" variant="brand" className="mt-7 w-full sm:w-auto sm:self-start px-8 text-base">
               <Link to="/auth/login">
                 <span className="text-nowrap">Find a Vendor You Can Trust</span>
               </Link>
@@ -220,7 +225,7 @@ function Home() {
               asChild
               size="lg"
               variant="brandSecondary"
-              className="mt-7 self-start px-8 text-base"
+              className="mt-7 w-full sm:w-auto sm:self-start px-8 text-base"
             >
               <Link to="/auth/register">
                 <span className="text-nowrap">Start Selling on URA</span>
@@ -303,7 +308,7 @@ function Home() {
               <FadeItem key={name}>
                 <Link
                   to="/products"
-                  className="group flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-white p-6 transition hover:-translate-y-1 hover:border-amber-200 hover:shadow-lg hover:shadow-slate-100"
+                  className="group flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 sm:p-6 transition hover:-translate-y-1 hover:border-amber-200 hover:shadow-lg hover:shadow-slate-100"
                 >
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 transition group-hover:bg-amber-500 group-hover:text-white">
                     <Icon className="h-6 w-6" />
@@ -371,14 +376,14 @@ function Home() {
             Join thousands of buyers and sellers already trading securely on URA.
           </p>
           <div className="relative mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button asChild size="lg" className="bg-white px-8 text-base font-bold text-amber-600 hover:bg-white/90">
+            <Button asChild size="lg" className="w-full sm:w-auto bg-white px-8 text-base font-bold text-amber-600 hover:bg-white/90">
               <Link to="/auth/register">Get Started Free</Link>
             </Button>
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="border-white/60 bg-transparent px-8 text-base font-bold text-white hover:bg-white/10"
+              className="w-full sm:w-auto border-white/60 bg-transparent px-8 text-base font-bold text-white hover:bg-white/10"
             >
               <Link to="/about">Learn More</Link>
             </Button>

@@ -97,7 +97,7 @@ export default function DeliverySelectionModal({
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-black text-gray-900">Without Delivery</p>
-              <p className="text-xs text-gray-500 mt-0.5">Pickup / arrange yourself — no delivery fee</p>
+              <p className="text-xs text-gray-500 mt-0.5">Pickup or arrange delivery yourself, no delivery fee</p>
             </div>
             <div className="text-right">
               <p className="text-base font-black text-gray-900">{formatNaira(productTotal)}</p>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Search, BadgeCheck, Store, ShoppingBag } from 'lucide-react';
+import { useSeo } from '@/hooks/useSeo';
 import { getPublicProductsFn } from '@/lib/api';
 import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
 
@@ -22,6 +23,13 @@ const naira = (n?: number) =>
   typeof n === 'number' ? `₦${n.toLocaleString()}` : '—';
 
 const ProductsPage = () => {
+  useSeo({
+    title: 'Shop Products',
+    description:
+      'Browse and buy products from verified vendors across Nigeria. Escrow-protected payments, AI-powered search, and fast delivery on URA.',
+    url: 'https://ura.com.ng/products',
+  });
+
   const [query, setQuery] = useState('');
 
   const { data, isLoading, isError } = useQuery({

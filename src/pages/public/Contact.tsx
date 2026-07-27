@@ -2,11 +2,19 @@ import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, Clock, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useSeo } from '@/hooks/useSeo';
 import { FadeIn } from '@/components/shared/Motion';
 
 const SUPPORT_EMAIL = 'info@ura.com.ng';
 
 const ContactPage = () => {
+  useSeo({
+    title: 'Contact URA',
+    description:
+      "Get in touch with the URA team. We're here to help buyers and vendors across Nigeria with orders, payments, and selling.",
+    url: 'https://ura.com.ng/contact',
+  });
+
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

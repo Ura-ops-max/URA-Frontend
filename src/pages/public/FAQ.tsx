@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, HelpCircle, MessageCircle, Search } from 'lucide-react';
 import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
+import { useSeo } from '@/hooks/useSeo';
 
 const FAQS = [
   {
@@ -73,6 +74,13 @@ const FAQItem = ({
 );
 
 const FAQ = () => {
+  useSeo({
+    title: 'Frequently Asked Questions',
+    description:
+      'Answers to common questions about buying, selling, escrow-protected payments, and delivery on URA — Nigeria’s trusted marketplace.',
+    url: 'https://ura.com.ng/faq',
+  });
+
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const [query, setQuery] = useState('');
 

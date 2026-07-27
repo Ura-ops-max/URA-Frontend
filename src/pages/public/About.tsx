@@ -2,8 +2,16 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Users, ShoppingBag, TrendingUp, ShieldCheck } from 'lucide-react';
 import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
+import { useSeo } from '@/hooks/useSeo';
 
 const AboutPage = () => {
+  useSeo({
+    title: 'About URA',
+    description:
+      "Learn about URA — Nigeria's trusted marketplace connecting buyers with verified vendors through escrow-protected payments and fast delivery.",
+    url: 'https://ura.com.ng/about',
+  });
+
   return (
     <main className="overflow-hidden bg-white dark:bg-slate-950">
       {/* --- Hero Section --- */}

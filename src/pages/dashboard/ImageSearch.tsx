@@ -9,11 +9,8 @@ import {
   Building2,
   Package,
 } from 'lucide-react';
-import { aiSearchService, flattenResults, productImageSearch } from '@/lib/ai-search.service';
-import type {
-  AISearchResult,
-  AISearchResponse,
-} from '@/lib/ai-search.service';
+import { productAndBusinessTextSearch, productImageSearch } from '@/lib/ai-search.service';
+import type { AISearchResult } from '@/lib/ai-search.service';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -85,10 +82,12 @@ const ResultCard = ({ result }: { result: AISearchResult }) => {
               {result.location}
             </span>
           )}
-          {/* Relevance score pill */}
-          <span className="ml-auto text-[10px] text-gray-300">
-            {Math.round(result.score * 100)}% match
-          </span>
+          {/* Relevance score pill — only when we have a real similarity score */}
+          {result.score > 0 && (
+            <span className="ml-auto text-[10px] text-gray-300">
+              {Math.round(result.score * 100)}% match
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -178,18 +177,13 @@ export const ImageSearch = () => {
       setState((s) => ({ ...s, isLoading: true, error: null }));
 
       try {
-        const res: AISearchResponse = await aiSearchService.textSearch({
-          q: query,
-          ...(state.useGeo && state.userCoords
-            ? { lat: state.userCoords.lat, lng: state.userCoords.lng, radius_km: 10 }
-            : {}),
-        });
+        const results = await productAndBusinessTextSearch(query);
 
         setState((s) => ({
           ...s,
-          results: flattenResults(res.results),
-          total: res.total,
-          geoActive: res.geo_active,
+          results,
+          total: results.length,
+          geoActive: false,
           hasSearched: true,
           isLoading: false,
         }));
@@ -202,7 +196,7 @@ export const ImageSearch = () => {
         }));
       }
     },
-    [state.useGeo, state.userCoords],
+    [],
   );
 
   // Debounced text search

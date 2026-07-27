@@ -130,6 +130,49 @@ export async function productImageSearch(file: File): Promise<AISearchResult[]> 
   }));
 }
 
+// ─── Product + business text search (our own backend) ───────────────────────
+// Uses the reliable in-house /search endpoint (regex over businesses & products)
+// instead of the external AI Lambda. Returns results in AISearchResult shape.
+export async function productAndBusinessTextSearch(query: string): Promise<AISearchResult[]> {
+  const { data } = await API.get('/search', { params: { q: query, type: 'all' } });
+  const root = data?.data ?? {};
+  const businesses = (root.businesses ?? []) as Record<string, any>[];
+  const products = (root.products ?? []) as Record<string, any>[];
+
+  const bizResults: AISearchResult[] = businesses.map((b) => ({
+    id: b._id,
+    type: 'business' as const,
+    name: b.businessName ?? 'Business',
+    description: b.about ?? b.tagline ?? '',
+    subtitle: b.category ?? '',
+    image: b.businessLogo ?? null,
+    price: null,
+    rating: typeof b.averageRating === 'number' ? b.averageRating : null,
+    location: b.address?.fullAddress ?? b.address?.city ?? null,
+    inStock: null,
+    score: 0,
+    raw: b,
+  }));
+
+  const prodResults: AISearchResult[] = products.map((p) => ({
+    id: p._id,
+    type: 'product' as const,
+    name: p.name ?? 'Product',
+    description: p.description ?? '',
+    subtitle: p.category ?? (p.business?.businessName ? `by ${p.business.businessName}` : ''),
+    image: Array.isArray(p.media) ? (p.media[0] ?? null) : null,
+    price: typeof p.price === 'number' ? p.price : null,
+    rating: typeof p.averageRating === 'number' ? p.averageRating : null,
+    location: null,
+    inStock: typeof p.stock === 'number' ? p.stock > 0 : null,
+    score: 0,
+    raw: p,
+  }));
+
+  // Products first (usually what people search for), then businesses.
+  return [...prodResults, ...bizResults];
+}
+
 // ─── flatten ─────────────────────────────────────────────────────────────────
 export function flattenResults(results: Record<string, unknown>): AISearchResult[] {
   const flat: AISearchResult[] = [];

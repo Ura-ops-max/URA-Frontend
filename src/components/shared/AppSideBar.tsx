@@ -103,7 +103,7 @@ const AppSideBar = () => {
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
 
-                  {/* Dropdown Menu matches the Urbanist Typography */}
+                  {/* Dropdown Menu matches the Geist Typography */}
                   <DropdownMenuContent
                     className="w-60 mb-4 rounded-3xl p-2 shadow-2xl border-white/20 backdrop-blur-2xl bg-white/95"
                     side="right"

@@ -9,7 +9,7 @@ const AboutPage = () => {
     title: 'About URA',
     description:
       "Learn about URA — Nigeria's trusted marketplace connecting buyers with verified vendors through escrow-protected payments and fast delivery.",
-    url: 'https://ura.com.ng/about',
+    url: 'https://www.ura.com.ng/about',
   });
 
   return (

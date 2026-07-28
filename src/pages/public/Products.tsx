@@ -27,7 +27,7 @@ const ProductsPage = () => {
     title: 'Shop Products',
     description:
       'Browse and buy products from verified vendors across Nigeria. Escrow-protected payments, AI-powered search, and fast delivery on URA.',
-    url: 'https://ura.com.ng/products',
+    url: 'https://www.ura.com.ng/products',
   });
 
   const [query, setQuery] = useState('');

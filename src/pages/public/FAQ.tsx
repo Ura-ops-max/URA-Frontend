@@ -78,7 +78,7 @@ const FAQ = () => {
     title: 'Frequently Asked Questions',
     description:
       'Answers to common questions about buying, selling, escrow-protected payments, and delivery on URA — Nigeria’s trusted marketplace.',
-    url: 'https://ura.com.ng/faq',
+    url: 'https://www.ura.com.ng/faq',
   });
 
   const [openIndex, setOpenIndex] = useState<number | null>(0);

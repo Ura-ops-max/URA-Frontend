@@ -11,7 +11,7 @@ interface SeoOptions {
   type?: 'website' | 'product' | 'article' | 'profile';
 }
 
-const SITE = 'https://ura.com.ng';
+const SITE = 'https://www.ura.com.ng';
 const DEFAULT_IMAGE = `${SITE}/images/newurahero.jpeg`;
 
 function upsertMeta(attr: 'name' | 'property', key: string, content: string) {

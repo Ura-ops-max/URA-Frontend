@@ -12,7 +12,7 @@ const ContactPage = () => {
     title: 'Contact URA',
     description:
       "Get in touch with the URA team. We're here to help buyers and vendors across Nigeria with orders, payments, and selling.",
-    url: 'https://ura.com.ng/contact',
+    url: 'https://www.ura.com.ng/contact',
   });
 
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });

@@ -7,7 +7,7 @@ import { useSeo } from '@/hooks/useSeo';
 const FAQS = [
   {
     q: 'What is URA?',
-    a: 'URA is a marketplace where you can discover businesses, buy and sell products, and pay securely — with buyer protection through escrow.',
+    a: 'URA is a marketplace where you can discover businesses, buy and sell products, and pay securely with buyer protection through escrow.',
   },
   {
     q: 'How do I create an account?',
@@ -27,7 +27,7 @@ const FAQS = [
   },
   {
     q: 'How do I fund my wallet?',
-    a: 'Open your Wallet and click "Fund Wallet". A one-time virtual bank account is generated for you — transfer any amount and your balance updates once the transfer is confirmed.',
+    a: 'Open your Wallet and click "Fund Wallet". A one-time virtual bank account is generated for you, transfer any amount and your balance updates once the transfer is confirmed.',
   },
   {
     q: 'Is my personal information safe?',
@@ -77,7 +77,7 @@ const FAQ = () => {
   useSeo({
     title: 'Frequently Asked Questions',
     description:
-      'Answers to common questions about buying, selling, escrow-protected payments, and delivery on URA — Nigeria’s trusted marketplace.',
+      'Answers to common questions about buying, selling, escrow-protected payments, and delivery on URA, Nigeria’s trusted marketplace.',
     url: 'https://www.ura.com.ng/faq',
   });
 

@@ -31,6 +31,7 @@ const ProductsPage = () => {
   });
 
   const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('All');
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['public-products'],
@@ -39,14 +40,22 @@ const ProductsPage = () => {
   });
 
   const products = (data as CatalogProduct[] | undefined) ?? [];
+
+  // Build the category list from the products actually available.
+  const categories = [
+    'All',
+    ...Array.from(new Set(products.map((p) => p.category).filter(Boolean) as string[])).sort(),
+  ];
+
   const filtered = products.filter((p) => {
     const q = query.toLowerCase();
-    return (
+    const matchesQuery =
       !q ||
       p.name?.toLowerCase().includes(q) ||
       p.category?.toLowerCase().includes(q) ||
-      p.displayName?.toLowerCase().includes(q)
-    );
+      p.displayName?.toLowerCase().includes(q);
+    const matchesCategory = category === 'All' || p.category === category;
+    return matchesQuery && matchesCategory;
   });
 
   return (
@@ -78,6 +87,25 @@ const ProductsPage = () => {
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-16">
+        {/* Category filter */}
+        {!isLoading && !isError && products.length > 0 && (
+          <div className="mb-10 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategory(cat)}
+                className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold transition ${
+                  category === cat
+                    ? 'bg-amber-500 text-white shadow-sm shadow-amber-200'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:border-amber-300 hover:text-amber-600'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
@@ -86,7 +114,11 @@ const ProductsPage = () => {
           <p className="py-20 text-center text-slate-400">Couldn&apos;t load products. Please try again.</p>
         ) : filtered.length === 0 ? (
           <p className="py-20 text-center text-slate-400">
-            {query ? `No products match “${query}”.` : 'No products listed yet.'}
+            {query
+              ? `No products match “${query}”.`
+              : category !== 'All'
+                ? `No products in ${category} yet.`
+                : 'No products listed yet.'}
           </p>
         ) : (
           <Stagger className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">

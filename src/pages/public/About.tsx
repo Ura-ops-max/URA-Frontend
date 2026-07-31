@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Users, ShoppingBag, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Users, ShoppingBag, TrendingUp, ShieldCheck, Rocket, Heart } from 'lucide-react';
 import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
 import { useSeo } from '@/hooks/useSeo';
 
@@ -66,8 +66,40 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* --- Core Pillars --- */}
+      {/* --- Our Story --- */}
       <section className="py-24">
+        <div className="mx-auto max-w-3xl px-6">
+          <FadeIn className="text-center">
+            <span className="text-xs font-black uppercase tracking-widest text-amber-500">
+              Our Story
+            </span>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
+              Born in Nigeria&apos;s markets, built for the internet age
+            </h2>
+          </FadeIn>
+          <FadeIn className="mt-8 space-y-5 text-left text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+            <p>
+              URA started with a simple observation: in Nigeria, commerce has always been social.
+              From bustling markets to WhatsApp groups and Instagram DMs, we buy and sell through
+              conversation, referral, and trust. But moving that trust online has never been easy —
+              buyers worry about scams, and honest sellers struggle to prove they&apos;re real.
+            </p>
+            <p>
+              We built URA to fix that. By combining a social feed with a secure marketplace, we let
+              vendors showcase their products, build a following, and get paid safely — while buyers
+              discover local businesses and pay with confidence, knowing their money is held in
+              escrow until their order arrives.
+            </p>
+            <p>
+              Today, URA is home to vendors and buyers across Nigeria, from fashion and gadgets to
+              beauty and everyday essentials. And we&apos;re only just getting started.
+            </p>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* --- Core Pillars --- */}
+      <section className="bg-slate-50 py-24 dark:bg-slate-900">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold">
@@ -104,6 +136,49 @@ const AboutPage = () => {
                 <div className="mb-4">{pillar.icon}</div>
                 <h3 className="font-bold mb-2">{pillar.title}</h3>
                 <p className="text-sm text-slate-500">{pillar.desc}</p>
+              </FadeItem>
+            ))}
+          </Stagger>
+        </div>
+      </section>
+
+      {/* --- What we stand for --- */}
+      <section className="py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <FadeIn className="mx-auto max-w-2xl text-center">
+            <span className="text-xs font-black uppercase tracking-widest text-amber-500">
+              What we stand for
+            </span>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">Our values</h2>
+          </FadeIn>
+
+          <Stagger className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-3">
+            {[
+              {
+                icon: <ShieldCheck className="h-6 w-6 text-blue-500" />,
+                title: 'Trust & Safety',
+                desc: 'Every payment is protected by escrow and every vendor can be verified. Your money and your reputation are safe with us.',
+              },
+              {
+                icon: <Heart className="h-6 w-6 text-rose-500" />,
+                title: 'Community First',
+                desc: 'Commerce is better together. We help vendors build a loyal following and buyers find people they can rely on.',
+              },
+              {
+                icon: <Rocket className="h-6 w-6 text-amber-500" />,
+                title: 'Empowerment',
+                desc: 'We give every business — from a street shop to a national brand — the tools to reach customers, get paid, and grow.',
+              },
+            ].map((v, i) => (
+              <FadeItem
+                key={i}
+                className="rounded-3xl border border-slate-100 bg-white p-8 transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800">
+                  {v.icon}
+                </div>
+                <h3 className="mt-5 text-lg font-bold">{v.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-500">{v.desc}</p>
               </FadeItem>
             ))}
           </Stagger>

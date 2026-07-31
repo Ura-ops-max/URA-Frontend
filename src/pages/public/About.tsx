@@ -81,12 +81,12 @@ const AboutPage = () => {
             <p>
               URA started with a simple observation: in Nigeria, commerce has always been social.
               From bustling markets to WhatsApp groups and Instagram DMs, we buy and sell through
-              conversation, referral, and trust. But moving that trust online has never been easy —
+              conversation, referral, and trust. But moving that trust online has never been easy,
               buyers worry about scams, and honest sellers struggle to prove they&apos;re real.
             </p>
             <p>
               We built URA to fix that. By combining a social feed with a secure marketplace, we let
-              vendors showcase their products, build a following, and get paid safely — while buyers
+              vendors showcase their products, build a following, and get paid safely while buyers
               discover local businesses and pay with confidence, knowing their money is held in
               escrow until their order arrives.
             </p>
@@ -167,7 +167,7 @@ const AboutPage = () => {
               {
                 icon: <Rocket className="h-6 w-6 text-amber-500" />,
                 title: 'Empowerment',
-                desc: 'We give every business — from a street shop to a national brand — the tools to reach customers, get paid, and grow.',
+                desc: 'We give every business from a street shop to a national brand, the tools to reach customers, get paid, and grow.',
               },
             ].map((v, i) => (
               <FadeItem

@@ -31,10 +31,6 @@ const ProfilePage: React.FC = () => {
   const { userId, businessId } = useParams<{ userId?: string; businessId?: string }>();
   const { user: currentUser, related } = useAuthContext();
 
-  if (!currentUser) {
-    return <ProfileSkeleton />; // Or return null
-  }
-
   const isBusinessProfile = location.pathname.includes('/business/');
   const targetId = businessId || userId;
 
@@ -78,6 +74,12 @@ const ProfilePage: React.FC = () => {
       setActiveTab(TABS.POSTS); // Businesses default to Posts
     }
   }, [isBusinessProfile]);
+
+  // All hooks are declared above, so it's safe to bail out here (keeps hook
+  // order stable across renders — React's rules-of-hooks).
+  if (!currentUser) {
+    return <ProfileSkeleton />;
+  }
 
   const renderTabContent = () => {
     if (!userProfile) return null;

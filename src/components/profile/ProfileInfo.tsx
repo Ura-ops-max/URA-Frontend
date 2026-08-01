@@ -112,7 +112,7 @@ const ProfileInfo: React.FC<Props> = ({ user, business, related, isMe }) => {
     if (!targetId || !Me?._id) return;
     // Prepare the payload to match your backend's req.body
     const payload = {
-      senderId: Me?._id!,
+      senderId: Me?._id ?? '',
       senderModel: 'User',
       receiverId: targetId,
       receiverModel: (isBusinessRoute ? 'Business' : 'User') as 'User' | 'Business',

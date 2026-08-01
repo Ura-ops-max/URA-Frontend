@@ -26,8 +26,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [activeProfileId]);
 
-  if (!activeProfileId) return;
-
   // Calculate total unread count across all chats
   const totalUnreadCount = conversations.reduce((acc, chat) => {
     return acc + (chat.unreadCount?.[activeProfileId!] || 0);

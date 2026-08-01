@@ -251,7 +251,7 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
         <div className="lg:rounded-2xl overflow-hidden relative shadow-inner isolate">
           {' '}
           {/* "isolate" is the magic CSS property here */}
-          <MediaCarousel media={product?.media!} />
+          <MediaCarousel media={product?.media ?? []} />
           <div className="absolute top-4 left-4 z-[35] bg-orange-600/95 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase flex items-center gap-1 shadow-lg border border-white/10">
             <ShoppingBag size={12} />
             <span>Marketplace Item</span>

@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   ArrowLeft,
   Loader2,
+  Play,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToggleLike } from '@/hooks/api/use-feed';
@@ -17,6 +18,11 @@ import { useSingleProduct } from '@/hooks/api/use-product';
 import { useCartContext } from '@/context/cart-provider';
 import { useAuthContext } from '@/context/auth-provider';
 import { Button } from '@/components/ui/button';
+import InstallAppButton from '@/components/shared/InstallAppButton';
+import { VideoPlayer } from '@/components/feed/VideoPlayer';
+
+/** True when a media URL points to a video file rather than an image. */
+const isVideoUrl = (u?: string) => !!u && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(u);
 
 const ProductDetailsPage = () => {
   const { productId } = useParams();
@@ -29,6 +35,7 @@ const ProductDetailsPage = () => {
   const { isAuthenticated } = useAuthContext();
 
   const [isLiked, setIsLiked] = useState(false);
+  const [activeMedia, setActiveMedia] = useState(0);
   const { mutate: toggleLike } = useToggleLike(productId || '', 'product');
 
   useEffect(() => {
@@ -97,38 +104,64 @@ const ProductDetailsPage = () => {
         >
           <ArrowLeft size={24} />
         </button>
-        <button
-          onClick={handleLikeClick}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <Heart
-            size={24}
-            className={cn(isLiked ? 'fill-red-500 text-red-500' : 'text-gray-900')}
-          />
-        </button>
+        <div className="flex items-center gap-2">
+          <InstallAppButton className="hidden sm:inline-flex" />
+          <button
+            onClick={handleLikeClick}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <Heart
+              size={24}
+              className={cn(isLiked ? 'fill-red-500 text-red-500' : 'text-gray-900')}
+            />
+          </button>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:gap-12 lg:p-12">
         {/* 2. MEDIA SECTION */}
         <div className="w-full lg:w-1/2 lg:sticky lg:top-24 h-fit">
           <div className="aspect-[4/5] bg-gray-50 overflow-hidden lg:rounded-3xl">
-            <img
-              src={product.media?.[0]}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+            {isVideoUrl(product.media?.[activeMedia]) ? (
+              <VideoPlayer
+                key={product.media[activeMedia]}
+                url={product.media[activeMedia]}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <img
+                src={product.media?.[activeMedia] ?? product.media?.[0]}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
-          {/* Gallery Thumbnails (Optional later) */}
-          <div className="flex gap-2 p-4 lg:px-0">
-            {product.media?.map((img: string, i: number) => (
-              <div
-                key={i}
-                className="w-20 h-20 rounded-xl overflow-hidden border border-gray-100 bg-gray-50"
-              >
-                <img src={img} className="w-full h-full object-cover" />
-              </div>
-            ))}
-          </div>
+          {/* Gallery thumbnails — click to switch; videos show a play badge */}
+          {product.media?.length > 1 && (
+            <div className="flex gap-2 p-4 lg:px-0 overflow-x-auto">
+              {product.media?.map((m: string, i: number) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveMedia(i)}
+                  className={cn(
+                    'relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border bg-gray-50 transition',
+                    activeMedia === i ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-100',
+                  )}
+                >
+                  {isVideoUrl(m) ? (
+                    <>
+                      <video src={`${m}#t=0.1`} preload="metadata" className="w-full h-full object-cover" />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <Play size={16} className="text-white fill-white" />
+                      </span>
+                    </>
+                  ) : (
+                    <img src={m} className="w-full h-full object-cover" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* 3. DETAILS SECTION */}

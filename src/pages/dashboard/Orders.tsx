@@ -12,6 +12,7 @@ import {
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ProductThumb } from '@/components/product/shared/ProductThumb';
 
 const STATUS_FILTERS = [
   { label: 'All', value: 'all' },
@@ -152,7 +153,9 @@ const OrdersPage = () => {
                           key={idx}
                           className="inline-block h-14 w-14 rounded-xl border-2 border-white bg-gray-100 overflow-hidden shadow-sm"
                         >
-                          <img src={item.image} alt="" className="h-full w-full object-cover" />
+                          {item.image ? (
+                            <ProductThumb url={item.image} alt="" />
+                          ) : null}
                         </div>
                       ))}
                       {order.items.length > 3 && (

@@ -18,8 +18,6 @@ export const VideoPlayer = ({ url, className }: { url: string; className: string
     }
   };
 
-  console.log(isPlaying);
-
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     const now = Date.now();
     const DOUBLE_CLICK_DELAY = 300;
@@ -66,13 +64,26 @@ export const VideoPlayer = ({ url, className }: { url: string; className: string
     >
       <video
         ref={videoRef}
-        src={url}
+        // Appending "#t=0.1" makes the browser load and paint the frame at 0.1s
+        // as a freeze-frame still, so the video never shows a black box when it
+        // isn't playing.
+        src={`${url}#t=0.1`}
         className={className}
         loop
         muted={isMuted}
         playsInline
+        preload="metadata"
         onTimeUpdate={handleTimeUpdate}
       />
+
+      {/* Play affordance — shown while paused so it reads as a video, not an image */}
+      {!isPlaying && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+          <div className="bg-black/40 backdrop-blur-sm p-4 rounded-full">
+            <Play className="text-white fill-white" size={28} />
+          </div>
+        </div>
+      )}
 
       {/* Feedback Icons */}
       {feedback && (

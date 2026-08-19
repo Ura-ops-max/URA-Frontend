@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Search, BadgeCheck, Store, ShoppingBag } from 'lucide-react';
 import { useSeo } from '@/hooks/useSeo';
+import { ProductThumb } from '@/components/product/shared/ProductThumb';
 import { getPublicProductsFn } from '@/lib/api';
 import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
 
@@ -130,11 +131,10 @@ const ProductsPage = () => {
                 >
                   <div className="aspect-square overflow-hidden bg-slate-100">
                     {p.media?.[0] ? (
-                      <img
-                        src={p.media[0]}
+                      <ProductThumb
+                        url={p.media[0]}
                         alt={p.name}
-                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                        onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}
+                        imgClassName="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-slate-300">

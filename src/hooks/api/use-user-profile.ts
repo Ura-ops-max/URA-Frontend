@@ -47,6 +47,10 @@ export const useUpdateProfile = () => {
       // 'authUser' backs the app-wide user object (and checkout's auto-fill),
       // so it must be refreshed or saved details won't show up anywhere.
       queryClient.invalidateQueries({ queryKey: ['authUser'] });
+      // The profile PAGE reads from ['profile', targetId, ...]. Without this,
+      // the owner keeps seeing their old picture while other devices (fresh
+      // fetch) see the new one.
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Update failed');
@@ -65,6 +69,9 @@ export const useUpdateBusiness = () => {
       // Refresh the auth payload so the saved business address (state/city)
       // is available to checkout for delivery pricing.
       queryClient.invalidateQueries({ queryKey: ['authUser'] });
+      // Refresh the profile page query so the owner immediately sees their
+      // updated logo/details, not just other viewers.
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Business update failed');

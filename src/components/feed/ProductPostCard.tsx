@@ -108,12 +108,16 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
       onClick: () => console.log('Follow logic'),
     },
     {
-      label: 'Copy Link',
+      label: 'Copy Store Link',
       icon: Link2,
       show: true,
       onClick: () => {
-        navigator.clipboard.writeText(`${window.location.origin}/posts/${post._id}`);
-        toast.success('Link copied!');
+        const storeId = post.authorId || (post.product?.business as unknown as string);
+        const url = storeId
+          ? `${window.location.origin}/dashboard/profile/business/${storeId}`
+          : `${window.location.origin}/posts/${post._id}`;
+        navigator.clipboard.writeText(url);
+        toast.success(storeId ? 'Store link copied!' : 'Link copied!');
       },
     },
     {
@@ -320,6 +324,7 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
         initialComments={post.commentsCount || 0}
         isLiked={post.isLiked}
         isBookmarked={post.isBookmarked}
+        storeId={(post.authorId || (post.product?.business as unknown as string)) ?? undefined}
       />
 
       {/* Product Details Modal Integration */}

@@ -47,15 +47,24 @@ export default function ProductsFeed({
   const [showScrollTop, setShowScrollTop] = useState(false);
   const { ref: bottomRef, inView: isBottomInView } = useInView();
 
-  // Handle Scroll tracking for the floating button
+  // Scroll tracking: show the floating button AND load older products near the
+  // bottom. The feed scrolls inside #main-feed-container, so a viewport-based
+  // observer alone never fires — without this, only the newest page loads and
+  // older products never appear in the feed (they'd only turn up via search).
   useEffect(() => {
     const container = document.getElementById('main-feed-container');
+    if (!container) return;
     const handleScroll = () => {
-      if (container) setShowScrollTop(container.scrollTop > 400);
+      setShowScrollTop(container.scrollTop > 400);
+      const nearBottom =
+        container.scrollTop + container.clientHeight >= container.scrollHeight - 800;
+      if (nearBottom && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
     };
-    if (container) container.addEventListener('scroll', handleScroll);
-    return () => container?.removeEventListener('scroll', handleScroll);
-  }, []);
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Infinite Scroll Logic
   useEffect(() => {

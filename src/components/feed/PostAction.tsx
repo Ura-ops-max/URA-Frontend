@@ -15,6 +15,8 @@ interface PostActionsProps {
   isBookmarked?: boolean;
   onRequireAuth?: () => void;
   isAuthenticated: boolean;
+  /** Seller's store (business) id — when set, Share links to the store page. */
+  storeId?: string;
 }
 
 export const PostActions = ({
@@ -25,6 +27,7 @@ export const PostActions = ({
   isLiked = false,
   isBookmarked = false,
   isAuthenticated,
+  storeId,
 }: PostActionsProps) => {
   const [localIsLiked, setLocalIsLiked] = useState(isLiked);
   const [localLikesCount, setLocalLikesCount] = useState(initialLikes);
@@ -99,10 +102,14 @@ export const PostActions = ({
   };
 
   const handleShare = async () => {
-    // Share remains PUBLIC - no auth check needed
+    // Share remains PUBLIC - no auth check needed. When we know the seller's
+    // store, share a link to the store so people land on the shop (and all its
+    // products), not just this single post.
     const shareData = {
-      title: 'Check out this product!',
-      url: `${window.location.origin}/posts/${postId}`,
+      title: storeId ? 'Check out this store on URA!' : 'Check out this product!',
+      url: storeId
+        ? `${window.location.origin}/dashboard/profile/business/${storeId}`
+        : `${window.location.origin}/posts/${postId}`,
     };
     try {
       if (navigator.share) await navigator.share(shareData);

@@ -19,6 +19,8 @@ interface CheckoutPaymentModalProps {
   escrowId: string;
   /** Payluk payment token — powers the inline (popup) card/bank checkout. */
   paymentToken?: string;
+  /** Which flow the buyer already chose: 'normal' (popup) or 'escrow' (wallet/transfer). */
+  mode: 'normal' | 'escrow';
   /** Finalised total the buyer must pay (product + delivery + Payluk fee). */
   amount: number;
   /** Our order id — used to build a unique payment reference. */
@@ -43,6 +45,7 @@ export default function CheckoutPaymentModal({
   customerId,
   escrowId,
   paymentToken,
+  mode,
   amount,
   orderId,
   orderNumber,
@@ -57,7 +60,6 @@ export default function CheckoutPaymentModal({
   // Which payment path the buyer picked after "Proceed to Pay": the choice
   // screen, or the escrow (wallet / bank transfer) flow. "Normal" opens the
   // Payluk popup directly, so it has no sub-screen here.
-  const [method, setMethod] = useState<'choose' | 'escrow'>('choose');
   // While the Payluk popup is open we hide our own overlay so it isn't covered.
   const [popupActive, setPopupActive] = useState(false);
   const { pay } = useEscrowCheckout();
@@ -279,58 +281,29 @@ export default function CheckoutPaymentModal({
             </div>
           )}
 
-          {(phase === 'ready' || phase === 'settling') && method === 'choose' && (
-            <>
-              <p className="text-sm text-gray-500 mb-4">Choose how you'd like to pay:</p>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                {/* Normal payment — Payluk popup (card / bank / USSD) */}
-                {paymentToken && (
-                  <button
-                    onClick={() => void payWithPopup()}
-                    disabled={busy}
-                    className="group flex flex-col gap-3 rounded-2xl border-2 border-gray-100 p-5 text-left transition hover:border-gray-900 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-900 text-white">
-                      <CreditCard className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="font-black text-gray-900">Normal Payment</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Instant checkout — card, bank transfer or USSD
-                      </p>
-                    </div>
-                  </button>
-                )}
-
-                {/* Escrow — buyer protection, pay from wallet or bank transfer */}
-                <button
-                  onClick={() => setMethod('escrow')}
-                  className="group flex flex-col gap-3 rounded-2xl border-2 border-gray-100 p-5 text-left transition hover:border-orange-500 hover:bg-orange-50/40"
-                >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-500">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-black text-gray-900">Pay with Escrow</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Protected — held until you confirm delivery
-                    </p>
-                  </div>
-                </button>
-              </div>
-            </>
+          {/* ── Normal payment: instant Payluk popup, no add-on fee ──── */}
+          {(phase === 'ready' || phase === 'settling') && mode === 'normal' && (
+            <div className="py-2">
+              <p className="text-sm text-gray-500 mb-5 leading-relaxed">
+                Instant checkout — pay by card, bank transfer or USSD. No extra fee.
+              </p>
+              <Button
+                onClick={() => void payWithPopup()}
+                disabled={busy}
+                className="w-full h-14 rounded-xl font-bold gap-2 bg-gray-900 hover:bg-black text-base disabled:opacity-50"
+              >
+                <CreditCard size={18} />
+                Pay {formatNaira(amount)} now
+              </Button>
+              <p className="mt-3 text-center text-[11px] text-gray-400">
+                Opens a secure Payluk payment window.
+              </p>
+            </div>
           )}
 
-          {(phase === 'ready' || phase === 'settling') && method === 'escrow' && (
+          {/* ── Escrow: pay from wallet or bank transfer, held safely ── */}
+          {(phase === 'ready' || phase === 'settling') && mode === 'escrow' && (
             <>
-              <button
-                onClick={() => setMethod('choose')}
-                className="mb-4 text-xs font-bold text-gray-400 hover:text-gray-600"
-              >
-                ← Payment options
-              </button>
-
               <div className="grid gap-5 sm:grid-cols-2 sm:items-start">
                 {/* ── Option 1: Pay from wallet ───────────────────────── */}
                 <div className="rounded-2xl border border-gray-100 p-4">

@@ -64,6 +64,7 @@ const CheckoutPage = () => {
     amount: number;
     orderId: string;
     orderNumber?: string;
+    mode: 'normal' | 'escrow';
   } | null>(null);
   const { guard, showModal, onModalSuccess, onModalDismiss } = usePaylukGuard();
   const hasShippingAddress = !!(
@@ -176,9 +177,13 @@ const CheckoutPage = () => {
     });
   };
 
-  // Step 2 — after the buyer picks delivery/pickup: create the escrow order for
-  // the chosen total, then open the payment modal (wallet or bank transfer).
-  const createOrderAndPay = async (formData: ShippingFormValues, withDelivery: boolean) => {
+  // Step 2 — after the buyer picks delivery + payment type: create the order for
+  // the chosen total & fee model, then open the matching payment UI.
+  const createOrderAndPay = async (
+    formData: ShippingFormValues,
+    withDelivery: boolean,
+    mode: 'normal' | 'escrow',
+  ) => {
     setIsLoading(true);
     try {
       const response = await API.post('/orders', {
@@ -191,7 +196,9 @@ const CheckoutPage = () => {
         // With delivery adds the Fez fee; without delivery charges product only.
         deliveryFee: withDelivery ? (deliveryFee ?? 0) : 0,
         deliveryMethod: withDelivery ? 'delivery' : 'pickup',
-        paymentMethod: 'escrow',
+        paymentMethod: mode === 'normal' ? 'card' : 'escrow',
+        // 'normal' → seller absorbs Payluk's fee (buyer pays clean price).
+        escrowMode: mode,
       });
 
       const { escrowId, customerId, payableAmount, paymentToken } = response.data?.payluk || {};
@@ -218,6 +225,7 @@ const CheckoutPage = () => {
         amount: payableAmount ?? (withDelivery ? orderTotal : totalPrice),
         orderId: order._id,
         orderNumber: order.orderNumber,
+        mode,
       });
     } catch (error: any) {
       const code = error?.response?.data?.code;
@@ -236,9 +244,9 @@ const CheckoutPage = () => {
     }
   };
 
-  const handleDeliveryChoice = (withDelivery: boolean) => {
+  const handleDeliveryChoice = (withDelivery: boolean, mode: 'normal' | 'escrow') => {
     setShowDeliveryModal(false);
-    if (pendingForm) createOrderAndPay(pendingForm, withDelivery);
+    if (pendingForm) createOrderAndPay(pendingForm, withDelivery, mode);
   };
 
   return (
@@ -538,6 +546,7 @@ const CheckoutPage = () => {
           customerId={transfer.customerId}
           escrowId={transfer.escrowId}
           paymentToken={transfer.paymentToken}
+          mode={transfer.mode}
           amount={transfer.amount}
           orderId={transfer.orderId}
           orderNumber={transfer.orderNumber}

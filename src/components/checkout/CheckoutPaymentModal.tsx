@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Copy, Check, Loader2, RefreshCw, Wallet, ShieldCheck, CreditCard } from 'lucide-react';
+import { X, Copy, Check, Loader2, RefreshCw, Wallet, ShieldCheck, CreditCard, Landmark } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEscrowCheckout } from 'payluk-escrow-inline-checkout/react';
 import { Button } from '@/components/ui/button';
@@ -58,6 +58,8 @@ export default function CheckoutPaymentModal({
   // screen, or the escrow (wallet / bank transfer) flow. "Normal" opens the
   // Payluk popup directly, so it has no sub-screen here.
   const [method, setMethod] = useState<'choose' | 'escrow'>('choose');
+  // While the Payluk popup is open we hide our own overlay so it isn't covered.
+  const [popupActive, setPopupActive] = useState(false);
   const { pay } = useEscrowCheckout();
 
   const settlingRef = useRef(false);
@@ -154,6 +156,12 @@ export default function CheckoutPaymentModal({
       toast.error('Card payment is unavailable for this order — use wallet or transfer.');
       return;
     }
+    if (typeof pay !== 'function') {
+      toast.error('Payment widget not ready. Refresh the page and try again.');
+      return;
+    }
+    // Hide our modal so the Payluk checkout isn't covered by our z-50 overlay.
+    setPopupActive(true);
     try {
       await pay({
         paymentToken,
@@ -162,15 +170,19 @@ export default function CheckoutPaymentModal({
         brand: import.meta.env.VITE_APP_NAME ?? 'URA',
         customerId,
         callback: () => {
+          setPopupActive(false);
           setPhase('paid');
           toast.success('Payment successful — your order is being processed.');
           onPaid();
         },
         onClose: () => {
+          setPopupActive(false);
           toast.info('Payment window closed.');
         },
       });
     } catch (err: any) {
+      console.error('[checkout] payWithPopup failed:', err);
+      setPopupActive(false);
       toast.error(err?.message || 'Could not open the payment window. Please try again.');
     }
   }, [paymentToken, pay, orderId, customerId, onPaid]);
@@ -209,11 +221,13 @@ export default function CheckoutPaymentModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+      className={`fixed inset-0 z-50 items-center justify-center p-4 bg-black/40 backdrop-blur-sm ${
+        popupActive ? 'hidden' : 'flex'
+      }`}
       onClick={busy ? undefined : onClose}
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-md sm:max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 h-1.5 bg-linear-to-r from-orange-500 to-orange-400" />
@@ -269,40 +283,42 @@ export default function CheckoutPaymentModal({
             <>
               <p className="text-sm text-gray-500 mb-4">Choose how you'd like to pay:</p>
 
-              {/* Normal payment — Payluk popup (card / bank / USSD) */}
-              {paymentToken && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {/* Normal payment — Payluk popup (card / bank / USSD) */}
+                {paymentToken && (
+                  <button
+                    onClick={() => void payWithPopup()}
+                    disabled={busy}
+                    className="group flex flex-col gap-3 rounded-2xl border-2 border-gray-100 p-5 text-left transition hover:border-gray-900 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-900 text-white">
+                      <CreditCard className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-black text-gray-900">Normal Payment</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Instant checkout — card, bank transfer or USSD
+                      </p>
+                    </div>
+                  </button>
+                )}
+
+                {/* Escrow — buyer protection, pay from wallet or bank transfer */}
                 <button
-                  onClick={() => void payWithPopup()}
-                  disabled={busy}
-                  className="group w-full flex items-center gap-4 rounded-2xl border-2 border-gray-100 p-4 text-left transition hover:border-gray-900 hover:bg-gray-50 disabled:opacity-50 mb-3"
+                  onClick={() => setMethod('escrow')}
+                  className="group flex flex-col gap-3 rounded-2xl border-2 border-gray-100 p-5 text-left transition hover:border-orange-500 hover:bg-orange-50/40"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-900 text-white">
-                    <CreditCard className="h-5 w-5" />
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-500">
+                    <ShieldCheck className="h-5 w-5" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-black text-gray-900">Normal Payment</p>
+                  <div>
+                    <p className="font-black text-gray-900">Pay with Escrow</p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      Instant checkout — card, bank transfer or USSD
+                      Protected — held until you confirm delivery
                     </p>
                   </div>
                 </button>
-              )}
-
-              {/* Escrow — buyer protection, pay from wallet or bank transfer */}
-              <button
-                onClick={() => setMethod('escrow')}
-                className="group w-full flex items-center gap-4 rounded-2xl border-2 border-gray-100 p-4 text-left transition hover:border-orange-500 hover:bg-orange-50/40"
-              >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-500">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-black text-gray-900">Pay with Escrow</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Protected — held until you confirm delivery
-                  </p>
-                </div>
-              </button>
+              </div>
             </>
           )}
 
@@ -315,47 +331,43 @@ export default function CheckoutPaymentModal({
                 ← Payment options
               </button>
 
-              {/* ── Option 1: Pay from wallet ─────────────────────────── */}
-              <div className="rounded-2xl border border-gray-100 p-4 mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-500">
-                    <Wallet size={16} className="text-orange-500" />
-                    Wallet balance
-                  </span>
-                  <span className="text-sm font-black text-gray-900">
-                    {walletBalance == null ? '—' : formatNaira(walletBalance)}
-                  </span>
-                </div>
-                <Button
-                  onClick={() => void settleFromWallet()}
-                  disabled={!canPayFromWallet || busy}
-                  className="w-full h-12 rounded-xl font-bold gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
-                >
-                  {phase === 'settling' ? (
-                    <Loader2 className="animate-spin" size={16} />
-                  ) : (
-                    <Wallet size={16} />
+              <div className="grid gap-5 sm:grid-cols-2 sm:items-start">
+                {/* ── Option 1: Pay from wallet ───────────────────────── */}
+                <div className="rounded-2xl border border-gray-100 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-500">
+                      <Wallet size={16} className="text-orange-500" />
+                      Wallet balance
+                    </span>
+                    <span className="text-sm font-black text-gray-900">
+                      {walletBalance == null ? '—' : formatNaira(walletBalance)}
+                    </span>
+                  </div>
+                  <Button
+                    onClick={() => void settleFromWallet()}
+                    disabled={!canPayFromWallet || busy}
+                    className="w-full h-12 rounded-xl font-bold gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
+                  >
+                    {phase === 'settling' ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      <Wallet size={16} />
+                    )}
+                    Pay {formatNaira(amount)} from Wallet
+                  </Button>
+                  {!canPayFromWallet && walletBalance != null && (
+                    <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
+                      Not enough balance — pay by bank transfer instead (no wallet top-up needed).
+                    </p>
                   )}
-                  Pay {formatNaira(amount)} from Wallet
-                </Button>
-                {!canPayFromWallet && walletBalance != null && (
-                  <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
-                    Not enough balance — pay by bank transfer below (no wallet top-up needed).
+                </div>
+
+                {/* ── Option 2: External bank transfer ────────────────── */}
+                <div className="rounded-2xl border border-gray-100 p-4">
+                  <p className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-500">
+                    <Landmark size={16} className="text-orange-500" /> Bank transfer
                   </p>
-                )}
-              </div>
-
-              {/* Divider */}
-              <div className="flex items-center gap-3 my-5">
-                <div className="h-px flex-1 bg-gray-100" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">
-                  or bank transfer
-                </span>
-                <div className="h-px flex-1 bg-gray-100" />
-              </div>
-
-              {/* ── Option 2: External bank transfer ──────────────────── */}
-              {accountError ? (
+                  {accountError ? (
                 <div className="flex flex-col items-center gap-3 py-2">
                   <p className="text-xs text-red-500 font-semibold text-center">{accountError}</p>
                   <Button
@@ -448,8 +460,10 @@ export default function CheckoutPaymentModal({
                   >
                     <RefreshCw size={14} /> I've sent it — check now
                   </Button>
-                </>
-              )}
+                    </>
+                  )}
+                </div>
+              </div>
 
               <div className="mt-5 flex items-center justify-center gap-2 text-gray-400">
                 <ShieldCheck size={14} className="text-blue-400" />

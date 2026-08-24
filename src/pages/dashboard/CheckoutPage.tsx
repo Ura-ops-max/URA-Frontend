@@ -60,6 +60,7 @@ const CheckoutPage = () => {
   const [transfer, setTransfer] = useState<{
     customerId: string;
     escrowId: string;
+    paymentToken: string;
     amount: number;
     orderId: string;
     orderNumber?: string;
@@ -193,7 +194,7 @@ const CheckoutPage = () => {
         paymentMethod: 'escrow',
       });
 
-      const { escrowId, customerId, payableAmount } = response.data?.payluk || {};
+      const { escrowId, customerId, payableAmount, paymentToken } = response.data?.payluk || {};
       const order = response.data?.order;
       const buyerCustomerId = user?.paylukCustomerId ?? customerId;
 
@@ -213,6 +214,7 @@ const CheckoutPage = () => {
       setTransfer({
         customerId: buyerCustomerId,
         escrowId,
+        paymentToken: paymentToken ?? '',
         amount: payableAmount ?? (withDelivery ? orderTotal : totalPrice),
         orderId: order._id,
         orderNumber: order.orderNumber,
@@ -535,6 +537,7 @@ const CheckoutPage = () => {
         <CheckoutPaymentModal
           customerId={transfer.customerId}
           escrowId={transfer.escrowId}
+          paymentToken={transfer.paymentToken}
           amount={transfer.amount}
           orderId={transfer.orderId}
           orderNumber={transfer.orderNumber}

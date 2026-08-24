@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Copy, Check, Loader2, RefreshCw, Wallet, ShieldCheck } from 'lucide-react';
+import { X, Copy, Check, Loader2, RefreshCw, Wallet, ShieldCheck, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
+import { useEscrowCheckout } from 'payluk-escrow-inline-checkout/react';
 import { Button } from '@/components/ui/button';
 import paylukAPI from '@/lib/payluk-axios';
+import { BASE_ROUTE } from '@/routes/common/routePaths.ts';
 
 interface VirtualAccount {
   accountNumber: string;
@@ -15,6 +17,8 @@ interface CheckoutPaymentModalProps {
   customerId: string;
   /** Payluk escrow id for this order — the seller's receiving escrow. */
   escrowId: string;
+  /** Payluk payment token — powers the inline (popup) card/bank checkout. */
+  paymentToken?: string;
   /** Finalised total the buyer must pay (product + delivery + Payluk fee). */
   amount: number;
   /** Our order id — used to build a unique payment reference. */
@@ -38,6 +42,7 @@ const formatNaira = (n: number) =>
 export default function CheckoutPaymentModal({
   customerId,
   escrowId,
+  paymentToken,
   amount,
   orderId,
   orderNumber,
@@ -49,6 +54,11 @@ export default function CheckoutPaymentModal({
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [phase, setPhase] = useState<Phase>('loading');
   const [copied, setCopied] = useState<CopiedField>(null);
+  // Which payment path the buyer picked after "Proceed to Pay": the choice
+  // screen, or the escrow (wallet / bank transfer) flow. "Normal" opens the
+  // Payluk popup directly, so it has no sub-screen here.
+  const [method, setMethod] = useState<'choose' | 'escrow'>('choose');
+  const { pay } = useEscrowCheckout();
 
   const settlingRef = useRef(false);
   const mountedRef = useRef(true);
@@ -135,6 +145,35 @@ export default function CheckoutPaymentModal({
       await settleFromWallet();
     }
   }, [fetchBalance, amount, settleFromWallet]);
+
+  // "Normal payment" — opens Payluk's inline checkout popup (card / bank / USSD),
+  // like a standard Paystack-style checkout. It still settles this escrow, so the
+  // webhook marks the order paid the same way.
+  const payWithPopup = useCallback(async () => {
+    if (!paymentToken) {
+      toast.error('Card payment is unavailable for this order — use wallet or transfer.');
+      return;
+    }
+    try {
+      await pay({
+        paymentToken,
+        reference: `pop_${orderId}_${Date.now()}`,
+        redirectUrl: `${window.location.origin}${BASE_ROUTE.PAYLUK_PAYMENT_COMPLETE}`,
+        brand: import.meta.env.VITE_APP_NAME ?? 'URA',
+        customerId,
+        callback: () => {
+          setPhase('paid');
+          toast.success('Payment successful — your order is being processed.');
+          onPaid();
+        },
+        onClose: () => {
+          toast.info('Payment window closed.');
+        },
+      });
+    } catch (err: any) {
+      toast.error(err?.message || 'Could not open the payment window. Please try again.');
+    }
+  }, [paymentToken, pay, orderId, customerId, onPaid]);
 
   // Initial load: balance + account together.
   const didInit = useRef(false);
@@ -226,8 +265,56 @@ export default function CheckoutPaymentModal({
             </div>
           )}
 
-          {(phase === 'ready' || phase === 'settling') && (
+          {(phase === 'ready' || phase === 'settling') && method === 'choose' && (
             <>
+              <p className="text-sm text-gray-500 mb-4">Choose how you'd like to pay:</p>
+
+              {/* Normal payment — Payluk popup (card / bank / USSD) */}
+              {paymentToken && (
+                <button
+                  onClick={() => void payWithPopup()}
+                  disabled={busy}
+                  className="group w-full flex items-center gap-4 rounded-2xl border-2 border-gray-100 p-4 text-left transition hover:border-gray-900 hover:bg-gray-50 disabled:opacity-50 mb-3"
+                >
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-900 text-white">
+                    <CreditCard className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-gray-900">Normal Payment</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Instant checkout — card, bank transfer or USSD
+                    </p>
+                  </div>
+                </button>
+              )}
+
+              {/* Escrow — buyer protection, pay from wallet or bank transfer */}
+              <button
+                onClick={() => setMethod('escrow')}
+                className="group w-full flex items-center gap-4 rounded-2xl border-2 border-gray-100 p-4 text-left transition hover:border-orange-500 hover:bg-orange-50/40"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-500">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-black text-gray-900">Pay with Escrow</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Protected — held until you confirm delivery
+                  </p>
+                </div>
+              </button>
+            </>
+          )}
+
+          {(phase === 'ready' || phase === 'settling') && method === 'escrow' && (
+            <>
+              <button
+                onClick={() => setMethod('choose')}
+                className="mb-4 text-xs font-bold text-gray-400 hover:text-gray-600"
+              >
+                ← Payment options
+              </button>
+
               {/* ── Option 1: Pay from wallet ─────────────────────────── */}
               <div className="rounded-2xl border border-gray-100 p-4 mb-4">
                 <div className="flex items-center justify-between mb-3">

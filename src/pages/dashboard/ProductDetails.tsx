@@ -11,15 +11,18 @@ import {
   ArrowLeft,
   Loader2,
   Play,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useToggleLike } from '@/hooks/api/use-feed';
+import { useToggleLike, useDeletePost } from '@/hooks/api/use-feed';
 import { useSingleProduct } from '@/hooks/api/use-product';
 import { useCartContext } from '@/context/cart-provider';
 import { useAuthContext } from '@/context/auth-provider';
 import { Button } from '@/components/ui/button';
 import InstallAppButton from '@/components/shared/InstallAppButton';
 import { VideoPlayer } from '@/components/feed/VideoPlayer';
+import { EditItemModal } from '@/components/feed/EditItemModal';
 
 /** True when a media URL points to a video file rather than an image. */
 const isVideoUrl = (u?: string) => !!u && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(u);
@@ -32,11 +35,32 @@ const ProductDetailsPage = () => {
   const relatedProducts = data?.relatedProducts;
 
   const { addItem, isUpdating } = useCartContext();
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, user, related } = useAuthContext();
 
   const [isLiked, setIsLiked] = useState(false);
   const [activeMedia, setActiveMedia] = useState(0);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { mutate: toggleLike } = useToggleLike(productId || '', 'product');
+
+  // Owner (the seller) sees Edit / Delete. Products carry the BUSINESS id, so we
+  // match against the user's own id AND the id of the business they own.
+  const myBusinessId = (related as { business_id?: string } | undefined)?.business_id;
+  const ownerIds = [user?._id, myBusinessId].filter(Boolean);
+  const productBusinessId =
+    (product?.business as any)?._id ?? (product?.business as unknown as string);
+  const isOwner = ownerIds.includes(productBusinessId as string);
+
+  const deleteProduct = useDeletePost(productId || '', 'product');
+  const handleDeleteProduct = () => {
+    deleteProduct.mutate(undefined, {
+      onSuccess: () => {
+        setShowDeleteConfirm(false);
+        navigate(-1);
+      },
+      onError: () => setShowDeleteConfirm(false),
+    });
+  };
 
   useEffect(() => {
     if (product) setIsLiked(!!product.isLiked);
@@ -106,6 +130,24 @@ const ProductDetailsPage = () => {
         </button>
         <div className="flex items-center gap-2">
           <InstallAppButton className="hidden sm:inline-flex" />
+          {isOwner && (
+            <>
+              <button
+                onClick={() => setShowEdit(true)}
+                title="Edit product"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-bold text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <Pencil size={18} /> <span className="hidden sm:inline">Edit</span>
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                title="Delete product"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <Trash2 size={18} /> <span className="hidden sm:inline">Delete</span>
+              </button>
+            </>
+          )}
           <button
             onClick={handleLikeClick}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -303,6 +345,73 @@ const ProductDetailsPage = () => {
                 </p>
               </Link>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Owner: edit product */}
+      {isOwner && product && (
+        <EditItemModal
+          open={showEdit}
+          onClose={() => setShowEdit(false)}
+          item={{
+            _id: product._id,
+            type: 'PRODUCT',
+            caption: product.description ?? '',
+            tags: [],
+            media: product.media ?? [],
+            productDetails: {
+              _id: product._id,
+              name: product.name ?? '',
+              price: product.price ?? 0,
+              description: product.description ?? '',
+              category: product.category ?? '',
+              stock: product.stock ?? 0,
+              media: product.media ?? [],
+            },
+          }}
+        />
+      )}
+
+      {/* Owner: delete confirmation */}
+      {isOwner && showDeleteConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          onClick={() => !deleteProduct.isPending && setShowDeleteConfirm(false)}
+        >
+          <div
+            className="w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
+              <Trash2 className="h-6 w-6 text-red-500" />
+            </div>
+            <h3 className="text-lg font-black text-gray-900">Delete this product?</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              “{product?.name}” will be removed permanently. This can't be undone.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleteProduct.isPending}
+                className="flex-1 h-11 rounded-xl font-bold"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteProduct}
+                disabled={deleteProduct.isPending}
+                className="flex-1 h-11 rounded-xl font-bold bg-red-500 hover:bg-red-600 text-white gap-2"
+              >
+                {deleteProduct.isPending ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <Trash2 size={16} />
+                )}
+                Delete
+              </Button>
+            </div>
           </div>
         </div>
       )}

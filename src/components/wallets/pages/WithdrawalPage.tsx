@@ -172,6 +172,9 @@ export default function WithdrawalPage() {
   const [intent, setIntent] = useState<IntentData | null>(null);
   const [confirmedIntent, setConfirmedIntent] = useState<IntentData | null>(null);
   const [reference, setReference] = useState(genRef);
+  // Some withdrawals require an OTP/PIN to confirm — revealed if Payluk asks.
+  const [otp, setOtp] = useState('');
+  const [needsOtp, setNeedsOtp] = useState(false);
 
   const customerId = user?.paylukCustomerId;
   const { data: walletBalance } = useWalletBalance(customerId);
@@ -293,15 +296,26 @@ export default function WithdrawalPage() {
         '/payment/verify',
         {
           reference: intent.reference,
+          ...(otp ? { otp } : {}),
         },
         { headers: { 'customer-id': customerId } },
       );
       setConfirmedIntent(data?.data ?? data);
       setStep('done');
+      setNeedsOtp(false);
+      setOtp('');
       toast.success('Withdrawal processed successfully!');
     } catch (err: any) {
-      setReference(genRef()); // fresh ref on failure
-      toast.error(err?.response?.data?.message ?? 'Failed to confirm withdrawal.');
+      const msg: string = err?.response?.data?.message ?? '';
+      // Payluk asked for a confirmation code — reveal the OTP field and let the
+      // user enter it, keeping the same intent/reference (don't regenerate).
+      if (/otp|pin|confirm|code/i.test(msg)) {
+        setNeedsOtp(true);
+        toast.error(msg || 'Enter the OTP sent to you to confirm this withdrawal.');
+      } else {
+        setReference(genRef()); // fresh ref on genuine failure
+        toast.error(msg || 'Failed to confirm withdrawal.');
+      }
     } finally {
       setConfirmLoading(false);
     }
@@ -649,9 +663,25 @@ export default function WithdrawalPage() {
         </div>
 
         <div className="space-y-3">
+          {needsOtp && (
+            <div className="mb-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">
+                Confirmation OTP / PIN <span className="text-red-400">*</span>
+              </label>
+              <Input
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\s/g, ''))}
+                placeholder="Enter the code sent to you"
+                className="h-12 rounded-xl border-orange-200 bg-orange-50/40 focus:bg-white text-center text-lg font-black tracking-[0.3em]"
+              />
+              <p className="mt-1.5 text-[11px] font-bold text-amber-600">
+                A confirmation code is required to complete this withdrawal.
+              </p>
+            </div>
+          )}
           <Button
             onClick={confirmWithdrawal}
-            disabled={confirmLoading}
+            disabled={confirmLoading || (needsOtp && !otp)}
             className="w-full h-14 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-base gap-2 transition-all active:scale-95 shadow-lg shadow-orange-100"
           >
             {confirmLoading ? (

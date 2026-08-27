@@ -15,7 +15,24 @@ export interface Bank {
 
 async function fetchBanks(): Promise<Bank[]> {
   const { data } = await paylukAPI.get('/payment/bank-list');
-  return (data?.data ?? []).filter((b: Bank) => b.active && b.supports_transfer);
+  // Payluk returns each bank as just { name, code } — it does NOT send
+  // `active`/`supports_transfer`, so filtering on those wiped out every bank.
+  // The bank-list endpoint already only returns transfer-capable banks, so we
+  // just normalise the shape the UI expects.
+  const list = (data?.data ?? []) as Array<{ name?: string; code?: string }>;
+  return list
+    .filter((b) => b?.name && b?.code)
+    .map((b, i) => ({
+      id: i,
+      name: b.name as string,
+      slug: (b.name as string).toLowerCase().replace(/\s+/g, '-'),
+      code: b.code as string,
+      supports_transfer: true,
+      active: true,
+      country: 'Nigeria',
+      currency: 'NGN',
+      type: 'nuban',
+    }));
 }
 
 export function useBanks() {

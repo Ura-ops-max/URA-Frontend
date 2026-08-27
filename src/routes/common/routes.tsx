@@ -77,6 +77,7 @@ export const protectedRoutePaths = [
     children: [
       { index: true, element: <WalletOverviewPage /> },
       { path: 'overview', element: <WalletOverviewPage /> },
+      { path: 'activities', element: <TransactionHistoryPage /> },
       { path: 'transactions', element: <TransactionHistoryPage /> },
       { path: 'seller-transactions', element: <SellerTransactionsPage /> },
       { path: 'claim-funds', element: <ClaimFundsPage /> },

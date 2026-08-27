@@ -261,7 +261,7 @@ export default function CheckoutPaymentModal({
             <span className="text-[10px] font-black uppercase tracking-widest text-orange-400">
               Total to pay
             </span>
-            <span className="text-2xl font-black text-orange-600">{formatNaira(amount)}</span>
+            <span className="text-xl sm:text-2xl font-black text-orange-600">{formatNaira(amount)}</span>
           </div>
 
           {phase === 'loading' && (

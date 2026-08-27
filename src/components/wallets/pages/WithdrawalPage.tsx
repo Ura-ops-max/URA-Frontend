@@ -641,7 +641,7 @@ export default function WithdrawalPage() {
             <p className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">
               You are sending
             </p>
-            <p className="text-4xl font-black text-white">{formatNGN(intent.amount)}</p>
+            <p className="text-3xl sm:text-4xl font-black text-white break-all">{formatNGN(intent.amount)}</p>
             <p className="text-xs text-gray-400 mt-2">
               + {formatNGN(intent.fee ?? 0)} fee = {formatNGN(total)} total
             </p>

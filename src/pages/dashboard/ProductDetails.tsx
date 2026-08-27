@@ -43,13 +43,15 @@ const ProductDetailsPage = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { mutate: toggleLike } = useToggleLike(productId || '', 'product');
 
-  // Owner (the seller) sees Edit / Delete. Products carry the BUSINESS id, so we
-  // match against the user's own id AND the id of the business they own.
+  // Owner (the seller) sees Edit / Delete. The backend tells us directly via
+  // `product.isOwner`; fall back to a client-side id match if it's absent.
   const myBusinessId = (related as { business_id?: string } | undefined)?.business_id;
   const ownerIds = [user?._id, myBusinessId].filter(Boolean);
   const productBusinessId =
     (product?.business as any)?._id ?? (product?.business as unknown as string);
-  const isOwner = ownerIds.includes(productBusinessId as string);
+  const isOwner =
+    (product as { isOwner?: boolean } | undefined)?.isOwner ??
+    ownerIds.includes(productBusinessId as string);
 
   const deleteProduct = useDeletePost(productId || '', 'product');
   const handleDeleteProduct = () => {

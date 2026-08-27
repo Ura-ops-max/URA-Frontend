@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Heart, ShoppingCart, Info, Star } from 'lucide-react';
+import { Heart, ShoppingCart, Info, Star, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { useToggleLike } from '@/hooks/api/use-feed';
+import { useToggleLike, useDeletePost } from '@/hooks/api/use-feed';
+import { useAuthContext } from '@/context/auth-provider';
+import { EditItemModal } from './EditItemModal';
 import type { ProductType } from '@/types/feed.types';
 
 // interface Product {
@@ -35,6 +37,19 @@ export const ProductCard = ({
 }: ProductCardProps) => {
   const [isWishlisted, setIsWishlisted] = useState(product.isLiked || false);
   const { mutate: toggleLike } = useToggleLike(product._id, 'product');
+
+  // Owner (the seller) sees Edit / Delete on their own products. Products carry
+  // the BUSINESS id in authorId/business, so match against the user's own id
+  // AND the id of the business they own.
+  const { user, related } = useAuthContext();
+  const [showEdit, setShowEdit] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const myBusinessId = (related as { business_id?: string } | undefined)?.business_id;
+  const ownerIds = [user?._id, myBusinessId].filter(Boolean) as string[];
+  const p = product as { authorId?: string; business?: string; isOwner?: boolean };
+  const isOwner =
+    p.isOwner ?? (ownerIds.includes(p.authorId as string) || ownerIds.includes(p.business as string));
+  const deleteProduct = useDeletePost(product._id, 'product');
 
   const formattedPrice = new Intl.NumberFormat('en-NG', {
     style: 'currency',
@@ -85,6 +100,34 @@ export const ProductCard = ({
             </motion.div>
           </button>
         </div>
+
+        {/* Owner actions — Edit / Delete (only the seller sees these) */}
+        {isOwner && (
+          <div className="absolute top-2 left-2 flex flex-col gap-2">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowEdit(true);
+              }}
+              title="Edit product"
+              className="p-2 bg-white/90 backdrop-blur-md rounded-full shadow-sm hover:bg-white text-gray-700 transition-all active:scale-90"
+            >
+              <Pencil size={16} />
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowDeleteConfirm(true);
+              }}
+              title="Delete product"
+              className="p-2 bg-white/90 backdrop-blur-md rounded-full shadow-sm hover:bg-red-50 text-red-600 transition-all active:scale-90"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        )}
 
         {/* Badge: Stock or Category */}
         <div className="absolute bottom-2 left-2 flex gap-1">
@@ -158,6 +201,80 @@ export const ProductCard = ({
           </div>
         </div>
       </div>
+
+      {/* Owner: edit product */}
+      {isOwner && (
+        <EditItemModal
+          open={showEdit}
+          onClose={() => setShowEdit(false)}
+          item={{
+            _id: product._id,
+            type: 'PRODUCT',
+            caption: product.description ?? '',
+            tags: [],
+            media: product.media ?? [],
+            productDetails: {
+              _id: product._id,
+              name: product.name ?? '',
+              price: product.price ?? 0,
+              description: product.description ?? '',
+              category: product.category ?? '',
+              stock: product.stock ?? 0,
+              media: product.media ?? [],
+            },
+          }}
+        />
+      )}
+
+      {/* Owner: delete confirmation */}
+      {isOwner && showDeleteConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!deleteProduct.isPending) setShowDeleteConfirm(false);
+          }}
+        >
+          <div
+            className="w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
+              <Trash2 className="h-6 w-6 text-red-500" />
+            </div>
+            <h3 className="text-lg font-black text-gray-900">Delete this product?</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              “{product.name}” will be removed permanently. This can't be undone.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleteProduct.isPending}
+                className="flex-1 h-11 rounded-xl border border-gray-200 font-bold text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() =>
+                  deleteProduct.mutate(undefined, {
+                    onSuccess: () => setShowDeleteConfirm(false),
+                    onError: () => setShowDeleteConfirm(false),
+                  })
+                }
+                disabled={deleteProduct.isPending}
+                className="flex-1 h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold flex items-center justify-center gap-2"
+              >
+                {deleteProduct.isPending ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <Trash2 size={16} />
+                )}
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

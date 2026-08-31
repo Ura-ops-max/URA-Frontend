@@ -165,7 +165,7 @@ const ProductDetailsPage = () => {
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:gap-12 lg:p-12">
         {/* 2. MEDIA SECTION */}
         <div className="w-full lg:w-1/2 lg:sticky lg:top-24 h-fit">
-          <div className="aspect-[4/5] bg-gray-50 overflow-hidden lg:rounded-3xl">
+          <div className="aspect-[4/5] bg-gray-50 overflow-hidden lg:rounded-[28px] lg:shadow-xl lg:shadow-gray-200/70 lg:ring-1 lg:ring-black/5">
             {isVideoUrl(product.media?.[activeMedia]) ? (
               <VideoPlayer
                 key={product.media[activeMedia]}
@@ -214,27 +214,46 @@ const ProductDetailsPage = () => {
             {product.category}
           </span>
 
-          <h1 className="text-3xl lg:text-5xl font-black text-gray-900 mb-2 leading-tight">
+          <h1 className="text-3xl lg:text-5xl font-black text-gray-900 mb-3 leading-[1.1] tracking-tight">
             {product.name}
           </h1>
 
-          <p className="text-3xl font-black text-orange-600 mb-10">{formattedPrice}</p>
+          <div className="flex items-center gap-3 mb-10">
+            <p className="text-3xl lg:text-4xl font-black text-orange-600">{formattedPrice}</p>
+            {product.stock > 0 ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-bold text-green-600">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> In stock
+              </span>
+            ) : (
+              <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-bold text-red-500">
+                Sold out
+              </span>
+            )}
+          </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-10">
-            <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
-              <div className="flex items-center gap-2 text-orange-500 mb-2">
-                <Package size={18} />
-                <span className="text-[10px] font-bold uppercase text-gray-400">Stock Status</span>
+          <div className="grid grid-cols-2 gap-3 mb-10">
+            <div className="p-4 rounded-2xl bg-white border border-gray-100 shadow-sm shadow-gray-100/60 transition hover:border-gray-200">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-orange-500">
+                  <Package size={16} />
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                  Stock Status
+                </span>
               </div>
               <p className="text-sm font-black text-gray-900">
                 {product.stock > 0 ? `${product.stock} units available` : 'Out of Stock'}
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
-              <div className="flex items-center gap-2 text-orange-500 mb-2">
-                <Ruler size={18} />
-                <span className="text-[10px] font-bold uppercase text-gray-400">Variations</span>
+            <div className="p-4 rounded-2xl bg-white border border-gray-100 shadow-sm shadow-gray-100/60 transition hover:border-gray-200">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-orange-500">
+                  <Ruler size={16} />
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                  Variations
+                </span>
               </div>
               <p className="text-sm font-black text-gray-900 truncate">{displaySizes}</p>
             </div>
@@ -292,13 +311,24 @@ const ProductDetailsPage = () => {
             </Button>
           </div>
 
-          <div className="hidden lg:flex items-center gap-8 mt-12 opacity-40">
-            <div className="flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest">
-              <ShieldCheck size={16} /> Secure Payment
-            </div>
-            <div className="flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest">
-              <Truck size={16} /> Doorstep Delivery
-            </div>
+          <div className="mt-8 grid grid-cols-3 gap-3">
+            {[
+              { icon: ShieldCheck, label: 'Secure Payment', color: 'text-blue-500 bg-blue-50' },
+              { icon: CheckCircle2, label: 'Buyer Protection', color: 'text-green-500 bg-green-50' },
+              { icon: Truck, label: 'Fast Delivery', color: 'text-orange-500 bg-orange-50' },
+            ].map(({ icon: Icon, label, color }) => (
+              <div
+                key={label}
+                className="flex flex-col items-center gap-2 rounded-2xl border border-gray-100 bg-white p-3 text-center"
+              >
+                <span className={cn('flex h-9 w-9 items-center justify-center rounded-xl', color)}>
+                  <Icon size={18} />
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 leading-tight">
+                  {label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -22,8 +22,8 @@ const CartPage = () => {
   if (!cart || cart.items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-          <ShoppingBag className="w-10 h-10 text-gray-300" />
+        <div className="w-20 h-20 bg-linear-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center mb-6">
+          <ShoppingBag className="w-10 h-10 text-orange-500" />
         </div>
         <h2 className="text-2xl font-black text-gray-900 mb-2">Your cart is empty</h2>
         <p className="text-gray-500 mb-8 max-w-xs">
@@ -81,25 +81,28 @@ const CartPage = () => {
                     <Trash2 size={18} />
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mb-4">
+                <p className="text-xs text-gray-500">
                   {item.product.business?.businessName || 'Merchant'}
+                </p>
+                <p className="text-xs font-semibold text-gray-400 mb-4">
+                  {formattedPrice(item.product.price)} each
                 </p>
 
                 <div className="mt-auto flex items-center justify-between">
                   {/* Quantity Controller */}
-                  <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden h-9">
+                  <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden h-10 bg-white">
                     <button
                       onClick={() => updateQty(item.product._id, item.quantity - 1)}
-                      className="px-3 hover:bg-gray-50 text-gray-600 transition-colors"
+                      className="px-3 h-full hover:bg-orange-50 hover:text-orange-600 text-gray-600 transition-colors"
                     >
                       <Minus size={14} />
                     </button>
-                    <span className="w-10 text-center text-sm font-bold text-gray-900">
+                    <span className="w-10 text-center text-sm font-black text-gray-900">
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => updateQty(item.product._id, item.quantity + 1)}
-                      className="px-3 hover:bg-gray-50 text-gray-600 transition-colors"
+                      className="px-3 h-full hover:bg-orange-50 hover:text-orange-600 text-gray-600 transition-colors"
                     >
                       <Plus size={14} />
                     </button>
@@ -116,8 +119,8 @@ const CartPage = () => {
 
         {/* RIGHT: SUMMARY CARD */}
         <div className="lg:col-span-4 sticky top-24">
-          <div className="bg-gray-50 rounded-3xl p-6 lg:p-8 border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-6">Order Summary</h3>
+          <div className="bg-white rounded-3xl p-6 lg:p-8 border border-gray-100 ring-1 ring-black/5 shadow-sm shadow-gray-100/70">
+            <h3 className="text-lg font-black text-gray-900 mb-6">Order Summary</h3>
 
             <div className="space-y-4 mb-6">
               <div className="flex justify-between text-gray-600 text-sm font-medium">

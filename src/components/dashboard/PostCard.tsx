@@ -40,16 +40,16 @@ export default function PostCard({ post, onRequireAuth }: PostCardProps) {
   return (
     <div
       className="
-        bg-white rounded-2xl shadow-md border
+        bg-white rounded-3xl shadow-sm shadow-gray-100/70 ring-1 ring-black/5 border border-gray-100
         overflow-hidden transition-all duration-300
-        hover:shadow-lg animate-fadeIn
+        hover:shadow-lg hover:shadow-gray-200/60 animate-fadeIn
       "
     >
       {/* HEADER */}
       <div className="flex items-center gap-3 p-4">
         <img
           src={post.business.profileImage || '/images/default-avatar.png'}
-          className="w-12 h-12 rounded-full object-cover"
+          className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-sm"
         />
 
         <div className="flex-1">
@@ -122,7 +122,10 @@ export default function PostCard({ post, onRequireAuth }: PostCardProps) {
         {/* TAGS */}
         <div className="flex flex-wrap gap-2 mt-3">
           {post.tags?.map((tag) => (
-            <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
+            <span
+              key={tag}
+              className="bg-orange-50 text-orange-600 text-xs font-semibold px-3 py-1 rounded-full hover:bg-orange-100 transition-colors"
+            >
               #{tag}
             </span>
           ))}

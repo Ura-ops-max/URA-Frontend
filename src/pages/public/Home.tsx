@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
+import { categoryColor } from '@/lib/category-colors';
 import {
   ShieldCheck,
   Store,
@@ -304,19 +305,24 @@ function Home() {
           </FadeIn>
 
           <Stagger className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {CATEGORIES.map(({ icon: Icon, name }) => (
-              <FadeItem key={name}>
-                <Link
-                  to="/products"
-                  className="group flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 sm:p-6 transition hover:-translate-y-1 hover:border-amber-200 hover:shadow-lg hover:shadow-slate-100"
-                >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 transition group-hover:bg-amber-500 group-hover:text-white">
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <span className="text-sm font-bold text-slate-700">{name}</span>
-                </Link>
-              </FadeItem>
-            ))}
+            {CATEGORIES.map(({ icon: Icon, name }) => {
+              const c = categoryColor(name);
+              return (
+                <FadeItem key={name}>
+                  <Link
+                    to="/products"
+                    className="group flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 sm:p-6 transition hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-100"
+                  >
+                    <div
+                      className={`flex h-14 w-14 items-center justify-center rounded-2xl transition group-hover:scale-110 ${c.bg} ${c.text}`}
+                    >
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <span className="text-sm font-bold text-slate-700">{name}</span>
+                  </Link>
+                </FadeItem>
+              );
+            })}
           </Stagger>
         </div>
       </section>

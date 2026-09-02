@@ -22,6 +22,7 @@ import { useAuthContext } from '@/context/auth-provider';
 import { Button } from '@/components/ui/button';
 import InstallAppButton from '@/components/shared/InstallAppButton';
 import { VideoPlayer } from '@/components/feed/VideoPlayer';
+import { categoryColor } from '@/lib/category-colors';
 import { EditItemModal } from '@/components/feed/EditItemModal';
 
 /** True when a media URL points to a video file rather than an image. */
@@ -210,9 +211,21 @@ const ProductDetailsPage = () => {
 
         {/* 3. DETAILS SECTION */}
         <div className="flex-1 p-6 lg:p-0">
-          <span className="text-[11px] font-black text-orange-500 uppercase tracking-[0.3em] mb-4 block">
-            {product.category}
-          </span>
+          {(() => {
+            const cat = categoryColor(product.category);
+            return (
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-widest mb-4',
+                  cat.bg,
+                  cat.text,
+                )}
+              >
+                <span className={cn('h-1.5 w-1.5 rounded-full', cat.dot)} />
+                {product.category}
+              </span>
+            );
+          })()}
 
           <h1 className="text-3xl lg:text-5xl font-black text-gray-900 mb-3 leading-[1.1] tracking-tight">
             {product.name}

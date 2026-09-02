@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Search, BadgeCheck, Store, ShoppingBag } from 'lucide-react';
 import { useSeo } from '@/hooks/useSeo';
+import { categoryColor } from '@/lib/category-colors';
 import { ProductThumb } from '@/components/product/shared/ProductThumb';
 import { getPublicProductsFn } from '@/lib/api';
 import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
@@ -144,7 +145,12 @@ const ProductsPage = () => {
                   </div>
                   <div className="p-4">
                     {p.category && (
-                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-widest ${categoryColor(p.category).bg} ${categoryColor(p.category).text}`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${categoryColor(p.category).dot}`}
+                        />
                         {p.category}
                       </span>
                     )}

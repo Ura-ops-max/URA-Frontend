@@ -3,6 +3,7 @@ import { Heart, ShoppingCart, Info, Star, Pencil, Trash2, Loader2 } from 'lucide
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useToggleLike, useDeletePost } from '@/hooks/api/use-feed';
+import { categoryColor } from '@/lib/category-colors';
 import { useAuthContext } from '@/context/auth-provider';
 import { EditItemModal } from './EditItemModal';
 import type { ProductType } from '@/types/feed.types';
@@ -37,6 +38,7 @@ export const ProductCard = ({
 }: ProductCardProps) => {
   const [isWishlisted, setIsWishlisted] = useState(product.isLiked || false);
   const { mutate: toggleLike } = useToggleLike(product._id, 'product');
+  const cat = categoryColor(product.category);
 
   // Owner (the seller) sees Edit / Delete on their own products. Products carry
   // the BUSINESS id in authorId/business, so match against the user's own id
@@ -146,7 +148,14 @@ export const ProductCard = ({
       {/* 2. CONTENT SECTION */}
       <div className="p-3 flex flex-col flex-1 gap-2">
         <div className="flex justify-between items-start">
-          <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest truncate">
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-widest truncate',
+              cat.bg,
+              cat.text,
+            )}
+          >
+            <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', cat.dot)} />
             {product.category}
           </span>
           <div className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded-full">

@@ -50,14 +50,21 @@ const VerifyEmail = () => {
   };
 
   const handleResend = async () => {
-    // Resending requires the user to be logged in (the backend identifies them by token).
-    if (!tokenStorage.getToken()) {
-      toast.error('Please sign in first, then resend the verification email.');
-      return;
-    }
     setResending(true);
     try {
-      await API.post('/settings/resend-verification');
+      if (tokenStorage.getToken()) {
+        // Logged in: the backend identifies the user from their session.
+        await API.post('/settings/resend-verification');
+      } else {
+        // Not logged in (e.g. just registered): resend by email. Prefer the
+        // email from the verify link, otherwise ask for it.
+        const email = params.get('email') || window.prompt('Enter your email to resend the code:')?.trim();
+        if (!email) {
+          toast.error('Please enter your email to resend the code.');
+          return;
+        }
+        await API.post('/auth/resend-verification', { email });
+      }
       toast.success('A new code has been sent. Please check your inbox.');
     } catch (err) {
       const e = err as { response?: { data?: { message?: string } } };

@@ -5,7 +5,7 @@ import { Loader2, Search, BadgeCheck, Store, ShoppingBag } from 'lucide-react';
 import { useSeo } from '@/hooks/useSeo';
 import { categoryColor } from '@/lib/category-colors';
 import { ProductThumb } from '@/components/product/shared/ProductThumb';
-import { getPublicProductsFn } from '@/lib/api';
+import { getPublicProductsFn, fetchProductCategories } from '@/lib/api';
 import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
 
 interface CatalogProduct {
@@ -35,29 +35,35 @@ const ProductsPage = () => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
 
+  // Products for the selected category (server-side filtered so it covers the
+  // whole catalog, not just the first page).
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['public-products'],
-    queryFn: () => getPublicProductsFn(1),
+    queryKey: ['public-products', category],
+    queryFn: () => getPublicProductsFn(1, category),
     staleTime: 1000 * 60 * 2,
+  });
+
+  // The full list of categories that actually have products — from the
+  // dedicated endpoint, so every category shows as a filter chip.
+  const { data: allCategories } = useQuery({
+    queryKey: ['product-categories'],
+    queryFn: fetchProductCategories,
+    staleTime: 1000 * 60 * 10,
   });
 
   const products = (data as CatalogProduct[] | undefined) ?? [];
 
-  // Build the category list from the products actually available.
-  const categories = [
-    'All',
-    ...Array.from(new Set(products.map((p) => p.category).filter(Boolean) as string[])).sort(),
-  ];
+  const categories = ['All', ...((allCategories ?? []).filter(Boolean) as string[]).sort()];
 
+  // Category is filtered server-side; only the text search runs on the client.
   const filtered = products.filter((p) => {
     const q = query.toLowerCase();
-    const matchesQuery =
+    return (
       !q ||
       p.name?.toLowerCase().includes(q) ||
       p.category?.toLowerCase().includes(q) ||
-      p.displayName?.toLowerCase().includes(q);
-    const matchesCategory = category === 'All' || p.category === category;
-    return matchesQuery && matchesCategory;
+      p.displayName?.toLowerCase().includes(q)
+    );
   });
 
   return (

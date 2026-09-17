@@ -208,8 +208,10 @@ export const resetPasswordMutationFn = async ({ token, password }: { token: stri
   return data;
 };
 
-export const getPublicProductsFn = async (page = 1) => {
-  const { data } = await API.get('/products', { params: { page } });
+export const getPublicProductsFn = async (page = 1, category?: string) => {
+  const params: Record<string, unknown> = { page };
+  if (category && category !== 'All') params.category = category;
+  const { data } = await API.get('/products', { params });
   return data.posts as Record<string, unknown>[];
 };
 

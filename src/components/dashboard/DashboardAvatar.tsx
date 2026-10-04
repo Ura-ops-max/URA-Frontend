@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { rememberReturnTo } from '@/lib/return-to';
 import { User, LogOut, Settings } from 'lucide-react';
 import { useAuthContext } from '@/context/auth-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -18,7 +19,19 @@ export const DashboardAvatar = () => {
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const navigate = useNavigate();
 
-  if (isLoading || !user) return null;
+  if (isLoading) return null;
+  if (!user)
+    return (
+      <button
+        onClick={() => {
+          rememberReturnTo(window.location.pathname + window.location.search);
+          navigate('/auth/login');
+        }}
+        className="rounded-full bg-[#FF6B35] px-4 py-2 text-sm font-bold text-white hover:bg-[#e85a20]"
+      >
+        Sign in
+      </button>
+    );
 
   return (
     <>

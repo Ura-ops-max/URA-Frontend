@@ -1,3 +1,4 @@
+import { rememberReturnTo } from '@/lib/return-to';
 import { useState } from 'react';
 import { EllipsisIcon, Loader, LogOut, Plus, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -71,6 +72,18 @@ const AppSideBar = () => {
                 <div className="flex justify-center py-2">
                   <Loader className="animate-spin text-orange-500" size={18} />
                 </div>
+              ) : !user ? (
+                <SidebarMenuButton
+                  size="lg"
+                  onClick={() => {
+                    rememberReturnTo(window.location.pathname + window.location.search);
+                    navigate('/auth/login');
+                  }}
+                  className="rounded-2xl h-12 justify-center bg-[#FF6B35] text-white font-bold hover:bg-[#e85a20] hover:text-white"
+                >
+                  <User className="h-4 w-4" />
+                  <span className="group-data-[collapsible=icon]:hidden">Sign in</span>
+                </SidebarMenuButton>
               ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

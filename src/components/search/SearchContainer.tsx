@@ -53,7 +53,8 @@ function flattenBackendResults(data: any): SearchResult[] {
       rating: biz.averageRating ?? null,
       location: biz.address?.fullAddress ?? biz.address?.city ?? null,
       inStock: null,
-      url: `/dashboard/profile/business/${biz._id}`,
+      // Open business page (works signed out); old profile page as fallback.
+      url: biz.slug ? `/${biz.slug}` : `/dashboard/profile/business/${biz._id}`,
     });
   }
 

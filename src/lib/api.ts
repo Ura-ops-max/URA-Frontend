@@ -59,6 +59,17 @@ export const getBusinessQueryFn = async (businessId: string): Promise<CurrentUse
   return response.data;
 };
 
+// Public business page by slug — ura.com.ng/<slug>. Works logged-in or out.
+export const getPublicBusinessBySlugQueryFn = async (slug: string) => {
+  const response = await API.get(`/businesses/${slug}`);
+  return response.data;
+};
+
+export const getBusinessQrCodeQueryFn = async (slug: string, loc?: string) => {
+  const response = await API.get(`/businesses/${slug}/qrcode`, { params: loc ? { loc } : undefined });
+  return response.data as { success: boolean; url: string; qrCodeDataUrl: string };
+};
+
 // Update Personal Profile (Handles Multipart/Form-Data for images)
 
 export const updateProfileMutationFn = async (data: {
@@ -322,6 +333,11 @@ export const orderAPI = {
   }) => API.post('/orders', data),
   getMyOrders: () => API.get('/orders'),
   getOrderById: (id: string) => API.get(`/orders/${id}`),
+  /** Seller: paid orders customers placed with my business. */
+  getReceivedOrders: () => API.get('/orders/received'),
+  /** Seller: order is ready — books a Fez rider (delivery) or tells buyer to pick up. */
+  markOrderReady: (id: string, mode?: 'pickup' | 'self_delivery') =>
+    API.post(`/orders/${id}/ready`, mode ? { mode } : {}),
 };
 
 export interface CreateReviewData {

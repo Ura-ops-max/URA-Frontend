@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, UserPlus, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { rememberReturnTo } from '@/lib/return-to';
 
 interface AuthPromptModalProps {
   isOpen: boolean;
@@ -60,7 +61,10 @@ export const AuthPromptModal = ({
             {/* Buttons Stack */}
             <div className="w-full flex flex-col gap-3">
               <button
-                onClick={() => navigate('/auth/login')}
+                onClick={() => {
+                  rememberReturnTo(window.location.pathname + window.location.search);
+                  navigate('/auth/login');
+                }}
                 className="w-full bg-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-800 transition-all active:scale-[0.98]"
               >
                 <LogIn size={18} />
@@ -68,7 +72,10 @@ export const AuthPromptModal = ({
               </button>
 
               <button
-                onClick={() => navigate('/auth/register')}
+                onClick={() => {
+                  rememberReturnTo(window.location.pathname + window.location.search);
+                  navigate('/auth/register');
+                }}
                 className="w-full bg-white text-gray-900 border-2 border-gray-100 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-50 transition-all active:scale-[0.98]"
               >
                 <UserPlus size={18} />

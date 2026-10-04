@@ -552,8 +552,15 @@ const CheckoutPage = () => {
           orderNumber={transfer.orderNumber}
           onClose={() => setTransfer(null)}
           onPaid={() => {
-            setTransfer(null);
-            navigate('/dashboard/orders');
+            // Ask our backend to confirm now (it double-checks with Payluk), so the
+            // order shows as paid right away instead of waiting for the webhook.
+            const ref = transfer.paymentToken || transfer.orderNumber;
+            API.post('/orders/confirm', { paymentId: ref })
+              .catch((e) => console.warn('[checkout] confirm after pay failed (webhook will finish):', e))
+              .finally(() => {
+                setTransfer(null);
+                navigate(`/dashboard/orders/${transfer.orderId}`);
+              });
           }}
         />
       )}

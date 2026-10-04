@@ -1,4 +1,6 @@
-import { Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import GuestWelcomeCard from '@/components/dashboard/GuestWelcomeCard';
+import { AuthPromptModal } from '@/components/shared/AuthPromptModel';
 import { useAuthContext } from '@/context/auth-provider';
 import { useIsDesktop } from '@/hooks/use-is-desktop';
 // import { useActivity } from '@/hooks/api/use-activity'; // Recent Activity hidden per request
@@ -19,6 +21,9 @@ import React from 'react';
 const Dashboard = () => {
   const { user, related, isLoading: isContextLoading } = useAuthContext();
   const isDesktop = useIsDesktop();
+  // Signed-out visitors can browse the feed; acting on it asks them to sign in.
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const askToSignIn = () => setShowAuthPrompt(true);
 
   // API Hooks
   const activeProfileId = user?._id;
@@ -51,14 +56,12 @@ const Dashboard = () => {
   }, [posts, businesses]);
 
   // 1. Loading State
-  if (isContextLoading || isChatsLoading) {
+  if (isContextLoading || (user && isChatsLoading)) {
     return <DashboardSkeleton />;
   }
 
-  // 2. Auth Guard
-  if (!user || !related) {
-    return <Navigate to="/auth/login" replace />;
-  }
+  // 2. Guest mode (no sign-in wall): show the feed, hide personal widgets.
+  const isGuest = !user || !related;
 
   // Inside Dashboard.tsx return statement:
 
@@ -66,6 +69,9 @@ const Dashboard = () => {
     <DashboardContainer
       // --- LEFT SIDE ---
       leftColumn={
+        isGuest ? (
+          <GuestWelcomeCard />
+        ) : (
         <div className="flex flex-col gap-6">
           {/* Ensure ProfileCard is bg-white/40 backdrop-blur internally */}
           <ProfileCard user={user} related={related} />
@@ -80,9 +86,13 @@ const Dashboard = () => {
             <ChatList chatList={conversations} activeProfileId={activeProfileId!} />
           </SidebarWidget>
         </div>
+        )
       }
       // --- RIGHT SIDE ---
       rightColumn={
+        isGuest ? (
+          <div />
+        ) : (
         <div className="flex flex-col gap-6">
           {/* Recent Activity hidden per request
           <SidebarWidget
@@ -112,19 +122,22 @@ const Dashboard = () => {
             />
           </SidebarWidget>
         </div>
+        )
       }
     >
       <div className="flex flex-col h-screen overflow-hidden">
         {/* ShareBox stays at the top */}
         <div className="flex-shrink-0 py-4 lg:p-4">
-          <ShareBox />
+          <ShareBox onRequireAuth={isGuest ? askToSignIn : undefined} />
         </div>
 
         {/* AllFeed takes the remaining space and scrolls */}
         <div className="flex-1 min-h-0">
-          <AllFeed />
+          <AllFeed onRequireAuth={askToSignIn} />
         </div>
       </div>
+
+      <AuthPromptModal isOpen={showAuthPrompt} onClose={() => setShowAuthPrompt(false)} />
     </DashboardContainer>
   );
 };

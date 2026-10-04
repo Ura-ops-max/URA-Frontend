@@ -1,3 +1,4 @@
+import { Navigate } from 'react-router-dom';
 import { AUTH_ROUTES, BASE_ROUTE, PROTECTED_ROUTES } from './routePaths';
 
 import Home from '@/pages/public/Home';
@@ -29,12 +30,14 @@ import DealsAndOffers from '@/pages/dashboard/Deals&Offer';
 import CartPage from '@/pages/dashboard/CartPage';
 import CheckoutPage from '@/pages/dashboard/CheckoutPage';
 import OrdersPage from '@/pages/dashboard/Orders';
+import OrderDetailsPage from '@/pages/dashboard/OrderDetails';
 import ProductDetailsPage from '@/pages/dashboard/ProductDetails';
 import BookmarkPage from '@/pages/dashboard/BookmarkPage';
 import PasswordSecurity from '@/components/settings/pages/Password&Security';
 import NotificationsPage from '@/components/settings/pages/NotificationLog';
 import AboutPage from '@/pages/public/About';
 import ContactPage from '@/pages/public/Contact';
+import BusinessPage from '@/pages/public/BusinessPage';
 import PaylukSetupPage from '@/pages/dashboard/PaylukSetupPage.tsx';
 import { ImageSearch } from '@/pages/dashboard/ImageSearch';
 import PaymentCompletePage from '@/pages/dashboard/PaymentCompletePage.tsx';
@@ -118,6 +121,9 @@ export const protectedRoutePaths = [
   { path: PROTECTED_ROUTES.CART, element: <CartPage /> },
   { path: PROTECTED_ROUTES.CHECKOUT, element: <CheckoutPage /> },
   { path: PROTECTED_ROUTES.ORDER, element: <OrdersPage /> },
+  // Checkout and the payment page send buyers here; details link to /:orderId.
+  { path: '/dashboard/orders', element: <OrdersPage /> },
+  { path: '/dashboard/orders/:orderId', element: <OrderDetailsPage /> },
   { path: PROTECTED_ROUTES.IMAGE_SEARCH, element: <ImageSearch /> },
   { path: BASE_ROUTE.PAYLUK_PAYMENT_COMPLETE, element: <PaymentCompletePage /> },
   //   {path: PROTECTED_ROUTES.STORE_MANAGEMENT, element: <StoreManagement /> },
@@ -125,7 +131,10 @@ export const protectedRoutePaths = [
 
 // --- Public/Base Routes ---
 export const baseRoutePaths = [
-  { path: BASE_ROUTE.HOME, element: <Home /> },
+  // ura.com.ng opens straight into the feed (browsable without signing in).
+  { path: BASE_ROUTE.HOME, element: <Navigate to="/dashboard" replace /> },
+  // The old welcome page is kept here for marketing links.
+  { path: '/welcome', element: <Home /> },
   { path: BASE_ROUTE.ABOUT, element: <AboutPage /> },
   { path: BASE_ROUTE.CONTACT, element: <ContactPage /> },
   { path: BASE_ROUTE.TERMS, element: <TermsOfService /> },
@@ -139,6 +148,12 @@ export const baseRoutePaths = [
   // and so the "Verify Now" banner isn't bounced by the auth-redirect guard.
   { path: AUTH_ROUTES.VERIFY_EMAIL, element: <VerifyEmail /> },
   { path: AUTH_ROUTES.RESET_PASSWORD, element: <ResetPassword /> },
+  // Business vanity URL — ura.com.ng/<slug> — e.g. ura.com.ng/extreme-shawarma.
+  // React Router ranks static paths (e.g. /about) above this dynamic one, so
+  // it can never shadow the routes above regardless of list order; the
+  // backend's RESERVED_SLUGS list is the actual guard against a business
+  // claiming one of those names as its slug.
+  { path: '/:businessSlug', element: <BusinessPage /> },
 ];
 
 // --- Utility ---

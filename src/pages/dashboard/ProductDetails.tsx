@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { AuthPromptModal } from '@/components/shared/AuthPromptModel';
 import {
   ShoppingCart,
   Heart,
@@ -31,6 +32,7 @@ const isVideoUrl = (u?: string) => !!u && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(u
 const ProductDetailsPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const { data, isLoading, error } = useSingleProduct(productId!);
   const product = data?.product;
   const relatedProducts = data?.relatedProducts;
@@ -70,21 +72,25 @@ const ProductDetailsPage = () => {
   }, [product]);
 
   const handleLikeClick = () => {
-    if (!isAuthenticated) return navigate('/login'); // Or your auth trigger
+    if (!isAuthenticated) return setShowAuthPrompt(true);
     const prev = isLiked;
     setIsLiked(!prev);
     toggleLike(undefined, { onError: () => setIsLiked(prev) });
   };
 
   const handleAddToCart = () => {
-    if (!isAuthenticated) return navigate('/login');
+    if (!isAuthenticated) return setShowAuthPrompt(true);
     if (!product?._id) return;
     addItem(product._id, 1);
   };
 
   const handleViewStore = () => {
+    const slug = (product?.business as { slug?: string } | undefined)?.slug;
+    // Public business page works for everyone; fall back to the old profile route.
+    if (slug) return navigate(`/${slug}`);
     const businessId = product?.business?._id;
     if (!businessId) return;
+    if (!isAuthenticated) return setShowAuthPrompt(true);
     navigate(`/dashboard/profile/business/${businessId}`);
   };
 
@@ -460,6 +466,16 @@ const ProductDetailsPage = () => {
           </div>
         </div>
       )}
+
+      <AuthPromptModal
+        isOpen={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+        actionName={
+          (product?.business as { businessName?: string } | undefined)?.businessName
+            ? `order from ${(product?.business as { businessName?: string }).businessName}`
+            : 'order this item'
+        }
+      />
     </div>
   );
 };

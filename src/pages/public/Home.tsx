@@ -127,7 +127,7 @@ function Home() {
 
               <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
                 <Button asChild size="lg" variant="brand" className="w-full sm:w-auto px-8 text-base">
-                  <Link to="/auth/login">
+                  <Link to="/dashboard">
                     <span className="text-nowrap">Find a Vendor You Can Trust</span>
                   </Link>
                 </Button>
@@ -198,7 +198,7 @@ function Home() {
               ))}
             </ul>
             <Button asChild size="lg" variant="brand" className="mt-7 w-full sm:w-auto sm:self-start px-8 text-base">
-              <Link to="/auth/login">
+              <Link to="/dashboard">
                 <span className="text-nowrap">Find a Vendor You Can Trust</span>
               </Link>
             </Button>

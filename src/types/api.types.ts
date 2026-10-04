@@ -65,6 +65,8 @@ export type UserType = {
 export type BusinessType = {
   _id: string;
   businessName: string;
+  /** URL-safe handle for the public page: ura.com.ng/<slug> */
+  slug?: string;
   about: string;
   category: string;
   businessLogo: string;

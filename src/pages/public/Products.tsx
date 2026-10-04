@@ -19,6 +19,7 @@ interface CatalogProduct {
   displayName?: string;
   displayAvatar?: string;
   isVerified?: boolean;
+  businessSlug?: string;
 }
 
 const naira = (n?: number) =>
@@ -132,10 +133,8 @@ const ProductsPage = () => {
           <Stagger className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
             {filtered.map((p) => (
               <FadeItem key={p._id}>
-                <Link
-                  to={`/dashboard/product/${p._id}`}
-                  className="group block overflow-hidden rounded-2xl border border-slate-100 bg-white transition hover:shadow-lg hover:shadow-slate-100"
-                >
+                <div className="group overflow-hidden rounded-2xl border border-slate-100 bg-white transition hover:shadow-lg hover:shadow-slate-100">
+                <Link to={`/dashboard/product/${p._id}`} className="block">
                   <div className="aspect-square overflow-hidden bg-slate-100">
                     {p.media?.[0] ? (
                       <ProductThumb
@@ -162,15 +161,19 @@ const ProductsPage = () => {
                     )}
                     <h3 className="mt-1 truncate text-sm font-bold text-slate-900">{p.name}</h3>
                     <p className="mt-1 text-lg font-black text-amber-600">{naira(p.price)}</p>
-                    {p.displayName && (
-                      <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
-                        <Store className="h-3 w-3" />
-                        <span className="truncate">{p.displayName}</span>
-                        {p.isVerified && <BadgeCheck className="h-3.5 w-3.5 text-sky-500" />}
-                      </div>
-                    )}
                   </div>
                 </Link>
+                {p.displayName && (
+                  <Link
+                    to={p.businessSlug ? `/${p.businessSlug}` : `/dashboard/product/${p._id}`}
+                    className="flex items-center gap-1.5 px-4 pb-4 text-xs text-slate-400 hover:text-amber-600"
+                  >
+                    <Store className="h-3 w-3" />
+                    <span className="truncate">{p.displayName}</span>
+                    {p.isVerified && <BadgeCheck className="h-3.5 w-3.5 text-sky-500" />}
+                  </Link>
+                )}
+                </div>
               </FadeItem>
             ))}
           </Stagger>

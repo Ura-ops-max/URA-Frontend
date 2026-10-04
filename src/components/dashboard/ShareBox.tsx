@@ -10,7 +10,7 @@ import { TagInput } from '../shared/TagInput';
 import { cn } from '@/lib/utils';
 import { generateAvatarUrl } from '@/utils/avatar-generator';
 
-const ShareBox = () => {
+const ShareBox = ({ onRequireAuth }: { onRequireAuth?: () => void } = {}) => {
   const { user } = useAuthContext();
   const { mutate, isPending } = useCreatePost();
 
@@ -60,13 +60,27 @@ const ShareBox = () => {
   };
 
   return (
-    <div className="rounded-[32px] bg-white/40 backdrop-blur-2xl p-4 border border-white/50 shadow-[0_10px_30px_rgba(0,0,0,0.02)] w-full">
+    <div
+      className="rounded-[32px] bg-white/40 backdrop-blur-2xl p-4 border border-white/50 shadow-[0_10px_30px_rgba(0,0,0,0.02)] w-full"
+      // Signed-out visitors: any tap on the composer opens the sign-in prompt.
+      onPointerDownCapture={
+        onRequireAuth
+          ? (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onRequireAuth();
+            }
+          : undefined
+      }
+    >
       <div className="flex flex-col gap-5">
         <div className="flex items-center gap-4">
           <Avatar className="h-11 w-11 shrink-0 border-2 border-white shadow-sm">
             <AvatarImage
               src={
-                user?.profilePicture || generateAvatarUrl(`${user?.firstName} ${user?.lastName}`)
+                user
+                  ? user.profilePicture || generateAvatarUrl(`${user.firstName} ${user.lastName}`)
+                  : undefined
               }
               className="object-cover"
             />

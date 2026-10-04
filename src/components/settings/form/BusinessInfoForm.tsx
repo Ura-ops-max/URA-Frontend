@@ -15,6 +15,7 @@ import { useAuthContext } from '@/context/auth-provider';
 import { NIGERIAN_STATES } from '@/lib/nigerian-states';
 import { useUserProfile } from '@/hooks/api/use-user-profile';
 import { useUpdateBusiness } from '@/hooks/api/use-user-profile';
+import BusinessLinkCard from '@/components/settings/ui/BusinessLinkCard';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -135,6 +136,8 @@ const BusinessInfoForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="divide-y divide-gray-100 overflow-x-hidden">
+      <BusinessLinkCard slug={business?.slug} />
+
       {/* 1. Visual Branding Section */}
       <div className="p-8 space-y-6">
         <div className="flex items-center gap-3">

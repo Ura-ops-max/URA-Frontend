@@ -113,7 +113,10 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
       show: true,
       onClick: () => {
         const storeId = post.authorId || (post.product?.business as unknown as string);
-        const url = storeId
+        const slug = (post as { businessSlug?: string }).businessSlug;
+        const url = slug
+          ? `${window.location.origin}/${slug}`
+          : storeId
           ? `${window.location.origin}/dashboard/profile/business/${storeId}`
           : `${window.location.origin}/posts/${post._id}`;
         navigator.clipboard.writeText(url);
@@ -188,7 +191,11 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
             />
             <div>
               <Link
-                to={`/dashboard/profile/business/${post.authorId}`}
+                to={
+                  (post as { businessSlug?: string }).businessSlug
+                    ? `/${(post as { businessSlug?: string }).businessSlug}`
+                    : `/dashboard/profile/business/${post.authorId}`
+                }
                 className="flex items-center gap-1 group"
               >
                 <h3 className="font-black text-gray-900 text-[16px] group-hover:text-orange-600 transition-colors">

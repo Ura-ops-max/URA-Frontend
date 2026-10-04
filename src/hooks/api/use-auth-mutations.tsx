@@ -1,3 +1,4 @@
+import { consumeReturnTo } from '@/lib/return-to';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -27,7 +28,7 @@ export const useLogin = () => {
       queryClient.invalidateQueries({ queryKey: ['authUser'] });
 
       toast.success(data.message || 'Login successful!');
-      navigate('/dashboard');
+      navigate(consumeReturnTo('/dashboard'));
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       const message = error.response?.data?.message || 'Something went wrong';

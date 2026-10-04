@@ -120,7 +120,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     key={b._id}
                     biz={b}
                     onClick={() =>
-                      onResultClick(b.businessName, `/dashboard/profile/business/${b._id}`)
+                      onResultClick(
+                        b.businessName,
+                        b.slug ? `/${b.slug}` : `/dashboard/profile/business/${b._id}`,
+                      )
                     }
                   />
                 ))}

@@ -4,7 +4,7 @@ import { XCircle, Loader2, Package, ArrowRight, ShoppingBag } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import API from '@/lib/axios-client';
 
-type Status = 'loading' | 'success' | 'already_confirmed' | 'error';
+type Status = 'loading' | 'success' | 'already_confirmed' | 'pending' | 'error';
 
 interface OrderSummary {
   _id: string;
@@ -150,7 +150,7 @@ function Confetti() {
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
-const CART_PATH = '/dashboard/product/cart';
+const ORDERS_PATH = '/dashboard/orders';
 
 const PaymentCompletePage = () => {
   const [searchParams] = useSearchParams();
@@ -169,9 +169,14 @@ const PaymentCompletePage = () => {
     API.post('/orders/confirm', { paymentId })
       .then(({ data }) => {
         setOrder(data.order);
+        if (data.pending) {
+          // Payluk hasn't confirmed the money yet; the webhook will finish it.
+          setStatus('pending');
+          return;
+        }
         setStatus(data.alreadyConfirmed ? 'already_confirmed' : 'success');
-        // Auto-redirect to cart after 3 seconds
-        setTimeout(() => navigate(CART_PATH), 3000);
+        // Take the buyer to their orders after a short pause.
+        setTimeout(() => navigate(ORDERS_PATH), 4000);
       })
       .catch((error: any) => {
         setStatus('error');
@@ -181,6 +186,30 @@ const PaymentCompletePage = () => {
         );
       });
   }, [paymentId]);
+
+  // Payment sent but Payluk hasn't confirmed it yet.
+  if (status === 'pending') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="max-w-sm text-center">
+          <div className="mx-auto mb-5 w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+          </div>
+          <h1 className="text-2xl font-black text-gray-900 mb-2">Confirming your payment</h1>
+          <p className="text-sm text-gray-500">
+            We&apos;re waiting for Payluk to confirm order {order?.orderNumber}. This usually takes under a
+            minute. You&apos;ll get a notification and an email as soon as it&apos;s confirmed.
+          </p>
+          <button
+            onClick={() => navigate(ORDERS_PATH)}
+            className="mt-6 w-full rounded-2xl bg-gray-900 py-3 text-sm font-bold text-white"
+          >
+            Go to my orders
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Loading
   if (status === 'loading') {
@@ -326,9 +355,9 @@ const PaymentCompletePage = () => {
             asChild
             className="flex-1 h-12 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black gap-2 transition-colors"
           >
-            <Link to={CART_PATH}>
+            <Link to={ORDERS_PATH}>
               <ShoppingBag size={16} />
-              Go to Cart
+              View my orders
               <ArrowRight size={14} />
             </Link>
           </Button>

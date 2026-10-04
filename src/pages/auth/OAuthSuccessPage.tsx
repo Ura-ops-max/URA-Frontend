@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { tokenStorage } from '@/lib/token-storage';
+import { consumeReturnTo } from '@/lib/return-to';
 import { Loader2 } from 'lucide-react';
 
 const OAuthSuccessPage = () => {
@@ -14,7 +15,7 @@ const OAuthSuccessPage = () => {
     if (accessToken && refreshToken) {
       tokenStorage.setToken(accessToken);
       tokenStorage.setRefreshToken(refreshToken);
-      navigate('/dashboard', { replace: true });
+      navigate(consumeReturnTo('/dashboard'), { replace: true });
     } else {
       navigate('/auth/login?error=oauth_failed', { replace: true });
     }

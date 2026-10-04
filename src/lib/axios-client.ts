@@ -1,6 +1,7 @@
 import type { CustomError } from '@/types/custom-error.type';
 import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { tokenStorage } from './token-storage';
+import { isGuestAllowedPath } from './guest-access';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
@@ -10,8 +11,13 @@ const options = {
   timeout: 10000,
 };
 
-// 1. Define public paths that shouldn't trigger a redirect
-const PUBLIC_PATHS = ['/', '/about', '/contact'];
+// Only private pages (dashboard, payment return) should force a login redirect.
+// Every other page — home, products, posts, and public business pages like
+// /extreme-shawarma — must stay open to logged-out visitors, even if some
+// background call (e.g. the cart) comes back 401.
+const PRIVATE_PREFIXES = ['/dashboard', '/payments'];
+const isPrivatePage = (path: string) =>
+  !isGuestAllowedPath(path) && PRIVATE_PREFIXES.some((p) => path === p || path.startsWith(p + '/'));
 
 const API = axios.create(options);
 
@@ -92,12 +98,8 @@ API.interceptors.response.use(
       if (!refreshToken) {
         tokenStorage.clearTokens();
 
-        // Only redirect if they aren't already on a public page
-        const isPublicPage = PUBLIC_PATHS.includes(window.location.pathname);
-        const isAuthPage = window.location.pathname.startsWith('/auth'); // Add this check
-
-        // 💥 UPDATE REDIRECT LOGIC 💥
-        if (!isPublicPage && !isAuthPage) {
+        // Only redirect when the visitor is on a private page.
+        if (isPrivatePage(window.location.pathname)) {
           window.location.href = '/auth/login';
         }
 
@@ -130,7 +132,9 @@ API.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         tokenStorage.clearTokens();
-        window.location.href = '/auth/login';
+        if (isPrivatePage(window.location.pathname)) {
+          window.location.href = '/auth/login';
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

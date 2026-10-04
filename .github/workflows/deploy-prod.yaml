@@ -3,7 +3,6 @@ name: Deploy to S3 and CloudFront
 on:
   push:
     branches:
-      - main
       - dracer/base
   workflow_dispatch:
 

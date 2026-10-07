@@ -30,7 +30,12 @@ export const useCart = () => {
     try {
       const response = await cartAPI.addToCart({ productId, quantity });
       setCart(response.data);
-      toast.success('Added to cart');
+      toast.success('Added to cart', {
+        action: {
+          label: 'View cart',
+          onClick: () => window.location.assign('/dashboard/product/cart'),
+        },
+      });
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to add item');
     } finally {

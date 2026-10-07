@@ -7,7 +7,7 @@ import { useSeo } from '@/hooks/useSeo';
 const FAQS = [
   {
     q: 'What is URA?',
-    a: 'URA is a marketplace where you can discover businesses, buy and sell products, and pay securely with buyer protection through escrow.',
+    a: 'URA is a marketplace where you can discover businesses, buy and sell products, and pay securely with buyer protection.',
   },
   {
     q: 'How do I create an account?',
@@ -15,11 +15,11 @@ const FAQS = [
   },
   {
     q: 'How does payment work?',
-    a: 'Payments are processed securely through our partner Payluk. You can pay instantly, or use Escrow so your funds are only released to the seller once your order is confirmed.',
+    a: 'Payments are processed securely through our partner Payluk. You can pay instantly, or use Buyer-Protected Payment so your funds are only released to the seller once your order is confirmed.',
   },
   {
-    q: 'What is escrow and why should I use it?',
-    a: 'Escrow holds your payment safely until you confirm you\'ve received your order as described. It protects both buyers and sellers from fraud.',
+    q: 'What is Buyer-Protected Payment and why should I use it?',
+    a: 'Buyer-Protected Payment holds your payment safely until you confirm you\'ve received your order as described. It protects both buyers and sellers from fraud.',
   },
   {
     q: 'How do I become a seller?',
@@ -77,7 +77,7 @@ const FAQ = () => {
   useSeo({
     title: 'Frequently Asked Questions',
     description:
-      'Answers to common questions about buying, selling, escrow-protected payments, and delivery on URA, Nigeria’s trusted marketplace.',
+      'Answers to common questions about buying, selling, buyer-protected payments, and delivery on URA, Nigeria’s trusted marketplace.',
     url: 'https://www.ura.com.ng/faq',
   });
 

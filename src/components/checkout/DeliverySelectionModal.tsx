@@ -162,9 +162,9 @@ export default function DeliverySelectionModal({
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-black text-gray-900">Pay with Escrow</p>
+                <p className="font-black text-gray-900">Buyer-Protected Payment</p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Protected — held until you confirm delivery (small fee applies)
+                  Your money is held safely until you confirm you got your order (small fee).
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-orange-500" />

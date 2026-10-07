@@ -51,7 +51,7 @@ export default function ConfirmPaymentPage() {
       <div className="mb-8">
         <h2 className="text-xl font-black text-gray-900">Confirm Payment to Seller</h2>
         <p className="text-sm text-gray-400 mt-1">
-          Confirm delivery and release escrow funds to the seller.
+          Confirm delivery and release funds to the seller.
         </p>
       </div>
 
@@ -59,7 +59,7 @@ export default function ConfirmPaymentPage() {
         <Info size={16} className="text-green-500 shrink-0 mt-0.5" />
         <p className="text-xs text-green-700 leading-relaxed">
           Only confirm payment once you've received your item and are satisfied with it. This action
-          releases the escrowed funds to the seller and{' '}
+          releases the held funds to the seller and{' '}
           <span className="font-black">cannot be undone</span>. Use the{' '}
           <span className="font-black">transaction ID</span> from your Purchase Transactions page.
         </p>

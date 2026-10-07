@@ -37,7 +37,7 @@ const CATEGORIES = [
 
 const FAQS = [
   {
-    q: 'How does escrow protect me?',
+    q: 'How does buyer protection work?',
     a: "Your payment is held safely by URA and only released to the seller after you confirm your order arrived. If something goes wrong, your money is protected.",
   },
   {
@@ -57,7 +57,7 @@ const FAQS = [
 const FEATURES = [
   {
     icon: ShieldCheck,
-    title: 'Secure Escrow Payments',
+    title: 'Buyer-Protected Payments',
     desc: 'Your money is held safely and only released to the seller once you confirm your order full buyer protection.',
   },
   {
@@ -90,7 +90,7 @@ const FEATURES = [
 const STEPS = [
   { icon: UserPlus, title: 'Create your account', desc: 'Sign up in seconds and verify your email to get started.' },
   { icon: Search, title: 'Discover & shop', desc: 'Browse businesses and products, and add what you love to your cart.' },
-  { icon: PackageCheck, title: 'Pay securely & receive', desc: 'Pay with escrow or instantly, and confirm when your order arrives.' },
+  { icon: PackageCheck, title: 'Pay securely & receive', desc: 'Pay with buyer protection or instantly, and confirm when your order arrives.' },
 ];
 
 function Home() {
@@ -114,7 +114,7 @@ function Home() {
             >
               <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-bold text-amber-700">
                 <Sparkles className="h-3.5 w-3.5" />
-                Escrow-protected · Verified vendors
+                Buyer-protected · Verified vendors
               </span>
 
               <h1 className="mt-6 max-w-2xl text-balance font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl xl:text-7xl">
@@ -145,7 +145,7 @@ function Home() {
 
               {/* Trust indicators */}
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 lg:justify-start">
-                {['Money held in escrow', 'Every vendor verified', 'Nationwide delivery'].map(
+                {['Money held safely', 'Every vendor verified', 'Nationwide delivery'].map(
                   (point) => (
                     <span
                       key={point}

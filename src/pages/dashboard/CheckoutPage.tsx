@@ -448,27 +448,15 @@ const CheckoutPage = () => {
                     <span>Subtotal</span>
                     <span>{formattedPrice(totalPrice)}</span>
                   </div>
-                  <div className="flex justify-between text-sm font-bold text-gray-500">
-                    <span>Delivery{selectedState ? ` · ${selectedState}` : ''}</span>
-                    {deliveryLoading ? (
-                      <span className="text-gray-400">Calculating…</span>
-                    ) : deliveryFee != null ? (
-                      <span>{formattedPrice(deliveryFee)}</span>
-                    ) : deliveryError ? (
-                      <span className="text-amber-600">Unavailable</span>
-                    ) : (
-                      <span className="text-gray-400">Select state</span>
-                    )}
-                  </div>
-                  {deliveryError && (
-                    <p className="text-xs leading-relaxed text-amber-600">{deliveryError}</p>
-                  )}
+                  {/* Delivery is optional — the fee is only shown in the next step,
+                      so the page total stays the item total. */}
+                  <p className="text-xs leading-relaxed text-gray-400">
+                    Delivery (optional): you&apos;ll choose on the next step.
+                  </p>
                   <div className="flex justify-between items-baseline pt-4">
-                    <span className="text-base font-black text-gray-900 uppercase">
-                      Total Amount
-                    </span>
+                    <span className="text-base font-black text-gray-900 uppercase">Total</span>
                     <span className="text-2xl sm:text-3xl font-black text-orange-600">
-                      {formattedPrice(orderTotal)}
+                      {formattedPrice(totalPrice)}
                     </span>
                   </div>
                 </div>

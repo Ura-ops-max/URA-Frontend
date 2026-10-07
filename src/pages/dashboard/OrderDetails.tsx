@@ -219,7 +219,7 @@ const OrderDetailsPage = () => {
         )}
         {role === 'buyer' && order.status === 'processing' && (
           <p className="mt-3 text-xs text-gray-500">
-            Your money is held safely in escrow. Only tap &quot;I&apos;ve received my order&quot; once you have the items.
+            Your money is held safely with buyer protection. Only tap &quot;I&apos;ve received my order&quot; once you have the items.
           </p>
         )}
       </div>

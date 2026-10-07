@@ -251,7 +251,7 @@ export default function CheckoutPaymentModal({
             <div>
               <h2 className="text-lg font-black text-gray-900 leading-tight">Complete Payment</h2>
               <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">
-                {orderNumber ? `Order ${orderNumber}` : 'Held safely in escrow'}
+                {orderNumber ? `Order ${orderNumber}` : 'Held safely (buyer-protected)'}
               </p>
             </div>
           </div>
@@ -441,7 +441,7 @@ export default function CheckoutPaymentModal({
               <div className="mt-5 flex items-center justify-center gap-2 text-gray-400">
                 <ShieldCheck size={14} className="text-blue-400" />
                 <span className="text-[10px] font-black uppercase tracking-widest">
-                  Held safely in escrow until delivery
+                  Held safely until you confirm delivery
                 </span>
               </div>
             </>

@@ -62,7 +62,7 @@ export default function OpenDisputePage() {
       <div className="mb-8">
         <h2 className="text-xl font-black text-gray-900">Open Dispute</h2>
         <p className="text-sm text-gray-400 mt-1">
-          Submit a dispute for an escrow transaction as a buyer.
+          Submit a dispute for a buyer-protected order as a buyer.
         </p>
       </div>
 

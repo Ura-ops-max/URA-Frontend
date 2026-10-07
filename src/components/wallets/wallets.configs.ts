@@ -42,13 +42,13 @@ export const walletsGroups = [
         id: 'seller-transactions',
         title: 'My Sales Transactions',
         icon: ShoppingBag,
-        desc: 'Your sales escrow transactions',
+        desc: 'Your buyer-protected sales',
       },
       {
         id: 'claim-funds',
         title: 'Claim Funds',
         icon: BadgeCheck,
-        desc: 'Claim funds from completed escrow',
+        desc: 'Claim funds from completed orders',
       },
       {
         id: 'respond-to-dispute',
@@ -65,7 +65,7 @@ export const walletsGroups = [
         id: 'buyer-transactions',
         title: 'My Transactions',
         icon: ShoppingCart,
-        desc: 'Your purchase escrow transactions',
+        desc: 'Your buyer-protected purchases',
       },
       {
         id: 'open-dispute',
@@ -77,7 +77,7 @@ export const walletsGroups = [
         id: 'confirm-payment',
         title: 'Confirm Payment to Seller',
         icon: CheckCircle,
-        desc: 'Release escrow funds to seller',
+        desc: 'Release funds to seller',
       },
     ],
   },

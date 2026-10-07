@@ -29,7 +29,7 @@ const ProductsPage = () => {
   useSeo({
     title: 'Shop Products',
     description:
-      'Browse and buy products from verified vendors across Nigeria. Escrow-protected payments, AI-powered search, and fast delivery on URA.',
+      'Browse and buy products from verified vendors across Nigeria. Buyer-protected payments, AI-powered search, and fast delivery on URA.',
     url: 'https://www.ura.com.ng/products',
   });
 
@@ -80,7 +80,7 @@ const ProductsPage = () => {
             Discover <span className="text-amber-500">Products</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-slate-600">
-            Browse products from trusted local businesses. Sign in to buy securely with escrow.
+            Browse products from trusted local businesses. Sign in to buy securely with buyer protection.
           </p>
 
           <div className="relative mx-auto mt-8 max-w-md">

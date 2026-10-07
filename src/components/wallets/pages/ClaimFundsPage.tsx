@@ -50,7 +50,7 @@ export default function ClaimFundsPage() {
       <div className="mb-8">
         <h2 className="text-xl font-black text-gray-900">Claim Funds</h2>
         <p className="text-sm text-gray-400 mt-1">
-          Enter the payment token of the escrow transaction you'd like to claim.
+          Enter the payment token of the order you'd like to claim.
         </p>
       </div>
 

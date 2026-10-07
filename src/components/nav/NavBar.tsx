@@ -1,15 +1,32 @@
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ShoppingCart, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import React from 'react';
 import Logo from '../shared/Logo';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { menuItems } from '@/lib/data';
+import { useAuthContext } from '@/context/auth-provider';
+import { useCartContext } from '@/context/cart-provider';
+import { PROTECTED_ROUTES } from '@/routes/common/routePaths';
 
-export const NavBar = () => {
+/**
+ * Top bar for the public pages.
+ *
+ * `variant="shop"` is used ONLY on a business's own link page
+ * (ura.com.ng/<slug>). On that page a signed-in customer sees Home + Cart
+ * instead of Login / Sign Up / Get Started. Every other public page keeps the
+ * default "site" bar exactly as before.
+ */
+export const NavBar = ({ variant = 'site' }: { variant?: 'site' | 'shop' }) => {
   const [menuState, setMenuState] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const location = useLocation();
+  const { isAuthenticated } = useAuthContext();
+  const { totalItems } = useCartContext();
+
+  // Show the Home + Cart bar only on a business link page, for signed-in customers.
+  const showShop = variant === 'shop' && isAuthenticated;
+  const cartCount = showShop ? totalItems : 0;
 
   React.useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -42,6 +59,20 @@ export const NavBar = () => {
               <div aria-label="home" className="flex items-center space-x-2">
                 <Logo url="/" />
               </div>
+
+              {/* Shop mode (phone): Home + Cart always visible next to the menu button. */}
+              {showShop && (
+                <div className="ml-auto mr-4 flex items-center gap-2 lg:hidden">
+                  <Link
+                    to="/dashboard"
+                    aria-label="Home"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-md border bg-white text-gray-800"
+                  >
+                    <LayoutDashboard size={18} />
+                  </Link>
+                  <CartButton count={cartCount} compact />
+                </div>
+              )}
 
               <button
                 onClick={() => setMenuState(!menuState)}
@@ -105,22 +136,34 @@ export const NavBar = () => {
                 </ul>
               </div>
 
-              <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className={cn(isScrolled && 'lg:hidden')}
-                >
-                  <Link to="/auth/login">Login</Link>
-                </Button>
-                <Button asChild size="sm" className={cn(isScrolled && 'lg:hidden')}>
-                  <Link to="/auth/register">Sign Up</Link>
-                </Button>
-                <Button asChild size="sm" className={cn(isScrolled ? 'lg:inline-flex' : 'hidden')}>
-                  <Link to="/auth/register">Get Started</Link>
-                </Button>
-              </div>
+              {showShop ? (
+                // Business link page, signed in: Home (the URA feed) + Cart.
+                <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/dashboard" onClick={() => setMenuState(false)}>
+                      <LayoutDashboard size={16} className="mr-1" /> Home
+                    </Link>
+                  </Button>
+                  <CartButton count={cartCount} onClick={() => setMenuState(false)} />
+                </div>
+              ) : (
+                <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className={cn(isScrolled && 'lg:hidden')}
+                  >
+                    <Link to="/auth/login">Login</Link>
+                  </Button>
+                  <Button asChild size="sm" className={cn(isScrolled && 'lg:hidden')}>
+                    <Link to="/auth/register">Sign Up</Link>
+                  </Button>
+                  <Button asChild size="sm" className={cn(isScrolled ? 'lg:inline-flex' : 'hidden')}>
+                    <Link to="/auth/register">Get Started</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -128,3 +171,34 @@ export const NavBar = () => {
     </header>
   );
 };
+
+/** Cart button with a live item count — opens the cart, then checkout. */
+function CartButton({
+  count,
+  compact = false,
+  onClick,
+}: {
+  count: number;
+  compact?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <Link
+      to={PROTECTED_ROUTES.CART}
+      onClick={onClick}
+      aria-label={`Cart, ${count} item${count === 1 ? '' : 's'}`}
+      className={cn(
+        'relative inline-flex items-center justify-center gap-1.5 rounded-md bg-orange-500 font-medium text-white transition hover:bg-orange-600',
+        compact ? 'h-9 w-9' : 'h-8 px-3 text-sm',
+      )}
+    >
+      <ShoppingCart size={compact ? 18 : 16} />
+      {!compact && <span>Cart</span>}
+      {count > 0 && (
+        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-gray-900 px-1 text-[10px] font-bold text-white">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </Link>
+  );
+}

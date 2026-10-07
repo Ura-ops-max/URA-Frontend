@@ -67,7 +67,7 @@ export default function RespondToDisputePage() {
       <div className="mb-8">
         <h2 className="text-xl font-black text-gray-900">Respond to Dispute</h2>
         <p className="text-sm text-gray-400 mt-1">
-          Submit your response to an open escrow dispute.
+          Submit your response to an open dispute.
         </p>
       </div>
 

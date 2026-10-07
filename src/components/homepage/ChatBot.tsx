@@ -11,7 +11,7 @@ const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '
 
 const GREETING: Message = {
   from: 'bot',
-  text: 'Hello! I am the Ura assistant. How can I help you today? You can ask about accounts, payments, escrow, selling, and more.',
+  text: 'Hello! I am the Ura assistant. How can I help you today? You can ask about accounts, payments, buyer protection, selling, and more.',
   time: now(),
 };
 
@@ -31,12 +31,12 @@ const KB: { keywords: string[]; answer: string }[] = [
   {
     keywords: ['pay', 'payment', 'checkout', 'card', 'transfer'],
     answer:
-      'Payments are handled securely through our partner Payluk. You can pay instantly or use Escrow so your money is only released once you confirm your order.',
+      'Payments are handled securely through our partner Payluk. You can pay instantly or use Buyer-Protected Payment so your money is only released once you confirm your order.',
   },
   {
     keywords: ['escrow', 'protect', 'buyer protection'],
     answer:
-      'Escrow holds your payment safely until you confirm you received your order as described — protecting both buyers and sellers from fraud.',
+      'Buyer-Protected Payment holds your payment safely until you confirm you received your order as described — protecting both buyers and sellers from fraud.',
   },
   {
     keywords: ['wallet', 'fund', 'balance', 'deposit', 'top up', 'top-up'],
@@ -61,7 +61,7 @@ const KB: { keywords: string[]; answer: string }[] = [
   {
     keywords: ['refund', 'dispute', 'problem', 'not received'],
     answer:
-      'If something goes wrong with an escrow order, you can open a dispute from your Wallet under "Respond to Dispute". Our team helps resolve it fairly.',
+      'If something goes wrong with a buyer-protected order, you can open a dispute from your Wallet under "Respond to Dispute". Our team helps resolve it fairly.',
   },
   {
     keywords: ['safe', 'secure', 'privacy', 'data'],
@@ -101,7 +101,7 @@ const quickReplies = [
   'How do I create an account?',
   'Payment issues',
   'Business verification',
-  'How does escrow work?',
+  'How does buyer protection work?',
   'Contact human agent',
 ];
 

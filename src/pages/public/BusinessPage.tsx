@@ -5,8 +5,11 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { chatAPI } from '@/lib/chat-api';
-import { BadgeCheck, MapPin, Phone, Star } from 'lucide-react';
+import { BadgeCheck, MapPin, Phone, Star, ShoppingCart, ChevronRight } from 'lucide-react';
 import { useAuthContext } from '@/context/auth-provider';
+import { useCartContext } from '@/context/cart-provider';
+import { PROTECTED_ROUTES } from '@/routes/common/routePaths';
+import { formatNaira } from '@/lib/order-status';
 import { usePublicBusiness } from '@/hooks/api/use-public-business';
 import { generateAvatarUrl } from '@/utils/avatar-generator';
 import ProductsFeed from '@/components/feed/ProductsFeed';
@@ -31,6 +34,17 @@ export default function BusinessPage() {
   const { data, isLoading, isError } = usePublicBusiness(businessSlug);
   const [activeTab, setActiveTab] = useState<Tab>('Products');
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [authAction, setAuthAction] = useState('order');
+
+  // Cart summary for the sticky "View cart" bar. Hooks must run before any
+  // early return, so compute here. Skip lines whose product is missing.
+  const { cart } = useCartContext();
+  const cartItems: any[] = isAuthenticated ? (cart?.items ?? []).filter((i: any) => i?.product) : [];
+  const cartCount = cartItems.reduce((n, i) => n + (Number(i.quantity) || 0), 0);
+  const cartTotal = cartItems.reduce(
+    (n, i) => n + (Number(i.product?.price) || 0) * (Number(i.quantity) || 0),
+    0,
+  );
 
   if (isLoading) return <ProfileSkeleton />;
 
@@ -50,11 +64,14 @@ export default function BusinessPage() {
   const fallbackAvatar = generateAvatarUrl(business.businessName);
   const avatar = business.businessLogo || fallbackAvatar;
 
-  const requireAuth = () => setShowAuthPrompt(true);
+  const requireAuth = (action = 'order') => {
+    setAuthAction(action);
+    setShowAuthPrompt(true);
+  };
 
   // Signed-in visitors: open (or create) a chat with this business.
   const handleMessage = async () => {
-    if (!isAuthenticated || !user?._id) return requireAuth();
+    if (!isAuthenticated || !user?._id) return requireAuth('message');
     setStartingChat(true);
     try {
       const { data: res } = await chatAPI.accessConversation({
@@ -72,7 +89,11 @@ export default function BusinessPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF9F6] pt-24 md:pt-28 pb-16 px-4 lg:px-12">
+    <div
+      className={`min-h-screen bg-[#FFF9F6] pt-24 md:pt-28 px-4 lg:px-12 ${
+        cartCount > 0 ? 'pb-32' : 'pb-16'
+      }`}
+    >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <header className="bg-white rounded-3xl shadow-sm ring-1 ring-black/5 overflow-hidden">
@@ -155,10 +176,18 @@ export default function BusinessPage() {
 
         <div className="mt-6">
           {activeTab === 'Products' && (
-            <ProductsFeed targetId={(business._id as string)} type="post" onRequireAuth={requireAuth} />
+            <ProductsFeed
+              targetId={business._id as string}
+              type="post"
+              onRequireAuth={() => requireAuth('order')}
+            />
           )}
           {activeTab === 'Posts' && (
-            <PostsFeed targetId={business._id as string} type="post" onRequireAuth={requireAuth} />
+            <PostsFeed
+              targetId={business._id as string}
+              type="post"
+              onRequireAuth={() => requireAuth('interact with')}
+            />
           )}
           {activeTab === 'Reviews' && <ReviewsSection itemId={business._id as string} itemModel="Business" />}
           {activeTab === 'About' && (
@@ -180,10 +209,28 @@ export default function BusinessPage() {
         </div>
       </div>
 
+      {/* Sticky "View cart" bar — lets customers go straight to checkout from the shop page. */}
+      {cartCount > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-4">
+          <Link
+            to={PROTECTED_ROUTES.CART}
+            className="mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl bg-orange-600 px-5 py-3.5 text-white shadow-xl shadow-orange-900/20 transition hover:bg-orange-700"
+          >
+            <span className="flex items-center gap-2 text-sm font-semibold">
+              <ShoppingCart className="h-5 w-5" />
+              {cartCount} item{cartCount === 1 ? '' : 's'} · {formatNaira(cartTotal)}
+            </span>
+            <span className="flex items-center gap-1 text-sm font-bold">
+              View cart &amp; checkout <ChevronRight className="h-4 w-4" />
+            </span>
+          </Link>
+        </div>
+      )}
+
       <AuthPromptModal
         isOpen={showAuthPrompt}
         onClose={() => setShowAuthPrompt(false)}
-        actionName={`contact ${business.businessName}`}
+        actionName={`${authAction}${authAction === 'order' ? ' from ' : ' '}${business.businessName}`}
       />
     </div>
   );

@@ -3,6 +3,7 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { XCircle, Loader2, Package, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import API from '@/lib/axios-client';
+import CheckoutAd from '@/components/ads/CheckoutAd';
 
 type Status = 'loading' | 'success' | 'already_confirmed' | 'pending' | 'error';
 
@@ -12,6 +13,8 @@ interface OrderSummary {
   totalAmount: number;
   status: string;
   paymentStatus: string;
+  /** The shop the order is with — used to fetch its checkout ad. */
+  business?: string;
 }
 
 const formatNGN = (n: number) =>
@@ -362,6 +365,8 @@ const PaymentCompletePage = () => {
             </Link>
           </Button>
         </div>
+
+        <CheckoutAd businessId={order?.business} />
       </div>
     </div>
   );

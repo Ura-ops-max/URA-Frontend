@@ -5,6 +5,7 @@ import { useEscrowCheckout } from 'payluk-escrow-inline-checkout/react';
 import { Button } from '@/components/ui/button';
 import paylukAPI from '@/lib/payluk-axios';
 import { BASE_ROUTE } from '@/routes/common/routePaths.ts';
+import CheckoutAd from '@/components/ads/CheckoutAd';
 
 interface VirtualAccount {
   accountNumber: string;
@@ -26,6 +27,8 @@ interface CheckoutPaymentModalProps {
   /** Our order id — used to build a unique payment reference. */
   orderId: string;
   orderNumber?: string;
+  /** Shop this order is with — used to fetch its checkout ad. */
+  businessId?: string;
   onClose: () => void;
   /** Called once the escrow has been settled (order is paid). */
   onPaid: () => void;
@@ -49,6 +52,7 @@ export default function CheckoutPaymentModal({
   amount,
   orderId,
   orderNumber,
+  businessId,
   onClose,
   onPaid,
 }: CheckoutPaymentModalProps) {
@@ -445,6 +449,10 @@ export default function CheckoutPaymentModal({
                 </span>
               </div>
             </>
+          )}
+
+          {(phase === 'ready' || phase === 'settling') && (
+            <CheckoutAd businessId={businessId} compact />
           )}
         </div>
       </div>

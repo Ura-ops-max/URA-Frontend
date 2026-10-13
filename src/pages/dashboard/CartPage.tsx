@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import CheckoutAd from '@/components/ads/CheckoutAd';
 
 const CartPage = () => {
   const { cart, totalItems, totalPrice, updateQty, removeItem, isLoading, isUpdating } =
@@ -146,6 +147,13 @@ const CartPage = () => {
                 <ArrowRight size={18} />
               </Button>
             </Link>
+
+            <CheckoutAd
+              businessId={
+                (cart?.items?.[0]?.product as any)?.business?._id ||
+                (cart?.items?.[0]?.product as any)?.business
+              }
+            />
 
             <div className="mt-8 pt-8 border-t border-gray-200">
               <div className="flex items-center gap-3 text-gray-400">

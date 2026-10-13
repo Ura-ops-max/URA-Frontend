@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Truck, Store, Loader2, ChevronRight, CreditCard, ShieldCheck } from 'lucide-react';
+import CheckoutAd from '@/components/ads/CheckoutAd';
 
 type PayMode = 'normal' | 'escrow';
 
@@ -10,6 +11,8 @@ interface DeliverySelectionModalProps {
   deliveryFee: number | null;
   deliveryLoading: boolean;
   deliveryError: string | null;
+  /** Shop this order is with — used to fetch its checkout ad. */
+  businessId?: string;
   /** Called with the buyer's choices: delivery method + payment type. */
   onSelect: (withDelivery: boolean, mode: PayMode) => void;
   onClose: () => void;
@@ -27,6 +30,7 @@ export default function DeliverySelectionModal({
   deliveryFee,
   deliveryLoading,
   deliveryError,
+  businessId,
   onSelect,
   onClose,
 }: DeliverySelectionModalProps) {
@@ -47,7 +51,7 @@ export default function DeliverySelectionModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="h-1.5 bg-linear-to-r from-orange-500 to-orange-400" />
@@ -115,6 +119,8 @@ export default function DeliverySelectionModal({
                 <ChevronRight className="ml-auto h-4 w-4 text-gray-300 group-hover:text-gray-900" />
               </div>
             </button>
+
+            <CheckoutAd businessId={businessId} compact />
           </div>
         )}
 
@@ -169,6 +175,8 @@ export default function DeliverySelectionModal({
               </div>
               <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-orange-500" />
             </button>
+
+            <CheckoutAd businessId={businessId} compact />
           </div>
         )}
       </div>

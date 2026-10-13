@@ -12,6 +12,7 @@ import paylukAPI from '@/lib/payluk-axios';
 import { useAuthContext } from '@/context/auth-provider';
 import { ProductThumb } from '@/components/product/shared/ProductThumb';
 import { formatNaira, getStatusConfig } from '@/lib/order-status';
+import CheckoutAd from '@/components/ads/CheckoutAd';
 
 /** Best-effort one-line summary of a Fez tracking response. */
 const summariseTracking = (data: any): string => {
@@ -279,6 +280,8 @@ const OrderDetailsPage = () => {
       </div>
 
       {/* Confirm receipt dialog */}
+      {role === 'buyer' && <CheckoutAd businessId={shop?._id || shop} />}
+
       {confirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setConfirmOpen(false)}>
           <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center" onClick={(e) => e.stopPropagation()}>

@@ -28,6 +28,7 @@ import { usePaylukGuard } from '@/hooks/use-payluk-guard';
 import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
 import DeliverySelectionModal from '@/components/checkout/DeliverySelectionModal';
 import CheckoutPaymentModal from '@/components/checkout/CheckoutPaymentModal';
+import CheckoutAd from '@/components/ads/CheckoutAd';
 
 // ── Validation schema ───────────────────────────────
 const shippingSchema = z.object({
@@ -112,6 +113,10 @@ const CheckoutPage = () => {
   // The seller is resolved from the product — the backend reads their business
   // profile address to use as the Fez pickup state.
   const firstProductId = cart?.items?.[0]?.product?._id;
+  // The shop this order is with — used to fetch its checkout ad.
+  const firstProduct: any = cart?.items?.[0]?.product;
+  const sellerBusinessId: string | undefined =
+    firstProduct?.business?._id || firstProduct?.business || firstProduct?.authorId;
 
   useEffect(() => {
     if (!selectedState || !firstProductId) {
@@ -496,6 +501,8 @@ const CheckoutPage = () => {
                   Choose delivery next, then pay from your wallet or by bank transfer.
                 </p>
 
+                <CheckoutAd businessId={sellerBusinessId} />
+
                 <div className="mt-8 grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-2 p-3 bg-white rounded-xl border border-gray-100">
                     <ShieldCheck size={18} className="text-blue-500" />
@@ -524,6 +531,7 @@ const CheckoutPage = () => {
           deliveryFee={deliveryFee}
           deliveryLoading={deliveryLoading}
           deliveryError={deliveryError}
+          businessId={sellerBusinessId}
           onSelect={handleDeliveryChoice}
           onClose={() => setShowDeliveryModal(false)}
         />
@@ -538,6 +546,7 @@ const CheckoutPage = () => {
           amount={transfer.amount}
           orderId={transfer.orderId}
           orderNumber={transfer.orderNumber}
+          businessId={sellerBusinessId}
           onClose={() => setTransfer(null)}
           onPaid={() => {
             // Ask our backend to confirm now (it double-checks with Payluk), so the

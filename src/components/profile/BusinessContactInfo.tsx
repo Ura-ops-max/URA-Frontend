@@ -8,7 +8,9 @@ export const BusinessContactInfo = ({ business }: { business: any }) => {
   // Get current day name (e.g., "Monday")
   const todayName = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date());
   const todaySchedule = business.operatingHours?.find((h: any) => h.day === todayName);
-  const isOpenToday = todaySchedule?.open !== 'Closed';
+  // Only "open today" if today's hours exist AND aren't marked Closed. Without
+  // the existence check, a day missing from the hours crashed this page.
+  const isOpenToday = Boolean(todaySchedule) && todaySchedule.open !== 'Closed';
 
   // Google Map URL Generation (using the text address)
   const encodedAddress = encodeURIComponent(business.address?.fullAddress || '');
@@ -56,7 +58,9 @@ export const BusinessContactInfo = ({ business }: { business: any }) => {
                   <p className="text-sm font-bold text-gray-900">
                     {isOpenToday
                       ? `Open: ${todaySchedule.open} - ${todaySchedule.close}`
-                      : 'Closed Today'}
+                      : todaySchedule
+                        ? 'Closed Today'
+                        : 'Hours not set for today'}
                   </p>
                   <p className="text-[11px] text-gray-500 font-medium">Business Hours</p>
                 </div>

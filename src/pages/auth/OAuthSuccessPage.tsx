@@ -19,7 +19,7 @@ const OAuthSuccessPage = () => {
     } else {
       navigate('/auth/login?error=oauth_failed', { replace: true });
     }
-  }, []);
+  }, [params, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">

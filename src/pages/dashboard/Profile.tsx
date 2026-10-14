@@ -40,10 +40,10 @@ const ProfilePage: React.FC = () => {
     if (!currentUser || !targetId) return false;
     if (isBusinessProfile) {
       // Check if current user owns the business being viewed
-      return related?.businesses[0]?._id === targetId;
+      return related?.businesses?.[0]?._id === targetId;
     }
     return currentUser._id === targetId;
-  }, [currentUser, targetId, isBusinessProfile]);
+  }, [currentUser, targetId, isBusinessProfile, related?.businesses]);
   // Inside ProfilePage.tsx
 
   const { data: profile, isLoading } = useUserProfile(targetId, isBusinessProfile);
@@ -73,7 +73,7 @@ const ProfilePage: React.FC = () => {
     if (isBusinessProfile && activeTab === TABS.FEEDS) {
       setActiveTab(TABS.POSTS); // Businesses default to Posts
     }
-  }, [isBusinessProfile]);
+  }, [isBusinessProfile, activeTab]);
 
   // All hooks are declared above, so it's safe to bail out here (keeps hook
   // order stable across renders — React's rules-of-hooks).

@@ -9,9 +9,6 @@ export const useCategories = (type: 'product' | 'business' = 'product') => {
 
   useEffect(() => {
     const loadCategories = async () => {
-      // Only fetch if we don't have them yet to prevent redundant calls
-      if (categories.length > 0) return;
-
       setIsLoading(true);
       setError(null);
 

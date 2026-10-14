@@ -253,13 +253,13 @@ const UploadProductForm = () => {
 
       {/* ── SECTION 2: Escrow & Delivery ───────────────── */}
       <div className="space-y-5">
-        <SectionHeader label="Escrow & Delivery" />
+        <SectionHeader label="Buyer-Protected Payment & Delivery" />
 
         {/* Explainer pill */}
         <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl">
           <ShieldCheck size={18} className="text-blue-500 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-blue-700 leading-relaxed">
-            Your product uses <strong>Payluk Escrow</strong> — payment is held securely until you
+            Your product uses <strong>Buyer-Protected Payment</strong> — payment is held securely until you
             confirm delivery, protecting both you and the buyer.
           </p>
         </div>

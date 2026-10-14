@@ -12,7 +12,7 @@ import {
 
 export const walletsGroups = [
   {
-    label: 'Escrow',
+    label: 'Buyer-Protected Payments',
     items: [
       { id: 'overview', title: 'Overview', icon: Grid, desc: 'Wallet overview' },
       { id: 'activities', title: 'Recent Activity', icon: Activity, desc: 'Transaction logs' },

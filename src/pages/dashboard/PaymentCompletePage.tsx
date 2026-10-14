@@ -169,8 +169,13 @@ const PaymentCompletePage = () => {
       setErrorMessage('No payment reference found. Please check your orders page.');
       return;
     }
+    // Cancelled on unmount so leaving the page (e.g. "Continue shopping")
+    // doesn't get yanked back to orders a few seconds later.
+    let redirectTimer: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
     API.post('/orders/confirm', { paymentId })
       .then(({ data }) => {
+        if (cancelled) return;
         setOrder(data.order);
         if (data.pending) {
           // Payluk hasn't confirmed the money yet; the webhook will finish it.
@@ -179,16 +184,21 @@ const PaymentCompletePage = () => {
         }
         setStatus(data.alreadyConfirmed ? 'already_confirmed' : 'success');
         // Take the buyer to their orders after a short pause.
-        setTimeout(() => navigate(ORDERS_PATH), 4000);
+        redirectTimer = setTimeout(() => navigate(ORDERS_PATH), 4000);
       })
       .catch((error: any) => {
+        if (cancelled) return;
         setStatus('error');
         setErrorMessage(
           error?.response?.data?.message ||
             'We could not confirm your payment. Please check your orders or contact support.',
         );
       });
-  }, [paymentId]);
+    return () => {
+      cancelled = true;
+      if (redirectTimer) clearTimeout(redirectTimer);
+    };
+  }, [paymentId, navigate]);
 
   // Payment sent but Payluk hasn't confirmed it yet.
   if (status === 'pending') {

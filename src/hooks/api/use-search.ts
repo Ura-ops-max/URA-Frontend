@@ -6,8 +6,11 @@ export const useSearch = (query: string, searchType: string, filters: any) => {
   const [results, setResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Stable key so a new-but-equal filters object doesn't re-run the search.
+  const filtersKey = JSON.stringify(filters ?? {});
 
   useEffect(() => {
+    const parsedFilters = JSON.parse(filtersKey);
     // 1. Minimum query check: prevent API spam for very short strings
     if (!query || query.trim().length < 2) {
       setResults(null);
@@ -24,7 +27,7 @@ export const useSearch = (query: string, searchType: string, filters: any) => {
         const response = await searchAPI.getGlobalSearch({
           q: query,
           type: searchType,
-          ...filters, // Spreads city, category, rating, openNow, etc.
+          ...parsedFilters, // Spreads city, category, rating, openNow, etc.
         });
 
         // Our controller returns { success: true, data: { businesses: [], products: [] } }
@@ -39,7 +42,7 @@ export const useSearch = (query: string, searchType: string, filters: any) => {
     }, 500); // 500ms is perfect for mobile/web typing speed
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query, searchType, JSON.stringify(filters)]);
+  }, [query, searchType, filtersKey]);
 
   return { results, isLoading, error };
 };

@@ -26,12 +26,14 @@ const TermsOfService = () => (
         ),
       },
       {
-        heading: 'Payments and Escrow',
+        heading: 'Payments and Buyer Protection',
         body: (
           <p>
-            Payments are processed through our payment partner, Payluk. When you use escrow, funds are held
-            securely and released to the seller once the transaction is confirmed. Applicable fees are shown
-            before you complete a payment.
+            Payments are processed through our payment partner, Payluk. At checkout you can choose Normal
+            Payment or Buyer-Protected Payment (escrow). With either, your payment is held securely and
+            released to the seller once you confirm you received your order. The two differ only in who pays
+            the payment processing fee: with Buyer-Protected Payment you pay it, with Normal Payment the
+            seller does. Applicable fees are shown before you complete a payment.
           </p>
         ),
       },

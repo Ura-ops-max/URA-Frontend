@@ -8,7 +8,7 @@ import { toast } from 'sonner';
  *
  * If the user has no profile yet but already has a valid phone on file, the
  * profile is created SILENTLY in the background (no modal) and then the action
- * runs — so e.g. "Fund Wallet" goes straight to generating the account. The
+ * runs — so e.g. "Withdraw" goes straight to generating the account. The
  * manual phone modal only appears as a fallback when there's no usable phone.
  *
  * Usage:

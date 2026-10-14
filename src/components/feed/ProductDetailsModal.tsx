@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useToggleLike } from '@/hooks/api/use-feed';
+import ProductImage from '@/components/product/ProductImage';
 
 export const ProductDetailsModal = ({
   isOpen,
@@ -111,7 +112,7 @@ export const ProductDetailsModal = ({
             <div className="flex-1 overflow-y-auto flex flex-col lg:flex-row no-scrollbar">
               {/* IMAGE SECTION */}
               <div className="w-full lg:w-[45%] shrink-0 bg-gray-50">
-                <img
+                <ProductImage
                   src={product.media?.[0]}
                   alt={product.name}
                   className="w-full h-full object-cover aspect-[4/5] lg:aspect-square lg:h-full"

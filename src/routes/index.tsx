@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import PageLoader from '@/components/shared/PageLoader';
 
 import ProtectedRoute from './protected.route';
 import { authenticationRoutePaths, baseRoutePaths, protectedRoutePaths } from './common/routes';
@@ -14,47 +16,48 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Routes>
-        <Route element={<BaseLayout />}>
-          <Route element={<PublichLayout />}>
-            {baseRoutePaths.map((route) => (
-              <Route key={route.path} path={route.path} element={route.element} />
-            ))}
-          </Route>
-        </Route>
-
-        <Route path="/" element={<AuthRoute />}>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
           <Route element={<BaseLayout />}>
-            <Route element={<AuthLayout />}>
-              {authenticationRoutePaths.map((route) => (
+            <Route element={<PublichLayout />}>
+              {baseRoutePaths.map((route) => (
                 <Route key={route.path} path={route.path} element={route.element} />
               ))}
             </Route>
           </Route>
-        </Route>
 
-        {/* Protected Route */}
-        {/* Protected Route */}
-        <Route path="/" element={<ProtectedRoute />}>
-          <Route element={<AppLayout />}>
-            {protectedRoutePaths.map((route) => (
-              <Route key={route.path} path={route.path} element={route.element}>
-                {/* If route has children, map them here */}
-                {route.children?.map((child, index) => (
-                  <Route
-                    key={index}
-                    index={child.index}
-                    path={child.path} // This will be "profile", "security", etc.
-                    element={child.element}
-                  />
+          <Route path="/" element={<AuthRoute />}>
+            <Route element={<BaseLayout />}>
+              <Route element={<AuthLayout />}>
+                {authenticationRoutePaths.map((route) => (
+                  <Route key={route.path} path={route.path} element={route.element} />
                 ))}
               </Route>
-            ))}
+            </Route>
           </Route>
-        </Route>
-        {/* Catch-all for undefined routes */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+
+          {/* Protected Route */}
+          <Route path="/" element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              {protectedRoutePaths.map((route) => (
+                <Route key={route.path} path={route.path} element={route.element}>
+                  {/* If route has children, map them here */}
+                  {route.children?.map((child, index) => (
+                    <Route
+                      key={index}
+                      index={child.index}
+                      path={child.path} // This will be "profile", "security", etc.
+                      element={child.element}
+                    />
+                  ))}
+                </Route>
+              ))}
+            </Route>
+          </Route>
+          {/* Catch-all for undefined routes */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

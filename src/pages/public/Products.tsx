@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Search, BadgeCheck, Store, ShoppingBag } from 'lucide-react';
 import { useSeo } from '@/hooks/useSeo';
@@ -33,7 +33,9 @@ const ProductsPage = () => {
     url: 'https://www.ura.com.ng/products',
   });
 
-  const [query, setQuery] = useState('');
+  // ?q= pre-fills the search (e.g. "Browse all of URA" from a shop with no match).
+  const [searchParams] = useSearchParams();
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
   const [category, setCategory] = useState('All');
 
   // Products for the selected category (server-side filtered so it covers the

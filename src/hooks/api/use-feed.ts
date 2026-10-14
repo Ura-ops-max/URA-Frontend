@@ -66,11 +66,11 @@ export const usePostsFeed = (targetId?: string, restrict: boolean = false) => {
   });
 };
 
-export const useProductsFeed = (targetId?: string, restrict: boolean = true) => {
+export const useProductsFeed = (targetId?: string, restrict: boolean = true, search = '') => {
   return useInfiniteQuery({
-    queryKey: ['products-feed', { targetId, restrict }],
+    queryKey: ['products-feed', { targetId, restrict, search }],
     queryFn: ({ pageParam = 1 }) =>
-      postService.getProductPosts({ targetId, restrict, page: pageParam as number }),
+      postService.getProductPosts({ targetId, restrict, page: pageParam as number, search }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) =>
       lastPage.length < 15 ? undefined : allPages.length + 1,

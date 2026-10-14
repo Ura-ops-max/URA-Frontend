@@ -1,5 +1,6 @@
 import { Star, MapPin, Package, CheckCircle, Clock } from 'lucide-react';
 import { generateAvatarUrl } from '@/utils/avatar-generator';
+import ProductImage from '@/components/product/ProductImage';
 
 // BUSINESS ITEM
 export const BusinessItem = ({ biz, onClick }: any) => {
@@ -104,8 +105,8 @@ export const ProductItem = ({ prod, onClick }: any) => (
     onClick={onClick}
     className="flex items-center p-4 border-b hover:bg-gray-50 cursor-pointer group transition-colors"
   >
-    <img
-      src={prod.media?.[0] || '/default-product.png'}
+    <ProductImage
+      src={prod.media?.[0]}
       className="w-16 h-16 rounded-lg object-cover mr-4 bg-gray-100 border border-gray-50 transition-transform group-active:scale-95"
       alt={prod.name}
     />

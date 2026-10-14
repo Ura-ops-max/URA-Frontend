@@ -13,6 +13,7 @@ import {
   Store,
   PlusCircle,
   Wallet,
+  Boxes,
 } from 'lucide-react';
 import { useAuthContext } from '@/context/auth-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -56,11 +57,15 @@ const MenuPage = () => {
   ];
 
   // Business Section (Conditional)
-  const businessSection = {
+  const businessSection: {
+    label: string;
+    items: { title: string; icon: typeof Store; path: string; badge?: number }[];
+  } = {
     label: 'Business Tools',
     items: [
       { title: 'List a Product', icon: PlusCircle, path: '/dashboard/post/create?type=product' },
-      { title: 'Store Orders', icon: Store, path: '/dashboard/store-management', badge: 0 },
+      { title: 'Inventory', icon: Boxes, path: '/dashboard/inventory' },
+      { title: 'Store Orders', icon: Store, path: '/dashboard/orders?view=received' },
       // { title: 'Business Loan', icon: BadgePercent, path: '/dashboard/loans' },
     ],
   };
@@ -124,11 +129,11 @@ const MenuPage = () => {
                     <span className="font-semibold text-gray-800 text-[14px]">{item.title}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {item.badge && (
+                    {item.badge ? (
                       <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                         {item.badge}
                       </span>
-                    )}
+                    ) : null}
                     <ChevronRight className="text-gray-300" size={16} />
                   </div>
                 </button>

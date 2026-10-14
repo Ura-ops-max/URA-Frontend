@@ -29,7 +29,7 @@ export const PROTECTED_ROUTES = {
   CHAT_CONVERSATION: '/dashboard/chat/:conversationId',
   PRODUCT_DETAIL: '/dashboard/product/:productId',
   IMAGE_SEARCH: '/dashboard/search/image',
-  STORE_MANAGEMENT: '/dashboard/store-management',
+  INVENTORY: '/dashboard/inventory',
   WALLET: '/dashboard/wallet',
   WALLET_OVERVIEW: '/dashboard/wallet/overview',
 };

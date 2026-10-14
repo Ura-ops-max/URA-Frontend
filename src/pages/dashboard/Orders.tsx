@@ -10,7 +10,7 @@ import {
   Phone,
   Loader2,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -29,7 +29,11 @@ const STATUS_FILTERS = [
 const OrdersPage = () => {
   const { user } = useAuthContext();
   const isSeller = !!user?.isBusinessOwner;
-  const [view, setView] = useState<'purchases' | 'received'>('purchases');
+  // ?view=received opens straight on "Orders received" (the Store Orders menu link).
+  const [searchParams] = useSearchParams();
+  const [view, setView] = useState<'purchases' | 'received'>(() =>
+    searchParams.get('view') === 'received' ? 'received' : 'purchases',
+  );
   const [activeTab, setActiveTab] = useState('all');
 
   const { orders, isLoading } = useOrders();

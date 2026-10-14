@@ -29,6 +29,7 @@ import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
 import DeliverySelectionModal from '@/components/checkout/DeliverySelectionModal';
 import CheckoutPaymentModal from '@/components/checkout/CheckoutPaymentModal';
 import CheckoutAd from '@/components/ads/CheckoutAd';
+import ProductImage from '@/components/product/ProductImage';
 
 // ── Validation schema ───────────────────────────────
 const shippingSchema = z.object({
@@ -425,8 +426,8 @@ const CheckoutPage = () => {
                   {cart?.items.map((item: any) => (
                     <div key={item.product._id} className="flex gap-4">
                       <div className="w-16 h-16 rounded-lg overflow-hidden bg-white border border-gray-100 shrink-0">
-                        <img
-                          src={item.product.media[0]}
+                        <ProductImage
+                          src={item.product.media?.[0]}
                           className="w-full h-full object-cover"
                           alt={item.product.name}
                         />

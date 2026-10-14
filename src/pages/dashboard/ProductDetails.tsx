@@ -25,6 +25,7 @@ import InstallAppButton from '@/components/shared/InstallAppButton';
 import { VideoPlayer } from '@/components/feed/VideoPlayer';
 import { categoryColor } from '@/lib/category-colors';
 import { EditItemModal } from '@/components/feed/EditItemModal';
+import ProductImage from '@/components/product/ProductImage';
 
 /** True when a media URL points to a video file rather than an image. */
 const isVideoUrl = (u?: string) => !!u && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(u);
@@ -180,7 +181,7 @@ const ProductDetailsPage = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <img
+              <ProductImage
                 src={product.media?.[activeMedia] ?? product.media?.[0]}
                 alt={product.name}
                 className="w-full h-full object-cover"
@@ -378,8 +379,8 @@ const ProductDetailsPage = () => {
                 onClick={() => window.scrollTo(0, 0)} // Scroll to top when clicking related
               >
                 <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gray-50 mb-3">
-                  <img
-                    src={item.media[0]}
+                  <ProductImage
+                    src={item.media?.[0]}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     alt={item.name}
                   />

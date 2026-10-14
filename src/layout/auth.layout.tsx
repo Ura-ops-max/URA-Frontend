@@ -1,5 +1,7 @@
+import { Suspense } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { ShieldCheck, BadgeCheck, Truck } from 'lucide-react';
+import PageLoader from '@/components/shared/PageLoader';
 
 const FEATURES = [
   { icon: BadgeCheck, text: 'Verified vendors you can trust' },
@@ -55,7 +57,9 @@ const AuthLayout = () => {
       {/* RIGHT: form */}
       <div className="flex w-full flex-col items-center justify-center bg-white px-6 py-12 lg:w-[55%] lg:px-20">
         <div className="w-full max-w-[440px] animate-in fade-in slide-in-from-right-8 duration-700">
-          <Outlet />
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import CheckoutAd from '@/components/ads/CheckoutAd';
+import ProductImage from '@/components/product/ProductImage';
 
 const CartPage = () => {
   const { cart, totalItems, totalPrice, updateQty, removeItem, isLoading, isUpdating } =
@@ -62,8 +63,8 @@ const CartPage = () => {
             >
               {/* Product Image */}
               <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden bg-gray-50 shrink-0">
-                <img
-                  src={item.product.media[0]}
+                <ProductImage
+                  src={item.product.media?.[0]}
                   alt={item.product.name}
                   className="w-full h-full object-cover"
                 />

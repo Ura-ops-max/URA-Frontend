@@ -1,8 +1,10 @@
+import { Suspense } from 'react';
 import { useNavigate, useLocation, NavLink, Outlet } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { walletsGroups } from '@/components/wallets/wallets.configs';
+import PageLoader from '@/components/shared/PageLoader';
 
 const WalletPage = () => {
   const navigate = useNavigate();
@@ -82,7 +84,9 @@ const WalletPage = () => {
 
         <div className="w-full max-w-4xl mx-auto p-6 md:p-10">
           {/* THE OUTLET: This renders ProfileSettings, ActivityLog, etc. */}
-          <Outlet />
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
         </div>
       </div>
     </div>

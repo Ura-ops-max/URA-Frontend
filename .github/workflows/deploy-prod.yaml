@@ -50,14 +50,36 @@ jobs:
 
       - name: Sync files to S3
         run: |
+          # Page files (assets/) are NOT deleted on deploy: a tab opened before
+          # this deploy may still ask for the previous build's files. Old ones
+          # are cleaned up in the next step once they're 2+ days old.
+          aws s3 sync dist/assets/ s3://${{ secrets.S3_BUCKET_NAME }}/assets/ \
+            --cache-control "public,max-age=31536000,immutable"
+
           aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }} \
             --delete \
             --cache-control "public,max-age=31536000,immutable" \
+            --exclude "assets/*" \
             --exclude "index.html" \
             --exclude "*.txt"
 
           aws s3 cp dist/index.html s3://${{ secrets.S3_BUCKET_NAME }}/index.html \
             --cache-control "public,max-age=0,must-revalidate"
+
+      - name: Remove page files from old builds (2+ days old)
+        run: |
+          CUTOFF=$(date -u -d '2 days ago' +%Y-%m-%dT%H:%M:%S)
+          aws s3api list-objects-v2 \
+            --bucket ${{ secrets.S3_BUCKET_NAME }} \
+            --prefix assets/ \
+            --query "Contents[?LastModified<'${CUTOFF}'].Key" \
+            --output text | tr '\t' '\n' | while read -r KEY; do
+              if [ -z "$KEY" ] || [ "$KEY" = "None" ]; then continue; fi
+              # Keep anything the current build still uses.
+              if [ ! -f "dist/$KEY" ]; then
+                aws s3 rm "s3://${{ secrets.S3_BUCKET_NAME }}/$KEY"
+              fi
+            done
 
       - name: Invalidate CloudFront cache
         run: |

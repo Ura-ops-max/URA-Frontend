@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
 import { Loader2, RefreshCcw, PackageOpen, ArrowUp } from 'lucide-react';
 import { useProductsFeed } from '@/hooks/api/use-feed'; // Reusing your specific author feed hook
@@ -15,6 +16,8 @@ interface ProductsFeedProps {
   onRequireAuth?: () => void;
   type?: string;
   category?: string;
+  /** Search inside the shop. When it finds nothing, offer all of URA instead. */
+  search?: string;
 }
 
 export default function ProductsFeed({
@@ -22,6 +25,7 @@ export default function ProductsFeed({
   onRequireAuth,
   type = 'feed',
   category,
+  search = '',
 }: ProductsFeedProps) {
   const { isAuthenticated } = useAuthContext();
   const { addItem } = useCartContext(); // Pull the cart methods
@@ -40,7 +44,7 @@ export default function ProductsFeed({
 
   // 1. Fetch logic - strictly filtering for products by this specific business
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status, refetch, isRefetching } =
-    useProductsFeed(targetId!, isPostType); // Passing 'false' for isPostType to get products
+    useProductsFeed(targetId!, isPostType, search.trim());
 
   const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
 
@@ -75,7 +79,8 @@ export default function ProductsFeed({
 
   const scrollToTop = () => {
     const container = document.getElementById('main-feed-container');
-    container?.scrollTo({ top: 0, behavior: 'smooth' });
+    if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (status === 'pending') {
@@ -109,6 +114,26 @@ export default function ProductsFeed({
     category && category !== 'All'
       ? allProducts.filter((product) => product.category === category)
       : allProducts;
+
+  if (filteredProducts.length === 0 && search.trim()) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-white border border-dashed rounded-[32px] border-gray-100">
+        <div className="bg-gray-50 p-4 rounded-full mb-3">
+          <PackageOpen className="w-8 h-8 text-gray-300" />
+        </div>
+        <h3 className="text-base font-bold text-gray-900">No results in this shop</h3>
+        <p className="text-gray-400 text-xs max-w-[260px] mb-4">
+          Nothing here matches “{search.trim()}”.
+        </p>
+        <Link
+          to={`/products?q=${encodeURIComponent(search.trim())}`}
+          className="text-sm font-bold text-orange-600 hover:underline"
+        >
+          Browse all of URA
+        </Link>
+      </div>
+    );
+  }
 
   if (filteredProducts.length === 0) {
     return (

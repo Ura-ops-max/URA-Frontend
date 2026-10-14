@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { createContext, useContext } from 'react';
 import useAuth from '@/hooks/api/use-auth';
 import { useLogout } from '@/hooks/api/use-auth-mutations';

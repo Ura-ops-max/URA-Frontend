@@ -15,7 +15,7 @@ export default function ConfirmPaymentPage() {
   const handleConfirm = async () => {
     const id = escrowId.trim();
     if (!id) {
-      toast.error('Escrow ID is required.');
+      toast.error('Transaction ID is required.');
       return;
     }
 
@@ -68,7 +68,7 @@ export default function ConfirmPaymentPage() {
       <div className="space-y-4">
         <div>
           <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">
-            Escrow ID (Transaction ID) <span className="text-orange-500">*</span>
+            Transaction ID <span className="text-orange-500">*</span>
           </label>
           <Input
             placeholder="e.g. 6a2a2c68fa797d3af379daf2"

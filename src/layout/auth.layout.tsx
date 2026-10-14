@@ -3,7 +3,7 @@ import { ShieldCheck, BadgeCheck, Truck } from 'lucide-react';
 
 const FEATURES = [
   { icon: BadgeCheck, text: 'Verified vendors you can trust' },
-  { icon: ShieldCheck, text: 'Escrow-protected payments' },
+  { icon: ShieldCheck, text: 'Buyer-protected payments' },
   { icon: Truck, text: 'Fast delivery across Nigeria' },
 ];
 

@@ -56,7 +56,7 @@ const CheckoutPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   // Flow: "Proceed to Pay" → stash the validated form + open the delivery
   // chooser → create the escrow order for the chosen total → open the payment
-  // modal (wallet or bank transfer).
+  // modal (wallet or card).
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
   const [pendingForm, setPendingForm] = useState<ShippingFormValues | null>(null);
   const [transfer, setTransfer] = useState<{
@@ -409,7 +409,7 @@ const CheckoutPage = () => {
                     Secure Payment Gateway will open here
                   </p>
                   <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-black">
-                    Supports Cards, Bank Transfer & USSD
+                    Secure payment by Payluk
                   </p>
                 </div>
               </section>
@@ -499,7 +499,7 @@ const CheckoutPage = () => {
                   )}
                 </Button>
                 <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
-                  Choose delivery next, then pay from your wallet or by bank transfer.
+                  Choose delivery next, then pay by card or from your wallet.
                 </p>
 
                 <CheckoutAd businessId={sellerBusinessId} />

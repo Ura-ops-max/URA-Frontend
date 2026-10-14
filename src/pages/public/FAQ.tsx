@@ -27,7 +27,7 @@ const FAQS = [
   },
   {
     q: 'Do I need to fund my wallet?',
-    a: 'No. At checkout you can pay by bank transfer from any bank app, or by card. If you already have a wallet balance (for example from sales or a refund), you can pay from it or withdraw it.',
+    a: 'No. At checkout you can pay by card. If you already have a wallet balance (for example from sales or a refund), you can pay from it or withdraw it.',
   },
   {
     q: 'Is my personal information safe?',

@@ -42,7 +42,7 @@ const FAQS = [
   },
   {
     q: 'Do I need to fund a wallet before buying?',
-    a: 'No. You can pay by bank transfer straight from any bank app at checkout, with no wallet top-up needed. Or pay from your URA wallet if you have a balance.',
+    a: 'No. You can pay by card at checkout, with no wallet top-up needed. Or pay from your URA wallet if you have a balance.',
   },
   {
     q: 'How much does delivery cost?',
@@ -73,7 +73,7 @@ const FEATURES = [
   {
     icon: Wallet,
     title: 'Easy Payments',
-    desc: 'Pay by bank transfer from any bank app, or by card. No wallet top-up needed.',
+    desc: 'Pay securely by card at checkout. No wallet top-up needed.',
   },
   {
     icon: BadgeCheck,

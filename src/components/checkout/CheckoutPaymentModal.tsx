@@ -1,17 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Copy, Check, Loader2, RefreshCw, Wallet, ShieldCheck, CreditCard, Landmark } from 'lucide-react';
+import { X, Check, Loader2, Wallet, ShieldCheck, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEscrowCheckout } from 'payluk-escrow-inline-checkout/react';
 import { Button } from '@/components/ui/button';
 import paylukAPI from '@/lib/payluk-axios';
 import { BASE_ROUTE } from '@/routes/common/routePaths.ts';
 import CheckoutAd from '@/components/ads/CheckoutAd';
-
-interface VirtualAccount {
-  accountNumber: string;
-  accountName: string;
-  bank: string;
-}
 
 interface CheckoutPaymentModalProps {
   /** The BUYER's Payluk customer id. */
@@ -21,8 +15,8 @@ interface CheckoutPaymentModalProps {
   /** Payluk payment token — powers the inline (popup) card/bank checkout. */
   paymentToken?: string;
   /**
-   * Which payment type the buyer chose. Both use this same URA screen (wallet,
-   * bank transfer, or card); they differ only in who pays Payluk's fee.
+   * Which payment type the buyer chose. Both use this same screen (wallet or
+   * card); they differ only in who pays Payluk's fee.
    */
   mode: 'normal' | 'escrow';
   /** Finalised total the buyer must pay (product + delivery + Payluk fee). */
@@ -37,7 +31,6 @@ interface CheckoutPaymentModalProps {
   onPaid: () => void;
 }
 
-type CopiedField = 'accountNumber' | 'bank' | null;
 type Phase = 'loading' | 'ready' | 'settling' | 'paid';
 
 const formatNaira = (n: number) =>
@@ -59,53 +52,14 @@ export default function CheckoutPaymentModal({
   onClose,
   onPaid,
 }: CheckoutPaymentModalProps) {
-  const [account, setAccount] = useState<VirtualAccount | null>(null);
-  const [accountError, setAccountError] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [phase, setPhase] = useState<Phase>('loading');
-  const [copied, setCopied] = useState<CopiedField>(null);
-  // Which payment path the buyer picked after "Proceed to Pay": the choice
-  // screen, or the escrow (wallet / bank transfer) flow. "Normal" opens the
-  // Payluk popup directly, so it has no sub-screen here.
   // While the Payluk popup is open we hide our own overlay so it isn't covered.
   const [popupActive, setPopupActive] = useState(false);
   const { pay } = useEscrowCheckout();
 
   const settlingRef = useRef(false);
   const mountedRef = useRef(true);
-  // Wallet balance when the pop-up opened. The pop-up only completes on its own
-  // when NEW money arrives (a bank transfer) — never just because the shopper
-  // already had enough in their wallet. That needs a tap on "Pay from Wallet".
-  const openingBalanceRef = useRef<number | null>(null);
-
-  // ── Generate the seller's receiving (virtual) account for external transfer.
-  const generateAccount = useCallback(async () => {
-    setAccountError(null);
-    try {
-      const { data } = await paylukAPI.post('/payment/virtual-account', null, {
-        headers: { 'customer-id': customerId },
-      });
-      const root = data?.data ?? data;
-      const a = root?.account ?? root?.virtualAccount ?? root?.virtual_account ?? root;
-      if (!mountedRef.current) return;
-      setAccount({
-        accountNumber:
-          a?.accountNumber ?? a?.account_number ?? a?.accountNo ?? a?.account_no ?? '',
-        accountName:
-          a?.accountName ?? a?.account_name ?? a?.accountTitle ?? a?.account_title ?? '',
-        bank: a?.bank ?? a?.bankName ?? a?.bank_name ?? '',
-      });
-    } catch (err: any) {
-      if (!mountedRef.current) return;
-      const reason = err?.response?.data?.message;
-      setAccountError(
-        reason
-          ? `Could not generate a transfer account: ${reason}`
-          : 'Could not generate a transfer account. Check your connection and try again.',
-      );
-    }
-  }, [customerId]);
-
   // ── Read the buyer's wallet balance (null if it couldn't be read).
   const fetchBalance = useCallback(async (): Promise<number | null> => {
     try {
@@ -115,8 +69,6 @@ export default function CheckoutPaymentModal({
       const payload = data?.data ?? data;
       const balance = Number(payload?.mainBalance ?? payload?.balance ?? 0);
       if (mountedRef.current) setWalletBalance(balance);
-      // First successful read is the starting point for "new money arrived".
-      if (openingBalanceRef.current === null) openingBalanceRef.current = balance;
       return balance;
     } catch {
       if (mountedRef.current) setWalletBalance((b) => b ?? 0);
@@ -124,8 +76,8 @@ export default function CheckoutPaymentModal({
     }
   }, [customerId]);
 
-  // ── Settle the escrow from the (now funded) wallet. Payluk's webhook flips the
-  // order to paid on our backend. Guarded so polling + buttons never double-fire.
+  // ── Pay this escrow from the buyer's wallet balance (only on a tap). Payluk's
+  // webhook flips the order to paid on our backend. Guarded against double taps.
   const settleFromWallet = useCallback(async () => {
     if (settlingRef.current) return;
     settlingRef.current = true;
@@ -153,46 +105,18 @@ export default function CheckoutPaymentModal({
       const msg = err?.response?.data?.message ?? '';
       toast.error(
         /insufficient|balance/i.test(msg)
-          ? "We haven't received your transfer yet — it can take a minute. Try again shortly."
-          : msg || 'Could not confirm payment yet. Please try again.',
+          ? 'Your wallet balance is not enough for this order. Pay by card instead.'
+          : msg || 'Could not complete the payment. Please try again.',
       );
     }
   }, [amount, orderId, escrowId, customerId, onPaid]);
-
-  // Check for the shopper's bank transfer. Completes on its own only when new
-  // money has arrived since the pop-up opened AND it covers the total.
-  // `manual` = the shopper tapped "I've sent it — check now": tell them the result.
-  const checkForTransfer = useCallback(
-    async (manual = false) => {
-      const opening = openingBalanceRef.current;
-      const balance = await fetchBalance();
-      if (balance === null) {
-        if (manual) toast.error('Could not check right now. Please try again in a moment.');
-        return;
-      }
-      const newMoneyArrived = opening !== null && balance > opening;
-      if (newMoneyArrived && balance >= amount && !settlingRef.current) {
-        await settleFromWallet();
-        return;
-      }
-      if (!manual) return;
-      if (newMoneyArrived) {
-        toast.info(
-          `We received ${formatNaira(balance - (opening ?? 0))}, but the total is ${formatNaira(amount)}. Please send the rest.`,
-        );
-      } else {
-        toast.info("Your transfer hasn't arrived yet. It can take a minute — we'll keep checking.");
-      }
-    },
-    [fetchBalance, amount, settleFromWallet],
-  );
 
   // "Pay by card" — opens Payluk's secure window, because card numbers must go
   // into a certified payment page. It settles this same escrow, so the webhook
   // marks the order paid the same way. Offered for both payment types.
   const payWithPopup = useCallback(async () => {
     if (!paymentToken) {
-      toast.error('Card payment is unavailable for this order — use wallet or transfer.');
+      toast.error('Card payment is unavailable for this order. Please try checking out again.');
       return;
     }
     if (typeof pay !== 'function') {
@@ -226,34 +150,21 @@ export default function CheckoutPaymentModal({
     }
   }, [paymentToken, pay, orderId, customerId, onPaid]);
 
-  // Initial load: balance + account together.
+  // Initial load: the wallet balance. Payluk no longer issues bank-transfer
+  // (virtual) accounts (CBN rule), so there is no transfer panel or polling.
   const didInit = useRef(false);
   useEffect(() => {
     mountedRef.current = true;
     if (!didInit.current) {
       didInit.current = true;
-      Promise.all([fetchBalance(), generateAccount()]).finally(() => {
+      fetchBalance().finally(() => {
         if (mountedRef.current) setPhase('ready');
       });
     }
     return () => {
       mountedRef.current = false;
     };
-  }, [fetchBalance, generateAccount]);
-
-  // Poll every 8s for an incoming bank transfer.
-  useEffect(() => {
-    if (phase !== 'ready') return;
-    const id = setInterval(() => void checkForTransfer(), 8000);
-    return () => clearInterval(id);
-  }, [phase, checkForTransfer]);
-
-  const copyField = async (field: CopiedField, value: string, label: string) => {
-    await navigator.clipboard.writeText(value);
-    setCopied(field);
-    toast.success(`${label} copied!`);
-    setTimeout(() => setCopied(null), 2000);
-  };
+  }, [fetchBalance]);
 
   const busy = phase === 'settling' || phase === 'loading';
   const canPayFromWallet = walletBalance != null && walletBalance >= amount;
@@ -266,7 +177,7 @@ export default function CheckoutPaymentModal({
       onClick={busy ? undefined : onClose}
     >
       <div
-        className="relative w-full max-w-md sm:max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 h-1.5 bg-linear-to-r from-orange-500 to-orange-400" />
@@ -302,7 +213,9 @@ export default function CheckoutPaymentModal({
             <span className="text-[10px] font-black uppercase tracking-widest text-orange-400">
               Total to pay
             </span>
-            <span className="text-xl sm:text-2xl font-black text-orange-600">{formatNaira(amount)}</span>
+            <span className="text-xl sm:text-2xl font-black text-orange-600">
+              {formatNaira(amount)}
+            </span>
           </div>
 
           {phase === 'loading' && (
@@ -322,149 +235,45 @@ export default function CheckoutPaymentModal({
             </div>
           )}
 
-          {/* ── Both payment types: wallet, bank transfer, or card ── */}
+          {/* ── Both payment types: wallet or card ── */}
           {(phase === 'ready' || phase === 'settling') && (
             <>
               <p className="text-sm text-gray-500 mb-5 leading-relaxed">
                 {mode === 'normal'
-                  ? 'No extra fee for you. Card, transfer or USSD.'
+                  ? 'No extra fee for you.'
                   : 'Buyer-Protected Payment: your money is held safely until you confirm delivery.'}
               </p>
-              <div className="grid gap-5 sm:grid-cols-2 sm:items-start">
-                {/* ── Option 1: Pay from wallet ───────────────────────── */}
-                <div className="rounded-2xl border border-gray-100 p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-500">
-                      <Wallet size={16} className="text-orange-500" />
-                      Wallet balance
-                    </span>
-                    <span className="text-sm font-black text-gray-900">
-                      {walletBalance == null ? '—' : formatNaira(walletBalance)}
-                    </span>
-                  </div>
-                  <Button
-                    onClick={() => void settleFromWallet()}
-                    disabled={!canPayFromWallet || busy}
-                    className="w-full h-12 rounded-xl font-bold gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
-                  >
-                    {phase === 'settling' ? (
-                      <Loader2 className="animate-spin" size={16} />
-                    ) : (
-                      <Wallet size={16} />
-                    )}
-                    Pay {formatNaira(amount)} from Wallet
-                  </Button>
-                  {!canPayFromWallet && walletBalance != null && (
-                    <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
-                      Not enough balance — pay by bank transfer instead (no wallet top-up needed).
-                    </p>
-                  )}
-                </div>
-
-                {/* ── Option 2: External bank transfer ────────────────── */}
-                <div className="rounded-2xl border border-gray-100 p-4">
-                  <p className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-500">
-                    <Landmark size={16} className="text-orange-500" /> Bank transfer
-                  </p>
-                  {accountError ? (
-                <div className="flex flex-col items-center gap-3 py-2">
-                  <p className="text-xs text-red-500 font-semibold text-center">{accountError}</p>
-                  <Button
-                    variant="outline"
-                    onClick={() => void generateAccount()}
-                    className="h-10 rounded-xl font-bold gap-2 border-gray-200"
-                  >
-                    <RefreshCw size={14} /> Try again
-                  </Button>
-                </div>
-              ) : !account ? (
-                <div className="py-4 flex items-center justify-center gap-2 text-gray-400">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-xs font-bold uppercase tracking-widest">
-                    Generating account…
+              {/* ── Option 1: Pay from wallet ───────────────────────── */}
+              <div className="rounded-2xl border border-gray-100 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-500">
+                    <Wallet size={16} className="text-orange-500" />
+                    Wallet balance
+                  </span>
+                  <span className="text-sm font-black text-gray-900">
+                    {walletBalance == null ? '—' : formatNaira(walletBalance)}
                   </span>
                 </div>
-              ) : (
-                <>
-                  <p className="text-sm text-gray-500 mb-4 leading-relaxed">
-                    Transfer the <span className="font-bold text-gray-700">exact amount</span> to the
-                    account below from any bank app. We confirm automatically — keep this open.
-                  </p>
-
-                  <div className="space-y-3 mb-5">
-                    <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">
-                          Bank
-                        </p>
-                        <p className="text-sm font-bold text-gray-800">{account.bank || '—'}</p>
-                      </div>
-                      <button
-                        onClick={() => copyField('bank', account.bank, 'Bank name')}
-                        className="p-2 rounded-lg bg-white shadow-sm hover:shadow transition-all active:scale-95 ml-3"
-                      >
-                        {copied === 'bank' ? (
-                          <Check size={14} className="text-green-500" />
-                        ) : (
-                          <Copy size={14} className="text-gray-400" />
-                        )}
-                      </button>
-                    </div>
-
-                    {account.accountName && (
-                      <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                          Account Name
-                        </p>
-                        <p className="text-sm font-bold text-gray-800">{account.accountName}</p>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between bg-orange-50 rounded-xl px-4 py-3">
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-orange-400 mb-0.5">
-                          Account Number
-                        </p>
-                        <p className="text-xl font-black tracking-widest text-orange-600">
-                          {account.accountNumber || '—'}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() =>
-                          copyField('accountNumber', account.accountNumber, 'Account number')
-                        }
-                        className="p-2 rounded-lg bg-white shadow-sm hover:shadow transition-all active:scale-95"
-                      >
-                        {copied === 'accountNumber' ? (
-                          <Check size={16} className="text-green-500" />
-                        ) : (
-                          <Copy size={16} className="text-gray-500" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mb-4 flex items-center justify-center gap-2 text-gray-400">
-                    <Loader2 className="h-4 w-4 animate-spin text-orange-300" />
-                    <span className="text-xs font-bold uppercase tracking-widest">
-                      {phase === 'settling' ? 'Confirming payment…' : 'Waiting for your transfer…'}
-                    </span>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    onClick={() => void checkForTransfer(true)}
-                    disabled={busy}
-                    className="w-full h-11 rounded-xl font-bold gap-2 border-gray-200"
-                  >
-                    <RefreshCw size={14} /> I've sent it — check now
-                  </Button>
-                    </>
+                <Button
+                  onClick={() => void settleFromWallet()}
+                  disabled={!canPayFromWallet || busy}
+                  className="w-full h-12 rounded-xl font-bold gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
+                >
+                  {phase === 'settling' ? (
+                    <Loader2 className="animate-spin" size={16} />
+                  ) : (
+                    <Wallet size={16} />
                   )}
-                </div>
+                  Pay {formatNaira(amount)} from Wallet
+                </Button>
+                {!canPayFromWallet && walletBalance != null && (
+                  <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
+                    Not enough balance — pay by card instead.
+                  </p>
+                )}
               </div>
 
-              {/* ── Option 3: Card (Payluk's secure window) ───────────── */}
+              {/* ── Option 2: Card (Payluk's secure window) ───────────── */}
               {paymentToken && (
                 <div className="mt-5">
                   <Button

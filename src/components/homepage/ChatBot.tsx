@@ -41,7 +41,7 @@ const KB: { keywords: string[]; answer: string }[] = [
   {
     keywords: ['wallet', 'fund', 'balance', 'deposit', 'top up', 'top-up'],
     answer:
-      "You don't need to top up your wallet. At checkout you can pay by bank transfer from any bank app, or by card. If you already have a balance (for example from sales or a refund), you can pay from it or withdraw it from your Wallet.",
+      "You don't need to top up your wallet. At checkout you pay by card in Payluk's secure window. If you already have a balance (for example from sales or a refund), you can pay from it or withdraw it from your Wallet.",
   },
   {
     keywords: ['sell', 'seller', 'business', 'list', 'product', 'convert'],

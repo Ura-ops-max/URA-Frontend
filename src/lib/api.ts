@@ -128,8 +128,9 @@ export const updateBusinessMutationFn = async (data: any) => {
   return response.data;
 };
 
-export const fetchChatList = async () => {
-  const response = await API.get('/conversations');
+/** Conversations for one profile (the user, or a business they own). */
+export const fetchChatList = async (profileId: string) => {
+  const response = await API.get('/conversations', { params: { profileId } });
   return response.data.data;
 };
 

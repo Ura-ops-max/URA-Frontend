@@ -24,7 +24,7 @@ const DealsAndOffers = () => {
     chats,
     isLoading: isChatsLoading,
     isError: chatError,
-  } = useChats(isDesktop ? { enabled: true } : { enabled: false });
+  } = useChats(activeProfileId || undefined, { enabled: isDesktop });
 
   if (isContextLoading || isChatsLoading) {
     return <DashboardSkeleton />;

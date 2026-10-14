@@ -8,12 +8,14 @@ type ChatQueryOptions = Omit<UseQueryOptions<Chat[]>, 'queryKey' | 'queryFn'>;
  * Custom hook to fetch the list of recent conversations.
  */
 
-export const useChats = (options: ChatQueryOptions = {}) => {
+export const useChats = (profileId: string | undefined, options: ChatQueryOptions = {}) => {
   const { data, isLoading, isError, error } = useQuery<Chat[]>({
-    queryKey: ['chatList'],
-    queryFn: fetchChatList,
+    queryKey: ['chatList', profileId],
+    queryFn: () => fetchChatList(profileId!),
     refetchInterval: 30000,
-    ...options, // <-- Spread the options here
+    ...options,
+    // The server needs to know whose chats to list; wait until we know.
+    enabled: Boolean(profileId) && (options.enabled ?? true),
   });
 
   // 3. Return the necessary state and data

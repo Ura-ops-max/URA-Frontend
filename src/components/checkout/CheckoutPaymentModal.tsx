@@ -97,7 +97,12 @@ export default function CheckoutPaymentModal({
       });
     } catch (err: any) {
       if (!mountedRef.current) return;
-      setAccountError(err?.response?.data?.message ?? 'Could not generate a transfer account.');
+      const reason = err?.response?.data?.message;
+      setAccountError(
+        reason
+          ? `Could not generate a transfer account: ${reason}`
+          : 'Could not generate a transfer account. Check your connection and try again.',
+      );
     }
   }, [customerId]);
 

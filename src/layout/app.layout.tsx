@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import { AuthProvider } from '@/context/auth-provider';
@@ -14,6 +14,7 @@ import { NotificationProvider } from '@/context/notification-provider';
 import { SocketSync } from '@/context/socket-sync';
 import { ChatProvider } from '@/context/chat-provider';
 import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
+import PageLoader from '@/components/shared/PageLoader';
 
 const AppLayoutContent = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -45,7 +46,9 @@ const AppLayoutContent = () => {
 
                   <main className="flex-1 pb-24 lg:pb-10">
                     <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 mt-6">
-                      <Outlet />
+                      <Suspense fallback={<PageLoader />}>
+                        <Outlet />
+                      </Suspense>
                     </div>
                   </main>
 

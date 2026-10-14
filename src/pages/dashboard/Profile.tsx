@@ -16,6 +16,7 @@ import ProductsFeed from '@/components/feed/ProductsFeed';
 import type { ProfileResponse } from '@/types/api.types';
 import FollowList from '@/components/profile/FollowList';
 import { ProfileSkeleton } from '@/components/skeleton/ProfileSkelenton';
+import BusinessStorefront from '@/components/profile/BusinessStorefront';
 
 const TABS = {
   FEEDS: 'Feeds',
@@ -83,7 +84,6 @@ const ProfilePage: React.FC = () => {
 
   const renderTabContent = () => {
     if (!userProfile) return null;
-    console.log(isBusinessProfile);
     switch (activeTab) {
       case TABS.FEEDS:
         return !isBusinessProfile ? (
@@ -119,6 +119,22 @@ const ProfilePage: React.FC = () => {
     }
   };
   if (isLoading && !userProfile) return <ProfileSkeleton />;
+
+  // Business pages: the same storefront as the public shop link.
+  if (isBusinessProfile) {
+    const biz = (profile as any)?.business;
+    if (!biz) return <ProfileSkeleton />;
+    return (
+      <div className="min-h-screen bg-[#FFF9F6] pt-6 px-4 lg:px-12 animate-in fade-in duration-500">
+        <BusinessStorefront
+          business={biz}
+          owner={(profile as any)?.user}
+          related={(profile as any)?.related}
+          inApp
+        />
+      </div>
+    );
+  }
 
   // Guard for JSX rendering
   if (!userProfile?.user) return <ProfileSkeleton />;

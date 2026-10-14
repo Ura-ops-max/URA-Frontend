@@ -72,8 +72,8 @@ const FEATURES = [
   },
   {
     icon: Wallet,
-    title: 'Instant Wallet Funding',
-    desc: 'Fund your wallet with a one-time virtual account and pay for anything on the platform instantly.',
+    title: 'Easy Payments',
+    desc: 'Pay by bank transfer from any bank app, or by card. No wallet top-up needed.',
   },
   {
     icon: BadgeCheck,

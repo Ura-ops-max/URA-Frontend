@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, ShoppingCart, Info, Star, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { Heart, ShoppingCart, Info, Star, Pencil, Trash2, Loader2, Minus, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useToggleLike, useDeletePost } from '@/hooks/api/use-feed';
@@ -7,6 +7,8 @@ import { categoryColor } from '@/lib/category-colors';
 import { useAuthContext } from '@/context/auth-provider';
 import { EditItemModal } from './EditItemModal';
 import type { ProductType } from '@/types/feed.types';
+import { useCartContext } from '@/context/cart-provider';
+import ProductImage from '@/components/product/ProductImage';
 
 // interface Product {
 //   _id: string;
@@ -53,6 +55,31 @@ export const ProductCard = ({
     p.isOwner ?? (ownerIds.includes(p.authorId as string) || ownerIds.includes(p.business as string));
   const deleteProduct = useDeletePost(product._id, 'product');
 
+  // Once the item is in the cart, the card shows − qty + instead of "Add".
+  const { cart, updateQty, removeItem, isUpdating } = useCartContext();
+  const cartQty: number = isAuthenticated
+    ? (cart?.items ?? []).find(
+        (i: any) => (i?.product?._id ?? i?.product) === product._id,
+      )?.quantity ?? 0
+    : 0;
+  const changeQty = (e: React.MouseEvent, next: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isUpdating) return;
+    if (next < 1) void removeItem(product._id);
+    else void updateQty(product._id, next);
+  };
+
+  // Real rating only — hidden until the product has been reviewed.
+  const rating = Number((product as { averageRating?: number }).averageRating) || 0;
+  const reviews = Number((product as { totalReviews?: number }).totalReviews) || 0;
+
+  // Bulk-uploaded items often have no description, or one that just repeats
+  // the name. Don't show it twice.
+  const description = (product.description ?? '').trim();
+  const showDescription =
+    description.length > 0 && description.toLowerCase() !== (product.name ?? '').trim().toLowerCase();
+
   const formattedPrice = new Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency: 'NGN',
@@ -79,8 +106,8 @@ export const ProductCard = ({
     >
       {/* 1. IMAGE CONTAINER */}
       <div className="relative aspect-[4/5] overflow-hidden bg-gray-50 shrink-0">
-        <img
-          src={product.media[0] || '/placeholder-product.png'}
+        <ProductImage
+          src={product.media?.[0]}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
@@ -158,10 +185,12 @@ export const ProductCard = ({
             <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', cat.dot)} />
             {product.category}
           </span>
-          <div className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded-full">
-            <Star size={10} className="fill-yellow-400 text-yellow-400" />
-            <span className="text-[10px] font-bold text-gray-600">4.8</span>
-          </div>
+          {reviews > 0 && rating > 0 && (
+            <div className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded-full">
+              <Star size={10} className="fill-yellow-400 text-yellow-400" />
+              <span className="text-[10px] font-bold text-gray-600">{rating.toFixed(1)}</span>
+            </div>
+          )}
         </div>
 
         <div className="space-y-1">
@@ -169,7 +198,7 @@ export const ProductCard = ({
             {product.name}
           </h3>
           <p className="text-gray-500 text-[11px] line-clamp-2 leading-relaxed h-8">
-            {product.description}
+            {showDescription ? description : ''}
           </p>
         </div>
 
@@ -187,6 +216,29 @@ export const ProductCard = ({
             >
               <Info size={18} />
             </button>
+            {cartQty > 0 ? (
+              <div className="flex-1 flex items-center justify-between h-10 rounded-xl bg-gray-900 text-white px-1">
+                <button
+                  onClick={(e) => changeQty(e, cartQty - 1)}
+                  disabled={isUpdating}
+                  aria-label={cartQty === 1 ? 'Remove from cart' : 'One less'}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 active:scale-90 disabled:opacity-50"
+                >
+                  {cartQty === 1 ? <Trash2 size={14} /> : <Minus size={14} />}
+                </button>
+                <span className="text-sm font-black tabular-nums" aria-live="polite">
+                  {cartQty}
+                </span>
+                <button
+                  onClick={(e) => changeQty(e, cartQty + 1)}
+                  disabled={isUpdating || cartQty >= product.stock}
+                  aria-label="One more"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 active:scale-90 disabled:opacity-40"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+            ) : (
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -207,6 +259,7 @@ export const ProductCard = ({
               </span>
               <span className="sm:hidden">Add</span>
             </button>
+            )}
           </div>
         </div>
       </div>

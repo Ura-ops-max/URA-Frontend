@@ -164,6 +164,8 @@ interface FetchParams {
   targetId?: string;
   restrict?: boolean;
   page: number;
+  /** Search inside the shop (product name). */
+  search?: string;
 }
 
 export const postService = {
@@ -180,9 +182,10 @@ export const postService = {
     targetId,
     restrict,
     page,
+    search,
   }: FetchParams): Promise<ProductPostType[]> => {
     const { data } = await API.get('/products', {
-      params: { businessId: targetId, restrict, page, limit: 15 },
+      params: { businessId: targetId, restrict, page, limit: 15, ...(search ? { q: search } : {}) },
     });
     return data.posts;
   },

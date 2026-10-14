@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { Outlet, useParams, useLocation } from 'react-router-dom';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import { useChat } from '@/hooks/use-chat';
 import { useAuthContext } from '@/context/auth-provider';
+import PageLoader from '@/components/shared/PageLoader';
 
 const ChatsPage = () => {
   const { user, related } = useAuthContext();
@@ -47,7 +48,9 @@ const ChatsPage = () => {
         overflow-hidden relative
       `}
       >
-        <Outlet context={{ chatData, activeTab, activeProfileId }} />
+        <Suspense fallback={<PageLoader />}>
+          <Outlet context={{ chatData, activeTab, activeProfileId }} />
+        </Suspense>
       </main>
     </div>
   );

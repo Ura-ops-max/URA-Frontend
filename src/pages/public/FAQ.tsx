@@ -26,8 +26,8 @@ const FAQS = [
     a: 'Go to Settings and choose "Convert to Business". You can then list products and receive payments directly to your wallet.',
   },
   {
-    q: 'How do I fund my wallet?',
-    a: 'Open your Wallet and click "Fund Wallet". A one-time virtual bank account is generated for you, transfer any amount and your balance updates once the transfer is confirmed.',
+    q: 'Do I need to fund my wallet?',
+    a: 'No. At checkout you can pay by bank transfer from any bank app, or by card. If you already have a wallet balance (for example from sales or a refund), you can pay from it or withdraw it.',
   },
   {
     q: 'Is my personal information safe?',

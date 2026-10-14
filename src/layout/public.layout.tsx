@@ -1,13 +1,23 @@
+import { Suspense } from 'react';
 import { NavBar } from '@/components/nav/NavBar';
 import Footer from '@/components/shared/Footer';
 import { AuthProvider } from '@/context/auth-provider';
 import { CartProvider } from '@/context/cart-provider';
 import { Outlet, useLocation } from 'react-router-dom';
+import PageLoader from '@/components/shared/PageLoader';
 
 // The general website pages that live at a single path segment. Anything else
 // that is a single segment (e.g. /xtreme-food-truck) is a business link page,
 // which is the ONLY place the shop-style bar (Home + Cart) should appear.
-const STATIC_PUBLIC_PATHS = new Set(['about', 'contact', 'terms', 'privacy', 'faq', 'products', 'welcome']);
+const STATIC_PUBLIC_PATHS = new Set([
+  'about',
+  'contact',
+  'terms',
+  'privacy',
+  'faq',
+  'products',
+  'welcome',
+]);
 
 const PublichLayout = () => {
   const { pathname } = useLocation();
@@ -20,7 +30,9 @@ const PublichLayout = () => {
         <div>
           <NavBar variant={isBusinessLinkPage ? 'shop' : 'site'} />
           <div className="min-h-dvh">
-            <Outlet />
+            <Suspense fallback={<PageLoader />}>
+              <Outlet />
+            </Suspense>
           </div>
           <Footer />
         </div>

@@ -20,7 +20,10 @@ interface CheckoutPaymentModalProps {
   escrowId: string;
   /** Payluk payment token — powers the inline (popup) card/bank checkout. */
   paymentToken?: string;
-  /** Which flow the buyer already chose: 'normal' (popup) or 'escrow' (wallet/transfer). */
+  /**
+   * Which payment type the buyer chose. Both use this same URA screen (wallet,
+   * bank transfer, or card); they differ only in who pays Payluk's fee.
+   */
   mode: 'normal' | 'escrow';
   /** Finalised total the buyer must pay (product + delivery + Payluk fee). */
   amount: number;
@@ -70,6 +73,10 @@ export default function CheckoutPaymentModal({
 
   const settlingRef = useRef(false);
   const mountedRef = useRef(true);
+  // Wallet balance when the pop-up opened. The pop-up only completes on its own
+  // when NEW money arrives (a bank transfer) — never just because the shopper
+  // already had enough in their wallet. That needs a tap on "Pay from Wallet".
+  const openingBalanceRef = useRef<number | null>(null);
 
   // ── Generate the seller's receiving (virtual) account for external transfer.
   const generateAccount = useCallback(async () => {
@@ -94,19 +101,21 @@ export default function CheckoutPaymentModal({
     }
   }, [customerId]);
 
-  // ── Read the buyer's wallet balance.
-  const fetchBalance = useCallback(async (): Promise<number> => {
+  // ── Read the buyer's wallet balance (null if it couldn't be read).
+  const fetchBalance = useCallback(async (): Promise<number | null> => {
     try {
       const { data } = await paylukAPI.get('/wallet', {
         headers: { 'customer-id': customerId },
       });
       const payload = data?.data ?? data;
-      const balance = payload?.mainBalance ?? payload?.balance ?? 0;
+      const balance = Number(payload?.mainBalance ?? payload?.balance ?? 0);
       if (mountedRef.current) setWalletBalance(balance);
+      // First successful read is the starting point for "new money arrived".
+      if (openingBalanceRef.current === null) openingBalanceRef.current = balance;
       return balance;
     } catch {
       if (mountedRef.current) setWalletBalance((b) => b ?? 0);
-      return 0;
+      return null;
     }
   }, [customerId]);
 
@@ -145,18 +154,37 @@ export default function CheckoutPaymentModal({
     }
   }, [amount, orderId, escrowId, customerId, onPaid]);
 
-  // Poll: the moment the wallet covers the amount (e.g. an external transfer
-  // landed), settle automatically.
-  const checkAndSettle = useCallback(async () => {
-    const balance = await fetchBalance();
-    if (balance >= amount && !settlingRef.current) {
-      await settleFromWallet();
-    }
-  }, [fetchBalance, amount, settleFromWallet]);
+  // Check for the shopper's bank transfer. Completes on its own only when new
+  // money has arrived since the pop-up opened AND it covers the total.
+  // `manual` = the shopper tapped "I've sent it — check now": tell them the result.
+  const checkForTransfer = useCallback(
+    async (manual = false) => {
+      const opening = openingBalanceRef.current;
+      const balance = await fetchBalance();
+      if (balance === null) {
+        if (manual) toast.error('Could not check right now. Please try again in a moment.');
+        return;
+      }
+      const newMoneyArrived = opening !== null && balance > opening;
+      if (newMoneyArrived && balance >= amount && !settlingRef.current) {
+        await settleFromWallet();
+        return;
+      }
+      if (!manual) return;
+      if (newMoneyArrived) {
+        toast.info(
+          `We received ${formatNaira(balance - (opening ?? 0))}, but the total is ${formatNaira(amount)}. Please send the rest.`,
+        );
+      } else {
+        toast.info("Your transfer hasn't arrived yet. It can take a minute — we'll keep checking.");
+      }
+    },
+    [fetchBalance, amount, settleFromWallet],
+  );
 
-  // "Normal payment" — opens Payluk's inline checkout popup (card / bank / USSD),
-  // like a standard Paystack-style checkout. It still settles this escrow, so the
-  // webhook marks the order paid the same way.
+  // "Pay by card" — opens Payluk's secure window, because card numbers must go
+  // into a certified payment page. It settles this same escrow, so the webhook
+  // marks the order paid the same way. Offered for both payment types.
   const payWithPopup = useCallback(async () => {
     if (!paymentToken) {
       toast.error('Card payment is unavailable for this order — use wallet or transfer.');
@@ -208,12 +236,12 @@ export default function CheckoutPaymentModal({
     };
   }, [fetchBalance, generateAccount]);
 
-  // Poll every 8s while the buyer is on the transfer step.
+  // Poll every 8s for an incoming bank transfer.
   useEffect(() => {
     if (phase !== 'ready') return;
-    const id = setInterval(() => void checkAndSettle(), 8000);
+    const id = setInterval(() => void checkForTransfer(), 8000);
     return () => clearInterval(id);
-  }, [phase, checkAndSettle]);
+  }, [phase, checkForTransfer]);
 
   const copyField = async (field: CopiedField, value: string, label: string) => {
     await navigator.clipboard.writeText(value);
@@ -255,7 +283,11 @@ export default function CheckoutPaymentModal({
             <div>
               <h2 className="text-lg font-black text-gray-900 leading-tight">Complete Payment</h2>
               <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">
-                {orderNumber ? `Order ${orderNumber}` : 'Held safely (buyer-protected)'}
+                {orderNumber
+                  ? `Order ${orderNumber}`
+                  : mode === 'normal'
+                    ? 'Normal Payment'
+                    : 'Buyer-Protected Payment'}
               </p>
             </div>
           </div>
@@ -285,29 +317,14 @@ export default function CheckoutPaymentModal({
             </div>
           )}
 
-          {/* ── Normal payment: instant Payluk popup, no add-on fee ──── */}
-          {(phase === 'ready' || phase === 'settling') && mode === 'normal' && (
-            <div className="py-2">
-              <p className="text-sm text-gray-500 mb-5 leading-relaxed">
-                Instant checkout — pay by card, bank transfer or USSD. No extra fee.
-              </p>
-              <Button
-                onClick={() => void payWithPopup()}
-                disabled={busy}
-                className="w-full h-14 rounded-xl font-bold gap-2 bg-gray-900 hover:bg-black text-base disabled:opacity-50"
-              >
-                <CreditCard size={18} />
-                Pay {formatNaira(amount)} now
-              </Button>
-              <p className="mt-3 text-center text-[11px] text-gray-400">
-                Opens a secure Payluk payment window.
-              </p>
-            </div>
-          )}
-
-          {/* ── Escrow: pay from wallet or bank transfer, held safely ── */}
-          {(phase === 'ready' || phase === 'settling') && mode === 'escrow' && (
+          {/* ── Both payment types: wallet, bank transfer, or card ── */}
+          {(phase === 'ready' || phase === 'settling') && (
             <>
+              <p className="text-sm text-gray-500 mb-5 leading-relaxed">
+                {mode === 'normal'
+                  ? 'No extra fee for you. Card, transfer or USSD.'
+                  : 'Buyer-Protected Payment: your money is held safely until you confirm delivery.'}
+              </p>
               <div className="grid gap-5 sm:grid-cols-2 sm:items-start">
                 {/* ── Option 1: Pay from wallet ───────────────────────── */}
                 <div className="rounded-2xl border border-gray-100 p-4">
@@ -431,7 +448,7 @@ export default function CheckoutPaymentModal({
 
                   <Button
                     variant="outline"
-                    onClick={() => void checkAndSettle()}
+                    onClick={() => void checkForTransfer(true)}
                     disabled={busy}
                     className="w-full h-11 rounded-xl font-bold gap-2 border-gray-200"
                   >
@@ -442,10 +459,30 @@ export default function CheckoutPaymentModal({
                 </div>
               </div>
 
+              {/* ── Option 3: Card (Payluk's secure window) ───────────── */}
+              {paymentToken && (
+                <div className="mt-5">
+                  <Button
+                    variant="outline"
+                    onClick={() => void payWithPopup()}
+                    disabled={busy}
+                    className="w-full h-12 rounded-xl font-bold gap-2 border-gray-200"
+                  >
+                    <CreditCard size={16} />
+                    Pay by card
+                  </Button>
+                  <p className="mt-2 text-center text-[11px] text-gray-400">
+                    Opens Payluk's secure card window.
+                  </p>
+                </div>
+              )}
+
               <div className="mt-5 flex items-center justify-center gap-2 text-gray-400">
                 <ShieldCheck size={14} className="text-blue-400" />
                 <span className="text-[10px] font-black uppercase tracking-widest">
-                  Held safely until you confirm delivery
+                  {mode === 'normal'
+                    ? 'Released to the shop when you confirm delivery'
+                    : 'Held safely until you confirm delivery'}
                 </span>
               </div>
             </>

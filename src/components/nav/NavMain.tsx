@@ -12,6 +12,7 @@ import {
   Bookmark, // 🚨 Added Bookmark icon
   type LucideIcon,
   PlusCircle,
+  Boxes,
 } from 'lucide-react';
 import {
   SidebarGroup,
@@ -89,13 +90,9 @@ export function NavMain() {
       url: '/dashboard/post/create?type=product',
       icon: PlusCircle,
     },
-    {
-      title: 'Store Orders',
-      url: '/dashboard/store-management',
-      icon: Store,
-      showBadge: true,
-      badgeValue: 12,
-    },
+    { title: 'Inventory', url: '/dashboard/inventory', icon: Boxes },
+    // Orders customers placed with this shop (the Orders page's "received" view).
+    { title: 'Store Orders', url: '/dashboard/orders?view=received', icon: Store },
     // { title: 'Business Loan', url: '/dashboard/loans', icon: BadgePercent },
     // Inside businessItems array in NavMain.tsx
   ];

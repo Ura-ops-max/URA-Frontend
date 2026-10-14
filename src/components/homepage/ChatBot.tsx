@@ -41,7 +41,7 @@ const KB: { keywords: string[]; answer: string }[] = [
   {
     keywords: ['wallet', 'fund', 'balance', 'deposit', 'top up', 'top-up'],
     answer:
-      'Open your Wallet and click "Fund Wallet". A one-time virtual bank account is generated for you — transfer any amount and your balance updates once confirmed.',
+      "You don't need to top up your wallet. At checkout you can pay by bank transfer from any bank app, or by card. If you already have a balance (for example from sales or a refund), you can pay from it or withdraw it from your Wallet.",
   },
   {
     keywords: ['sell', 'seller', 'business', 'list', 'product', 'convert'],

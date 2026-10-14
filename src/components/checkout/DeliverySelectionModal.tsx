@@ -153,7 +153,7 @@ export default function DeliverySelectionModal({
               <div className="flex-1 min-w-0">
                 <p className="font-black text-gray-900">Normal Payment</p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Instant checkout, no extra fee — card, transfer or USSD
+                  No extra fee for you. Card, transfer or USSD
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-gray-900" />

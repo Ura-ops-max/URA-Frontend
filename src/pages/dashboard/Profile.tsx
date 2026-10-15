@@ -125,7 +125,7 @@ const ProfilePage: React.FC = () => {
     const biz = (profile as any)?.business;
     if (!biz) return <ProfileSkeleton />;
     return (
-      <div className="min-h-screen bg-[#FFF9F6] pt-6 px-4 lg:px-12 animate-in fade-in duration-500">
+      <div className="min-h-screen animate-in fade-in duration-500">
         <BusinessStorefront
           business={biz}
           owner={(profile as any)?.user}

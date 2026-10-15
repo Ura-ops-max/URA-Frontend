@@ -18,6 +18,8 @@ interface ProductsFeedProps {
   category?: string;
   /** Search inside the shop. When it finds nothing, offer all of URA instead. */
   search?: string;
+  /** Override the product grid columns (e.g. a wider shop page). */
+  gridClassName?: string;
 }
 
 export default function ProductsFeed({
@@ -26,6 +28,7 @@ export default function ProductsFeed({
   type = 'feed',
   category,
   search = '',
+  gridClassName,
 }: ProductsFeedProps) {
   const { isAuthenticated } = useAuthContext();
   const { addItem } = useCartContext(); // Pull the cart methods
@@ -164,7 +167,7 @@ export default function ProductsFeed({
 
       {/* PRODUCT GRID - Optimized for e-commerce */}
       {/* PRODUCT GRID */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
+      <div className={cn('grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6', gridClassName)}>
         {filteredProducts.map(
           (
             product: ProductType, // Add explicit type here

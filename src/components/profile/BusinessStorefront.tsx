@@ -420,7 +420,7 @@ export default function BusinessStorefront({
                     maxLength={60}
                     placeholder={`Search ${business.businessName}`}
                     aria-label="Search this shop"
-                    className="h-11 w-full rounded-2xl bg-white pl-10 pr-10 text-sm ring-1 ring-gray-200 outline-none transition focus:ring-2 focus:ring-orange-300"
+                    className="h-11 w-full rounded-2xl bg-white pl-10 pr-10 text-base sm:text-sm ring-1 ring-gray-200 outline-none transition focus:ring-2 focus:ring-orange-300"
                   />
                   {searchInput && (
                     <button

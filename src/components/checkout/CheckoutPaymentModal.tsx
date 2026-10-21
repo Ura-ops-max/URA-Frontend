@@ -170,13 +170,14 @@ export default function CheckoutPaymentModal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 items-center justify-center p-4 bg-black/40 backdrop-blur-sm ${
+      // Phones: a sheet from the bottom. Larger screens: centred.
+      className={`fixed inset-0 z-50 items-end justify-center sm:items-center sm:p-4 bg-black/40 backdrop-blur-sm ${
         widgetOpen ? 'hidden' : 'flex'
       }`}
       onClick={busy ? undefined : onClose}
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[92dvh] overflow-y-auto pb-[env(safe-area-inset-bottom)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 h-1.5 bg-linear-to-r from-orange-500 to-orange-400" />
@@ -191,8 +192,10 @@ export default function CheckoutPaymentModal({
           </button>
         )}
 
-        <div className="p-6 sm:p-8">
-          <div className="flex items-center gap-4 mb-6">
+        <div className="p-5 sm:p-8">
+          {/* Grab handle (phones) */}
+          <div className="mx-auto -mt-1 mb-4 h-1.5 w-10 rounded-full bg-gray-200 sm:hidden" aria-hidden />
+          <div className="flex items-center gap-4 mb-6 pr-8">
             <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-6 h-6 text-orange-500" />
             </div>

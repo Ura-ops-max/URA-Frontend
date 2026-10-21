@@ -193,7 +193,7 @@ export default function StockTab({ products, loading, onReload, onPatched }: Pro
               setShown(PAGE);
             }}
             placeholder="Search by name or item code"
-            className="h-11 w-full rounded-xl bg-white pl-10 pr-10 text-sm ring-1 ring-gray-200 outline-none focus:ring-2 focus:ring-orange-300"
+            className="h-11 w-full rounded-xl bg-white pl-10 pr-10 text-base sm:text-sm ring-1 ring-gray-200 outline-none focus:ring-2 focus:ring-orange-300"
           />
           {query && (
             <button
@@ -211,7 +211,11 @@ export default function StockTab({ products, loading, onReload, onPatched }: Pro
             bulkPhotoStatus && 'pointer-events-none opacity-60',
           )}
         >
-          {bulkPhotoStatus ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}
+          {bulkPhotoStatus ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <ImagePlus size={16} />
+          )}
           {bulkPhotoStatus ?? 'Add many photos'}
           <input
             type="file"
@@ -244,7 +248,7 @@ export default function StockTab({ products, loading, onReload, onPatched }: Pro
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
         {FILTERS.map((f) => (
           <button
             key={f.key}
@@ -253,8 +257,10 @@ export default function StockTab({ products, loading, onReload, onPatched }: Pro
               setShown(PAGE);
             }}
             className={cn(
-              'rounded-full px-3.5 py-1.5 text-sm font-medium transition',
-              filter === f.key ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 ring-1 ring-gray-200',
+              'shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition',
+              filter === f.key
+                ? 'bg-orange-500 text-white'
+                : 'bg-white text-gray-600 ring-1 ring-gray-200',
             )}
           >
             {f.label}
@@ -292,7 +298,12 @@ export default function StockTab({ products, loading, onReload, onPatched }: Pro
                   aria-label={`Add a photo for ${p.name}`}
                   className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-gray-100"
                 >
-                  <ProductImage src={p.media?.[0]} name={p.name} alt="" className="h-full w-full object-cover" />
+                  <ProductImage
+                    src={p.media?.[0]}
+                    name={p.name}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                   <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition hover:bg-black/30 hover:opacity-100">
                     {photoBusy[p._id] ? (
                       <Loader2 size={16} className="animate-spin opacity-100" />
@@ -308,7 +319,12 @@ export default function StockTab({ products, loading, onReload, onPatched }: Pro
                 </button>
 
                 <div className="min-w-0 flex-1">
-                  <p className={cn('truncate text-sm font-semibold', v.isHidden ? 'text-gray-400' : 'text-gray-900')}>
+                  <p
+                    className={cn(
+                      'truncate text-sm font-semibold',
+                      v.isHidden ? 'text-gray-400' : 'text-gray-900',
+                    )}
+                  >
                     {p.name}
                   </p>
                   <p className="truncate text-xs text-gray-400">
@@ -316,80 +332,85 @@ export default function StockTab({ products, loading, onReload, onPatched }: Pro
                   </p>
                 </div>
 
-                {/* Price */}
-                <label className="flex items-center gap-1 text-sm">
-                  <span className="text-gray-400">₦</span>
-                  <input
-                    type="number"
-                    min={0}
-                    inputMode="decimal"
-                    value={v.price}
-                    onChange={(e) => {
-                      const n = Number(e.target.value);
-                      if (e.target.value !== '' && Number.isFinite(n) && n >= 0) setDraft(p, { price: n });
-                    }}
-                    aria-label={`Price of ${p.name}`}
-                    className="h-9 w-24 rounded-lg border border-gray-200 px-2 text-right tabular-nums"
-                  />
-                </label>
+                {/* Controls: a full-width second line on phones, inline from sm. */}
+                <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-3">
+                  {/* Price */}
+                  <label className="flex items-center gap-1 text-sm">
+                    <span className="text-gray-400">₦</span>
+                    <input
+                      type="number"
+                      min={0}
+                      inputMode="decimal"
+                      value={v.price}
+                      onChange={(e) => {
+                        const n = Number(e.target.value);
+                        if (e.target.value !== '' && Number.isFinite(n) && n >= 0)
+                          setDraft(p, { price: n });
+                      }}
+                      aria-label={`Price of ${p.name}`}
+                      className="h-10 w-24 rounded-lg border border-gray-200 px-2 text-right text-base sm:h-9 sm:text-sm tabular-nums"
+                    />
+                  </label>
 
-                {/* Stock − / + */}
-                <div className="flex items-center rounded-lg border border-gray-200">
-                  <button
-                    onClick={() => setDraft(p, { stock: Math.max(0, v.stock - 1) })}
-                    aria-label="One less"
-                    className="flex h-9 w-8 items-center justify-center text-gray-500 hover:bg-gray-50"
-                  >
-                    <Minus size={14} />
-                  </button>
-                  <input
-                    type="number"
-                    min={0}
-                    step={1}
-                    inputMode="numeric"
-                    value={v.stock}
-                    onChange={(e) => {
-                      const n = Number(e.target.value);
-                      if (e.target.value !== '' && Number.isInteger(n) && n >= 0) setDraft(p, { stock: n });
-                    }}
-                    aria-label={`Stock of ${p.name}`}
-                    className={cn(
-                      'h-9 w-14 border-x border-gray-200 text-center tabular-nums',
-                      v.stock === 0 && 'text-red-600 font-semibold',
-                    )}
-                  />
-                  <button
-                    onClick={() => setDraft(p, { stock: v.stock + 1 })}
-                    aria-label="One more"
-                    className="flex h-9 w-8 items-center justify-center text-gray-500 hover:bg-gray-50"
-                  >
-                    <Plus size={14} />
-                  </button>
-                </div>
+                  {/* Stock − / + */}
+                  <div className="flex items-center rounded-lg border border-gray-200">
+                    <button
+                      onClick={() => setDraft(p, { stock: Math.max(0, v.stock - 1) })}
+                      aria-label="One less"
+                      className="flex h-10 w-10 items-center justify-center text-gray-500 hover:bg-gray-50 sm:h-9 sm:w-8"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      inputMode="numeric"
+                      value={v.stock}
+                      onChange={(e) => {
+                        const n = Number(e.target.value);
+                        if (e.target.value !== '' && Number.isInteger(n) && n >= 0)
+                          setDraft(p, { stock: n });
+                      }}
+                      aria-label={`Stock of ${p.name}`}
+                      className={cn(
+                        'h-10 w-14 border-x border-gray-200 text-center text-base sm:h-9 sm:text-sm tabular-nums',
+                        v.stock === 0 && 'text-red-600 font-semibold',
+                      )}
+                    />
+                    <button
+                      onClick={() => setDraft(p, { stock: v.stock + 1 })}
+                      aria-label="One more"
+                      className="flex h-10 w-10 items-center justify-center text-gray-500 hover:bg-gray-50 sm:h-9 sm:w-8"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
 
-                {/* On / Off */}
-                <button
-                  role="switch"
-                  aria-checked={!v.isHidden}
-                  aria-label={`${p.name} is ${v.isHidden ? 'off' : 'on'}`}
-                  onClick={() => setDraft(p, { isHidden: !v.isHidden })}
-                  className="flex items-center gap-2 text-xs font-semibold text-gray-500"
-                >
-                  <span
-                    className={cn(
-                      'relative h-6 w-11 rounded-full transition',
-                      v.isHidden ? 'bg-gray-300' : 'bg-green-500',
-                    )}
+                  {/* On / Off */}
+                  <button
+                    role="switch"
+                    aria-checked={!v.isHidden}
+                    aria-label={`${p.name} is ${v.isHidden ? 'off' : 'on'}`}
+                    onClick={() => setDraft(p, { isHidden: !v.isHidden })}
+                    className="flex items-center gap-2 text-xs font-semibold text-gray-500"
                   >
                     <span
                       className={cn(
-                        'absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all',
-                        v.isHidden ? 'left-0.5' : 'left-5.5',
+                        'relative h-6 w-11 rounded-full transition',
+                        v.isHidden ? 'bg-gray-300' : 'bg-green-500',
                       )}
-                    />
-                  </span>
-                  <span className="w-6">{v.isHidden ? 'Off' : 'On'}</span>
-                </button>
+                    >
+                      <span
+                        className={cn(
+                          'absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all',
+                          v.isHidden ? 'left-0.5' : 'left-5.5',
+                        )}
+                      />
+                    </span>
+                    <span className="w-6">{v.isHidden ? 'Off' : 'On'}</span>
+                  </button>
+                </div>
               </li>
             );
           })}
@@ -398,7 +419,11 @@ export default function StockTab({ products, loading, onReload, onPatched }: Pro
 
       {visible.length > shown && (
         <div className="text-center">
-          <Button variant="outline" onClick={() => setShown((n) => n + PAGE)} className="rounded-xl">
+          <Button
+            variant="outline"
+            onClick={() => setShown((n) => n + PAGE)}
+            className="rounded-xl"
+          >
             Show more ({(visible.length - shown).toLocaleString()} left)
           </Button>
         </div>

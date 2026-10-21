@@ -200,7 +200,7 @@ export default function UploadTab({ onSaved }: { onSaved: () => void }) {
                   value={mapping[i] ?? ''}
                   onChange={(e) => setColumn(i, e.target.value as InventoryField | '')}
                   aria-label={`What is “${h}”?`}
-                  className="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm sm:w-56"
+                  className="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-base sm:h-10 sm:w-56 sm:text-sm"
                 >
                   <option value="">Don’t use</option>
                   {FIELDS.map((f) => (
@@ -259,7 +259,7 @@ export default function UploadTab({ onSaved }: { onSaved: () => void }) {
                   <li key={r.row} className="flex items-start gap-3 px-4 py-2.5 text-sm">
                     <span className="w-10 shrink-0 text-xs text-gray-400 tabular-nums">#{r.row}</span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-gray-800">{r.name || '—'}</p>
+                      <p className="break-words font-medium text-gray-800 sm:truncate">{r.name || '—'}</p>
                       {r.reason && <p className="text-xs text-red-600">{r.reason}</p>}
                       {r.status === 'update' && r.changes?.length ? (
                         <p className="text-xs text-gray-400">Changes: {r.changes.join(', ')}</p>

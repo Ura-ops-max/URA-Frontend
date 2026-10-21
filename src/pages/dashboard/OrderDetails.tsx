@@ -251,7 +251,8 @@ const OrderDetailsPage = () => {
         )}
 
         {/* Next action */}
-        <div className="mt-6 flex flex-wrap gap-2">
+        {/* Phones: one full-width button per row. Larger screens: in a row. */}
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap [&>button]:w-full sm:[&>button]:w-auto [&>button]:h-11 sm:[&>button]:h-9">
           {canPayNow && (
             <Button onClick={payNow} disabled={busy} className="rounded-xl bg-orange-600 hover:bg-orange-700 font-bold">
               {busy ? <Loader2 size={16} className="animate-spin" /> : <><CreditCard size={16} className="mr-1" /> Pay now</>}
@@ -432,16 +433,16 @@ const OrderDetailsPage = () => {
       {/* Confirm receipt dialog */}
 
       {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setConfirmOpen(false)}>
-          <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4" onClick={() => setConfirmOpen(false)}>
+          <div className="w-full max-w-sm rounded-t-3xl bg-white p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] text-center sm:rounded-3xl sm:pb-6" onClick={(e) => e.stopPropagation()}>
             <PackageCheck className="mx-auto h-10 w-10 text-green-600" />
             <h3 className="mt-3 text-lg font-black">Did you receive everything?</h3>
             <p className="mt-1 text-sm text-gray-500">
               Confirming releases {formatNaira(subtotal)} to {shop?.businessName ?? 'the seller'}. This can&apos;t be undone.
             </p>
-            <div className="mt-6 flex gap-3">
-              <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setConfirmOpen(false)}>Not yet</Button>
-              <Button className="flex-1 rounded-xl bg-green-600 hover:bg-green-700" onClick={confirmReceived}>Yes, release payment</Button>
+            <div className="mt-6 flex flex-col-reverse gap-3 min-[380px]:flex-row">
+              <Button variant="outline" className="flex-1 h-11 rounded-xl" onClick={() => setConfirmOpen(false)}>Not yet</Button>
+              <Button className="flex-1 h-11 rounded-xl bg-green-600 hover:bg-green-700" onClick={confirmReceived}>Yes, release payment</Button>
             </div>
           </div>
         </div>
@@ -481,8 +482,11 @@ function DisputeDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-3xl bg-white p-6" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-md max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:rounded-3xl sm:p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3 className="text-lg font-black">{asSeller ? 'Reply to the dispute' : 'Report a problem'}</h3>
         <p className="mt-1 text-sm text-gray-500">
           {asSeller
@@ -495,7 +499,7 @@ function DisputeDialog({
           maxLength={2000}
           rows={5}
           placeholder={asSeller ? 'Your reply' : 'What went wrong?'}
-          className="mt-4 w-full rounded-xl border border-gray-200 p-3 text-sm outline-none focus:ring-2 focus:ring-orange-300"
+          className="mt-4 w-full rounded-xl border border-gray-200 p-3 text-base sm:text-sm outline-none focus:ring-2 focus:ring-orange-300"
         />
         <label className="mt-3 block text-xs font-semibold text-gray-600">
           Photo or PDF (optional, up to 5 MB)
@@ -514,11 +518,11 @@ function DisputeDialog({
             }}
           />
         </label>
-        <div className="mt-6 flex gap-3">
-          <Button variant="outline" className="flex-1 rounded-xl" onClick={onClose} disabled={sending}>
+        <div className="mt-6 flex flex-col-reverse gap-3 min-[380px]:flex-row">
+          <Button variant="outline" className="flex-1 h-11 rounded-xl" onClick={onClose} disabled={sending}>
             Cancel
           </Button>
-          <Button className="flex-1 rounded-xl bg-red-600 hover:bg-red-700" onClick={submit} disabled={sending || !message.trim()}>
+          <Button className="flex-1 h-11 rounded-xl bg-red-600 hover:bg-red-700" onClick={submit} disabled={sending || !message.trim()}>
             {sending ? <Loader2 size={16} className="animate-spin" /> : 'Send'}
           </Button>
         </div>

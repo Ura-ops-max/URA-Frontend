@@ -67,13 +67,9 @@ const TransactionHistoryPage = lazy(
 const SellerTransactionsPage = lazy(
   () => import('@/components/wallets/pages/SellerTransactionsPage'),
 );
-const ClaimFundsPage = lazy(() => import('@/components/wallets/pages/ClaimFundsPage'));
-const RespondToDisputePage = lazy(() => import('@/components/wallets/pages/RespondToDisputePage'));
 const BuyerTransactionsPage = lazy(
   () => import('@/components/wallets/pages/BuyerTransactionsPage'),
 );
-const OpenDisputePage = lazy(() => import('@/components/wallets/pages/OpenDisputePage'));
-const ConfirmPaymentPage = lazy(() => import('@/components/wallets/pages/ConfirmPaymentPage'));
 const WithdrawalPage = lazy(() => import('@/components/wallets/pages/WithdrawalPage'));
 const InventoryPage = lazy(() => import('@/pages/dashboard/Inventory'));
 
@@ -108,11 +104,12 @@ export const protectedRoutePaths = [
       { path: 'activities', element: <TransactionHistoryPage /> },
       { path: 'transactions', element: <TransactionHistoryPage /> },
       { path: 'seller-transactions', element: <SellerTransactionsPage /> },
-      { path: 'claim-funds', element: <ClaimFundsPage /> },
-      { path: 'respond-to-dispute', element: <RespondToDisputePage /> },
+      // Claim / dispute / confirm now happen on each order, through URA's backend.
+      { path: 'claim-funds', element: <Navigate to="/dashboard/orders?view=received" replace /> },
+      { path: 'respond-to-dispute', element: <Navigate to="/dashboard/orders?view=received" replace /> },
       { path: 'buyer-transactions', element: <BuyerTransactionsPage /> },
-      { path: 'open-dispute', element: <OpenDisputePage /> },
-      { path: 'confirm-payment', element: <ConfirmPaymentPage /> },
+      { path: 'open-dispute', element: <Navigate to="/dashboard/orders" replace /> },
+      { path: 'confirm-payment', element: <Navigate to="/dashboard/orders" replace /> },
       { path: 'withdraw', element: <WithdrawalPage /> },
     ],
   },
@@ -152,6 +149,7 @@ export const protectedRoutePaths = [
   { path: PROTECTED_ROUTES.IMAGE_SEARCH, element: <ImageSearch /> },
   { path: PROTECTED_ROUTES.INVENTORY, element: <InventoryPage /> },
   { path: BASE_ROUTE.PAYLUK_PAYMENT_COMPLETE, element: <PaymentCompletePage /> },
+  { path: BASE_ROUTE.PAYMENT_COMPLETE, element: <PaymentCompletePage /> },
 ];
 
 // --- Public/Base Routes ---

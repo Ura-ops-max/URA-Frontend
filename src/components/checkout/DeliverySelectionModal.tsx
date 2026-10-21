@@ -152,8 +152,9 @@ export default function DeliverySelectionModal({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-black text-gray-900">Normal Payment</p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  No extra fee for you
+<p className="text-xs text-gray-500 mt-0.5">
+                  No extra fee for you. Goes straight to the seller, so there is no buyer
+                  protection.
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-gray-900" />

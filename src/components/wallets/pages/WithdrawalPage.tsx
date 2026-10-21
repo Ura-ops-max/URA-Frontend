@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useBanks, getBankCategory, type Bank, type BankCategory } from '@/hooks/api/use-banks';
 import { useWalletBalance } from '@/hooks/api/use-wallet-balance';
-import paylukAPI from '@/lib/payluk-axios';
+import API from '@/lib/axios-client';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -26,9 +26,6 @@ function formatNGN(amount: number) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
 }
 
-function genRef() {
-  return `WDR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-}
 
 const CATEGORIES: BankCategory[] = [
   'All',
@@ -171,7 +168,6 @@ export default function WithdrawalPage() {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [intent, setIntent] = useState<IntentData | null>(null);
   const [confirmedIntent, setConfirmedIntent] = useState<IntentData | null>(null);
-  const [reference, setReference] = useState(genRef);
   // Some withdrawals require an OTP/PIN to confirm — revealed if Payluk asks.
   const [otp, setOtp] = useState('');
   const [needsOtp, setNeedsOtp] = useState(false);
@@ -214,16 +210,9 @@ export default function WithdrawalPage() {
     setAccountName('');
     try {
       // Try with real bank code first; fall back to "001" on test-limit errors
+      // URA's backend checks the account with Payluk for this user.
       const tryVerify = async (code: string) =>
-        paylukAPI.post(
-          '/payment/verify-account',
-          {
-            accountNumber: acctNum,
-            bankCode: code,
-            bankName: bank.name,
-          },
-          { headers: { 'customer-id': customerId } },
-        );
+        API.post('/wallet/verify-account', { accountNumber: acctNum, bankCode: code });
 
       let resp;
       try {
@@ -237,8 +226,7 @@ export default function WithdrawalPage() {
         }
       }
 
-      const payload = resp.data?.data ?? resp.data;
-      const name = payload?.accountName ?? payload?.account_name ?? payload?.name;
+      const name = resp.data?.accountName;
       if (!name) throw new Error('Could not retrieve account name');
       setAccountName(name);
       setVerified(true);
@@ -262,25 +250,25 @@ export default function WithdrawalPage() {
 
     setIntentLoading(true);
     try {
-      const { data } = await paylukAPI.post(
-        '/payment/create-intent',
-        {
-          amount: amt,
-          reference,
-          transactionType: 'withdrawal',
-          withdrawalDetails: {
-            bankCode: selectedBank!.code,
-            accountNumber,
-            accountName,
-            bankName: selectedBank!.name,
-          },
-        },
-        { headers: { 'customer-id': customerId } },
-      );
-      setIntent(data?.data ?? data);
+      // Step 1 (URA backend → Payluk): stage the payout. No money moves yet.
+      const withdrawalDetails = {
+        bankCode: selectedBank!.code,
+        accountNumber,
+        accountName,
+        bankName: selectedBank!.name,
+      };
+      const { data } = await API.post('/wallet/withdraw', { amount: amt, ...withdrawalDetails });
+      setIntent({
+        id: data.reference,
+        reference: data.reference,
+        amount: Number(data.amount) || amt,
+        fee: Number(data.fee) || 0,
+        status: data.status ?? 'pending',
+        withdrawalDetails,
+        createdAt: new Date().toISOString(),
+      });
       setStep('review');
     } catch (err: any) {
-      setReference(genRef()); // fresh ref on failure
       toast.error(err?.response?.data?.message ?? 'Failed to create withdrawal intent.');
     } finally {
       setIntentLoading(false);
@@ -292,15 +280,17 @@ export default function WithdrawalPage() {
     if (!intent) return;
     setConfirmLoading(true);
     try {
-      const { data } = await paylukAPI.post(
-        '/payment/verify',
-        {
-          reference: intent.reference,
-          ...(otp ? { otp } : {}),
-        },
-        { headers: { 'customer-id': customerId } },
-      );
-      setConfirmedIntent(data?.data ?? data);
+      // Step 2 (URA backend → Payluk): carry out the payout, with the OTP if asked.
+      const { data } = await API.post('/wallet/withdraw/confirm', {
+        reference: intent.reference,
+        ...(otp ? { otp } : {}),
+      });
+      setConfirmedIntent({
+        ...intent,
+        status: data.status ?? intent.status,
+        amount: Number(data.amount) || intent.amount,
+        fee: Number(data.fee) || intent.fee,
+      });
       setStep('done');
       setNeedsOtp(false);
       setOtp('');
@@ -313,7 +303,6 @@ export default function WithdrawalPage() {
         setNeedsOtp(true);
         toast.error(msg || 'Enter the OTP sent to you to confirm this withdrawal.');
       } else {
-        setReference(genRef()); // fresh ref on genuine failure
         toast.error(msg || 'Failed to confirm withdrawal.');
       }
     } finally {
@@ -538,7 +527,6 @@ export default function WithdrawalPage() {
                 value={amount}
                 onChange={(e) => {
                   setAmount(e.target.value);
-                  setReference(genRef());
                 }}
                 placeholder="0.00"
                 min="0"

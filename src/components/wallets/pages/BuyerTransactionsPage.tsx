@@ -1,15 +1,5 @@
 import { useState } from 'react';
-import {
-  Loader2,
-  ShoppingCart,
-  Copy,
-  Check,
-  CheckCircle,
-  MessageSquareWarning,
-  X,
-  Paperclip,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Loader2, ShoppingCart, Copy, Check } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import {
   useEscrowTransactions,
@@ -25,7 +15,7 @@ function safeFormat(dateStr: string | null | undefined, fmt: string): string {
   return isValid(d) ? format(d, fmt) : '—';
 }
 import { toast } from 'sonner';
-import paylukAPI from '@/lib/payluk-axios';
+import { OrderLink } from './OrderLink';
 
 function formatNGN(amount: number) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
@@ -51,187 +41,6 @@ function CopyButton({ value, label }: { value: string; label: string }) {
 }
 
 // ── Confirm Payment inline button ─────────────────────────────────────────────
-function ConfirmPaymentButton({
-  escrowId,
-  customerId,
-  status,
-}: {
-  escrowId: string;
-  customerId: string;
-  status: EscrowStatus;
-}) {
-  const [loading, setLoading] = useState(false);
-  const confirmable = status === 'ONGOING';
-
-  const handle = async () => {
-    setLoading(true);
-    try {
-      const { data } = await paylukAPI.post(`/escrow/confirm-payment/${escrowId}`, null, {
-        headers: { 'customer-id': customerId, accept: 'application/json' },
-      });
-      toast.success(data?.message ?? 'Payment confirmed — funds released to seller.');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? 'Failed to confirm payment.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Button
-      size="sm"
-      onClick={handle}
-      disabled={loading || !confirmable}
-      title={
-        !confirmable
-          ? `Status must be ONGOING to confirm (currently ${status})`
-          : 'Confirm delivery & release funds'
-      }
-      className={`h-8 rounded-xl text-xs font-bold gap-1.5 ${
-        confirmable
-          ? 'bg-green-600 hover:bg-green-700 text-white'
-          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-      }`}
-    >
-      {loading ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
-      Confirm Payment
-    </Button>
-  );
-}
-
-// ── Open Dispute inline modal ─────────────────────────────────────────────────
-function OpenDisputeModal({
-  paymentToken,
-  customerId,
-  onClose,
-}: {
-  paymentToken: string;
-  customerId: string;
-  onClose: () => void;
-}) {
-  const [message, setMessage] = useState('');
-  const [file, setFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async () => {
-    if (!message.trim()) {
-      toast.error('Message is required.');
-      return;
-    }
-    setLoading(true);
-    try {
-      const form = new FormData();
-      form.append('message', message.trim());
-      if (file) form.append('file', file);
-
-      const { data } = await paylukAPI.post(`/escrow/submit-dispute/${paymentToken}`, form, {
-        headers: { 'customer-id': customerId, 'content-type': 'multipart/form-data' },
-      });
-      toast.success(data?.message ?? 'Dispute submitted successfully.');
-      onClose();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? 'Failed to submit dispute.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="relative w-full max-w-md bg-white rounded-[28px] shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="h-1.5 bg-gradient-to-r from-red-400 to-orange-400" />
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <X size={18} />
-        </button>
-        <div className="p-7">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-              <MessageSquareWarning size={18} className="text-red-500" />
-            </div>
-            <div>
-              <h3 className="text-base font-black text-gray-900">Open Dispute</h3>
-              <p className="text-xs text-gray-400 font-mono">{paymentToken}</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">
-                Message <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                rows={4}
-                placeholder="Describe the issue..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="w-full rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-100 resize-none"
-              />
-            </div>
-
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">
-                Evidence (optional)
-              </label>
-              {file ? (
-                <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
-                  <div className="flex items-center gap-2">
-                    <Paperclip size={13} className="text-orange-400" />
-                    <p className="text-xs font-bold text-gray-700 truncate max-w-[200px]">
-                      {file.name}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setFile(null)}
-                    className="text-gray-400 hover:text-red-400 transition-colors"
-                  >
-                    <X size={13} />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex items-center gap-2 cursor-pointer bg-gray-50 rounded-xl px-4 py-3 border border-dashed border-gray-200 hover:border-red-200 transition-colors">
-                  <Paperclip size={13} className="text-gray-400" />
-                  <span className="text-xs font-bold text-gray-400">Attach a file</span>
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                  />
-                </label>
-              )}
-            </div>
-
-            <Button
-              onClick={handleSubmit}
-              disabled={loading || !message.trim()}
-              className="w-full h-11 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black gap-2 transition-all active:scale-95"
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={14} className="animate-spin" /> Submitting...
-                </>
-              ) : (
-                <>
-                  <MessageSquareWarning size={14} /> Submit Dispute
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Transaction card ──────────────────────────────────────────────────────────
 function Detail({
   label,
   value,
@@ -251,11 +60,8 @@ function Detail({
   );
 }
 
-function TransactionCard({ tx, customerId }: { tx: EscrowTransaction; customerId: string }) {
-  const [showDispute, setShowDispute] = useState(false);
-
+function TransactionCard({ tx }: { tx: EscrowTransaction }) {
   return (
-    <>
       <div className="p-5 rounded-2xl border border-gray-100 hover:border-blue-100 hover:shadow-sm transition-all space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
@@ -283,56 +89,27 @@ function TransactionCard({ tx, customerId }: { tx: EscrowTransaction; customerId
           )}
         </div>
 
-        {/* IDs — both are needed for different actions */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">
-                Transaction ID
-              </p>
-              <p className="text-xs font-mono font-bold text-gray-700 truncate max-w-[220px]">
-                {tx.id}
-              </p>
-            </div>
-            <CopyButton value={tx.id} label="Transaction ID" />
+        <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">
+              Transaction ID
+            </p>
+            <p className="text-xs font-mono font-bold text-gray-700 truncate max-w-[220px]">
+              {tx.id}
+            </p>
           </div>
-          <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">
-                Payment Token
-              </p>
-              <p className="text-xs font-mono font-bold text-gray-700">{tx.paymentToken}</p>
-            </div>
-            <CopyButton value={tx.paymentToken} label="Payment token" />
-          </div>
+          <CopyButton value={tx.id} label="Transaction ID" />
         </div>
 
         <p className="text-[11px] text-gray-400">
           Created {safeFormat(tx.createdAt, 'dd MMM yyyy · h:mm a')}
         </p>
 
-        {/* Actions */}
-        <div className="pt-2 border-t border-gray-50 flex items-center gap-2 flex-wrap">
-          <ConfirmPaymentButton escrowId={tx.id} customerId={customerId} status={tx.status} />
-          <Button
-            size="sm"
-            onClick={() => setShowDispute(true)}
-            className="h-8 rounded-xl text-xs font-bold gap-1.5 bg-red-50 hover:bg-red-100 text-red-500 border-0 shadow-none"
-          >
-            <MessageSquareWarning size={12} />
-            Open Dispute
-          </Button>
+        {/* Confirming and disputes happen on the order (through URA's backend). */}
+        <div className="pt-2 border-t border-gray-50">
+          <OrderLink tx={tx} />
         </div>
       </div>
-
-      {showDispute && (
-        <OpenDisputeModal
-          paymentToken={tx.paymentToken}
-          customerId={customerId}
-          onClose={() => setShowDispute(false)}
-        />
-      )}
-    </>
   );
 }
 
@@ -439,7 +216,7 @@ export default function BuyerTransactionsPage() {
         <>
           <div className="space-y-4">
             {transactions.map((tx) => (
-              <TransactionCard key={tx.id} tx={tx} customerId={user.paylukCustomerId!} />
+              <TransactionCard key={tx.id} tx={tx} />
             ))}
           </div>
           {pagination && (

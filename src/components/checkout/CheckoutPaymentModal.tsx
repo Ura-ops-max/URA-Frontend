@@ -1,178 +1,177 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Check, Loader2, Wallet, ShieldCheck, CreditCard } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { X, Check, Loader2, Wallet, ShieldCheck, CreditCard, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEscrowCheckout } from 'payluk-escrow-inline-checkout/react';
 import { Button } from '@/components/ui/button';
-import paylukAPI from '@/lib/payluk-axios';
-import { BASE_ROUTE } from '@/routes/common/routePaths.ts';
 import CheckoutAd from '@/components/ads/CheckoutAd';
+import { useWalletBalance } from '@/hooks/api/use-wallet-balance';
+import {
+  paymentsApi,
+  paymentErrorMessage,
+  type PaymentType,
+  type StartPaymentResponse,
+} from '@/lib/payments-api';
 
+/**
+ * One payment screen for both payment types. URA's backend creates the
+ * escrow and returns the payment token; Payluk's Checkout SDK widget collects
+ * the money over this page. Only the backend decides an order is paid (from
+ * Payluk's webhook, or by checking with Payluk): after the widget reports
+ * back, this screen asks the backend and waits.
+ */
 interface CheckoutPaymentModalProps {
-  /** The BUYER's Payluk customer id. */
-  customerId: string;
-  /** Payluk escrow id for this order — the seller's receiving escrow. */
-  escrowId: string;
-  /** Payluk payment token — powers the inline (popup) card/bank checkout. */
-  paymentToken?: string;
-  /**
-   * Which payment type the buyer chose. Both use this same screen (wallet or
-   * card); they differ only in who pays Payluk's fee.
-   */
-  mode: 'normal' | 'escrow';
-  /** Finalised total the buyer must pay (product + delivery + Payluk fee). */
-  amount: number;
-  /** Our order id — used to build a unique payment reference. */
   orderId: string;
   orderNumber?: string;
+  paymentType: PaymentType;
+  /** From POST /orders/:id/pay. */
+  payment: StartPaymentResponse;
   /** Shop this order is with — used to fetch its checkout ad. */
   businessId?: string;
   onClose: () => void;
-  /** Called once the escrow has been settled (order is paid). */
+  /** Called once the backend reports the order paid. */
   onPaid: () => void;
 }
 
-type Phase = 'loading' | 'ready' | 'settling' | 'paid';
+type Phase = 'ready' | 'starting' | 'confirming' | 'paid' | 'slow';
+
+const POLL_MS = 4_000;
+const POLL_FOR_MS = 3 * 60_000;
 
 const formatNaira = (n: number) =>
   new Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency: 'NGN',
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(n);
 
 export default function CheckoutPaymentModal({
-  customerId,
-  escrowId,
-  paymentToken,
-  mode,
-  amount,
   orderId,
   orderNumber,
+  paymentType,
+  payment,
   businessId,
   onClose,
   onPaid,
 }: CheckoutPaymentModalProps) {
-  const [walletBalance, setWalletBalance] = useState<number | null>(null);
-  const [phase, setPhase] = useState<Phase>('loading');
-  // While the Payluk popup is open we hide our own overlay so it isn't covered.
-  const [popupActive, setPopupActive] = useState(false);
+  const [phase, setPhase] = useState<Phase>('ready');
+  // While the Payluk widget is open we hide our overlay so it isn't covered.
+  const [widgetOpen, setWidgetOpen] = useState(false);
+  const [walletBusy, setWalletBusy] = useState(false);
   const { pay } = useEscrowCheckout();
+  const { data: wallet } = useWalletBalance(payment.customerId);
 
-  const settlingRef = useRef(false);
   const mountedRef = useRef(true);
-  // ── Read the buyer's wallet balance (null if it couldn't be read).
-  const fetchBalance = useCallback(async (): Promise<number | null> => {
-    try {
-      const { data } = await paylukAPI.get('/wallet', {
-        headers: { 'customer-id': customerId },
-      });
-      const payload = data?.data ?? data;
-      const balance = Number(payload?.mainBalance ?? payload?.balance ?? 0);
-      if (mountedRef.current) setWalletBalance(balance);
-      return balance;
-    } catch {
-      if (mountedRef.current) setWalletBalance((b) => b ?? 0);
-      return null;
-    }
-  }, [customerId]);
+  // The first attempt uses the reference we were given; later ones get a new
+  // one from the backend (Payluk wants a unique reference per checkout).
+  const usedFirstRef = useRef(false);
+  const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Pay this escrow from the buyer's wallet balance (only on a tap). Payluk's
-  // webhook flips the order to paid on our backend. Guarded against double taps.
-  const settleFromWallet = useCallback(async () => {
-    if (settlingRef.current) return;
-    settlingRef.current = true;
-    setPhase('settling');
-    try {
-      await paylukAPI.post(
-        '/payment/escrow',
-        {
-          amount,
-          reference: `order_${orderId}_${Date.now()}`,
-          gateway: 'wallet',
-          transactionType: 'escrow',
-          escrowDetails: { escrowId: [escrowId] },
-        },
-        { headers: { 'customer-id': customerId } },
-      );
-      if (!mountedRef.current) return;
-      setPhase('paid');
-      toast.success('Payment received — your order is being processed.');
-      onPaid();
-    } catch (err: any) {
-      settlingRef.current = false;
-      if (!mountedRef.current) return;
-      setPhase('ready');
-      const msg = err?.response?.data?.message ?? '';
-      toast.error(
-        /insufficient|balance/i.test(msg)
-          ? 'Your wallet balance is not enough for this order. Pay by card instead.'
-          : msg || 'Could not complete the payment. Please try again.',
-      );
-    }
-  }, [amount, orderId, escrowId, customerId, onPaid]);
-
-  // "Pay by card" — opens Payluk's secure window, because card numbers must go
-  // into a certified payment page. It settles this same escrow, so the webhook
-  // marks the order paid the same way. Offered for both payment types.
-  const payWithPopup = useCallback(async () => {
-    if (!paymentToken) {
-      toast.error('Card payment is unavailable for this order. Please try checking out again.');
-      return;
-    }
-    if (typeof pay !== 'function') {
-      toast.error('Payment widget not ready. Refresh the page and try again.');
-      return;
-    }
-    // Hide our modal so the Payluk checkout isn't covered by our z-50 overlay.
-    setPopupActive(true);
-    try {
-      await pay({
-        paymentToken,
-        reference: `pop_${orderId}_${Date.now()}`,
-        redirectUrl: `${window.location.origin}${BASE_ROUTE.PAYLUK_PAYMENT_COMPLETE}`,
-        brand: import.meta.env.VITE_APP_NAME ?? 'URA',
-        customerId,
-        callback: () => {
-          setPopupActive(false);
-          setPhase('paid');
-          toast.success('Payment successful — your order is being processed.');
-          onPaid();
-        },
-        onClose: () => {
-          setPopupActive(false);
-          toast.info('Payment window closed.');
-        },
-      });
-    } catch (err: any) {
-      console.error('[checkout] payWithPopup failed:', err);
-      setPopupActive(false);
-      toast.error(err?.message || 'Could not open the payment window. Please try again.');
-    }
-  }, [paymentToken, pay, orderId, customerId, onPaid]);
-
-  // Initial load: the wallet balance. Payluk no longer issues bank-transfer
-  // (virtual) accounts (CBN rule), so there is no transfer panel or polling.
-  const didInit = useRef(false);
   useEffect(() => {
     mountedRef.current = true;
-    if (!didInit.current) {
-      didInit.current = true;
-      fetchBalance().finally(() => {
-        if (mountedRef.current) setPhase('ready');
-      });
-    }
     return () => {
       mountedRef.current = false;
+      if (pollTimer.current) clearTimeout(pollTimer.current);
     };
-  }, [fetchBalance]);
+  }, []);
 
-  const busy = phase === 'settling' || phase === 'loading';
-  const canPayFromWallet = walletBalance != null && walletBalance >= amount;
+  const finishPaid = useCallback(() => {
+    setPhase('paid');
+    toast.success('Payment confirmed. Your order is being processed.');
+    setTimeout(() => mountedRef.current && onPaid(), 1200);
+  }, [onPaid]);
+
+  // Ask URA's backend (which checks with Payluk) until the order is paid.
+  const waitForConfirmation = useCallback(() => {
+    setPhase('confirming');
+    const until = Date.now() + POLL_FOR_MS;
+    const check = async () => {
+      if (!mountedRef.current) return;
+      try {
+        const s = await paymentsApi.status(orderId);
+        if (s.paymentStatus === 'paid') return finishPaid();
+      } catch {
+        /* network blip: keep waiting */
+      }
+      if (Date.now() >= until) {
+        if (mountedRef.current) setPhase('slow');
+        return;
+      }
+      pollTimer.current = setTimeout(() => void check(), POLL_MS);
+    };
+    void check();
+  }, [orderId, finishPaid]);
+
+  // ── Main button: Payluk's Checkout SDK widget ─────────────────────────────
+  const payWithWidget = async () => {
+    if (typeof pay !== 'function') {
+      toast.error('Payment window not ready. Refresh the page and try again.');
+      return;
+    }
+    setPhase('starting');
+    let attempt = payment;
+    try {
+      if (usedFirstRef.current) attempt = await paymentsApi.start(orderId);
+      usedFirstRef.current = true;
+    } catch (err: any) {
+      setPhase('ready');
+      if (err?.response?.data?.code === 'ALREADY_PAID') return finishPaid();
+      toast.error(paymentErrorMessage(err, 'Could not start the payment. Please try again.'));
+      return;
+    }
+
+    setWidgetOpen(true);
+    try {
+      await pay({
+        paymentToken: attempt.paymentToken,
+        reference: attempt.reference,
+        redirectUrl: `${window.location.origin}/payment-complete?orderId=${encodeURIComponent(orderId)}`,
+        brand: 'URA',
+        logoUrl: `${window.location.origin}/icon-192.png`,
+        customerId: attempt.customerId,
+        // The widget says it's done: the backend still has to confirm it.
+        callback: () => {
+          setWidgetOpen(false);
+          waitForConfirmation();
+        },
+        onClose: () => {
+          setWidgetOpen(false);
+          setPhase('ready');
+          toast.info('Payment window closed. Your order is saved; you can pay again.');
+        },
+      });
+    } catch (err: any) {
+      console.error('[checkout] Payluk widget failed to open:', err?.code ?? err);
+      setWidgetOpen(false);
+      setPhase('ready');
+      toast.error(err?.message || 'Could not open the payment window. Please try again.');
+    }
+  };
+
+  // ── Pay from wallet: only when the balance covers it, only on a tap ───────
+  const canPayFromWallet = (wallet?.mainBalance ?? 0) >= payment.amountToPay;
+  const payWithWallet = async () => {
+    if (walletBusy) return;
+    setWalletBusy(true);
+    try {
+      const s = await paymentsApi.payFromWallet(orderId);
+      if (s.paymentStatus === 'paid') finishPaid();
+      else waitForConfirmation();
+    } catch (err: any) {
+      if (err?.response?.data?.code === 'ALREADY_PAID') return finishPaid();
+      toast.error(paymentErrorMessage(err, 'Could not pay from your wallet. Please try again.'));
+    } finally {
+      if (mountedRef.current) setWalletBusy(false);
+    }
+  };
+
+  const { breakdown } = payment;
+  const busy = phase === 'starting' || phase === 'confirming' || walletBusy;
+  const showChoices = phase === 'ready' || phase === 'starting';
 
   return (
     <div
       className={`fixed inset-0 z-50 items-center justify-center p-4 bg-black/40 backdrop-blur-sm ${
-        popupActive ? 'hidden' : 'flex'
+        widgetOpen ? 'hidden' : 'flex'
       }`}
       onClick={busy ? undefined : onClose}
     >
@@ -185,6 +184,7 @@ export default function CheckoutPaymentModal({
         {!busy && (
           <button
             onClick={onClose}
+            aria-label="Close"
             className="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-600 transition-colors"
           >
             <X size={20} />
@@ -199,34 +199,45 @@ export default function CheckoutPaymentModal({
             <div>
               <h2 className="text-lg font-black text-gray-900 leading-tight">Complete Payment</h2>
               <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">
-                {orderNumber
-                  ? `Order ${orderNumber}`
-                  : mode === 'normal'
-                    ? 'Normal Payment'
-                    : 'Buyer-Protected Payment'}
+                {paymentType === 'normal' ? 'Normal Payment' : 'Buyer-Protected Payment'}
+                {orderNumber ? ` · ${orderNumber}` : ''}
               </p>
             </div>
           </div>
 
-          {/* Amount */}
-          <div className="mb-6 flex items-baseline justify-between rounded-2xl bg-orange-50 px-4 py-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-orange-400">
-              Total to pay
-            </span>
-            <span className="text-xl sm:text-2xl font-black text-orange-600">
-              {formatNaira(amount)}
-            </span>
-          </div>
+          {/* Breakdown */}
+          <dl className="mb-6 space-y-2 rounded-2xl bg-gray-50 px-4 py-3 text-sm">
+            <Row label="Items" value={formatNaira(breakdown.items)} />
+            {breakdown.delivery > 0 && <Row label="Delivery" value={formatNaira(breakdown.delivery)} />}
+            {breakdown.serviceFee > 0 && <Row label="Service fee" value={formatNaira(breakdown.serviceFee)} />}
+            <div className="flex items-baseline justify-between border-t border-gray-200 pt-2">
+              <dt className="text-[10px] font-black uppercase tracking-widest text-orange-500">Total</dt>
+              <dd className="text-xl font-black text-orange-600">{formatNaira(breakdown.total)}</dd>
+            </div>
+          </dl>
 
-          {phase === 'loading' && (
-            <div className="py-10 flex flex-col items-center gap-3 text-gray-400">
+          {phase === 'confirming' && (
+            <div className="py-8 flex flex-col items-center gap-3 text-gray-500" role="status">
               <Loader2 className="h-7 w-7 animate-spin text-orange-400" />
-              <p className="text-xs font-bold uppercase tracking-widest">Preparing payment…</p>
+              <p className="text-sm font-bold">Confirming your payment...</p>
+              <p className="text-xs text-gray-400 text-center">This usually takes a few seconds.</p>
+            </div>
+          )}
+
+          {phase === 'slow' && (
+            <div className="py-6 flex flex-col items-center gap-3 text-center" role="status">
+              <p className="text-sm font-bold text-gray-900">We're still confirming your payment</p>
+              <p className="text-xs text-gray-500">
+                You'll get a notice as soon as it's confirmed. You don't need to pay again.
+              </p>
+              <Button onClick={onPaid} className="mt-2 rounded-xl bg-gray-900 hover:bg-black">
+                Go to my order
+              </Button>
             </div>
           )}
 
           {phase === 'paid' && (
-            <div className="py-10 flex flex-col items-center gap-3">
+            <div className="py-8 flex flex-col items-center gap-3" role="status">
               <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center">
                 <Check className="h-7 w-7 text-green-500" />
               </div>
@@ -235,78 +246,72 @@ export default function CheckoutPaymentModal({
             </div>
           )}
 
-          {/* ── Both payment types: wallet or card ── */}
-          {(phase === 'ready' || phase === 'settling') && (
+          {showChoices && (
             <>
-              <p className="text-sm text-gray-500 mb-5 leading-relaxed">
-                {mode === 'normal'
-                  ? 'No extra fee for you.'
-                  : 'Buyer-Protected Payment: your money is held safely until you confirm delivery.'}
+              <Button
+                onClick={() => void payWithWidget()}
+                disabled={busy}
+                className="w-full h-14 rounded-xl font-bold gap-2 bg-orange-500 hover:bg-orange-600 text-base disabled:opacity-50"
+              >
+                {phase === 'starting' ? <Loader2 className="animate-spin" size={18} /> : <CreditCard size={18} />}
+                Pay {formatNaira(payment.amountToPay)}
+              </Button>
+              <p className="mt-2 text-center text-[11px] text-gray-400">
+                Pay securely with Payluk without leaving URA.
               </p>
-              {/* ── Option 1: Pay from wallet ───────────────────────── */}
-              <div className="rounded-2xl border border-gray-100 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-500">
-                    <Wallet size={16} className="text-orange-500" />
-                    Wallet balance
-                  </span>
-                  <span className="text-sm font-black text-gray-900">
-                    {walletBalance == null ? '—' : formatNaira(walletBalance)}
-                  </span>
-                </div>
-                <Button
-                  onClick={() => void settleFromWallet()}
-                  disabled={!canPayFromWallet || busy}
-                  className="w-full h-12 rounded-xl font-bold gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
-                >
-                  {phase === 'settling' ? (
-                    <Loader2 className="animate-spin" size={16} />
-                  ) : (
-                    <Wallet size={16} />
-                  )}
-                  Pay {formatNaira(amount)} from Wallet
-                </Button>
-                {!canPayFromWallet && walletBalance != null && (
-                  <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
-                    Not enough balance — pay by card instead.
-                  </p>
-                )}
-              </div>
 
-              {/* ── Option 2: Card (Payluk's secure window) ───────────── */}
-              {paymentToken && (
-                <div className="mt-5">
+              {canPayFromWallet && (
+                <div className="mt-5 rounded-2xl border border-gray-100 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-500">
+                      <Wallet size={16} className="text-orange-500" />
+                      Wallet balance
+                    </span>
+                    <span className="text-sm font-black text-gray-900">
+                      {formatNaira(wallet?.mainBalance ?? 0)}
+                    </span>
+                  </div>
                   <Button
                     variant="outline"
-                    onClick={() => void payWithPopup()}
+                    onClick={() => void payWithWallet()}
                     disabled={busy}
                     className="w-full h-12 rounded-xl font-bold gap-2 border-gray-200"
                   >
-                    <CreditCard size={16} />
-                    Pay by card
+                    {walletBusy ? <Loader2 className="animate-spin" size={16} /> : <Wallet size={16} />}
+                    Pay from wallet
                   </Button>
-                  <p className="mt-2 text-center text-[11px] text-gray-400">
-                    Opens Payluk's secure card window.
-                  </p>
                 </div>
               )}
 
-              <div className="mt-5 flex items-center justify-center gap-2 text-gray-400">
-                <ShieldCheck size={14} className="text-blue-400" />
-                <span className="text-[10px] font-black uppercase tracking-widest">
-                  {mode === 'normal'
-                    ? 'Released to the shop when you confirm delivery'
-                    : 'Held safely until you confirm delivery'}
-                </span>
-              </div>
+              {paymentType === 'normal' ? (
+                <p className="mt-5 flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-xs leading-relaxed text-amber-800">
+                  <Info size={14} className="mt-0.5 shrink-0" />
+                  Normal Payment goes straight to the seller. For protection, choose Buyer-Protected
+                  Payment.
+                </p>
+              ) : (
+                <div className="mt-5 flex items-center justify-center gap-2 text-gray-400">
+                  <ShieldCheck size={14} className="text-blue-400" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">
+                    Held safely until you confirm delivery
+                  </span>
+                </div>
+              )}
             </>
           )}
 
-          {(phase === 'ready' || phase === 'settling') && (
-            <CheckoutAd businessId={businessId} compact />
-          )}
+          {(showChoices || phase === 'confirming') && <CheckoutAd businessId={businessId} compact />}
         </div>
       </div>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <dt className="text-gray-500">{label}</dt>
+      <dd className="font-semibold text-gray-900">{value}</dd>
     </div>
   );
 }

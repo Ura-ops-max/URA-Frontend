@@ -4,6 +4,7 @@ import { XCircle, Loader2, Package, ArrowRight, ShoppingBag } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import API from '@/lib/axios-client';
 import CheckoutAd from '@/components/ads/CheckoutAd';
+import { paymentsApi } from '@/lib/payments-api';
 
 type Status = 'loading' | 'success' | 'already_confirmed' | 'pending' | 'error';
 
@@ -158,47 +159,78 @@ const ORDERS_PATH = '/dashboard/orders';
 const PaymentCompletePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const paymentId = searchParams.get('paymentId');
+  // Payluk's widget sends the buyer back here with ?orderId=<URA order id>.
+  const orderId = searchParams.get('orderId');
   const [status, setStatus] = useState<Status>('loading');
   const [order, setOrder] = useState<OrderSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    if (!paymentId) {
+    if (!orderId) {
       setStatus('error');
-      setErrorMessage('No payment reference found. Please check your orders page.');
+      setErrorMessage('No order reference found. Please check your orders page.');
       return;
     }
-    // Cancelled on unmount so leaving the page (e.g. "Continue shopping")
-    // doesn't get yanked back to orders a few seconds later.
-    let redirectTimer: ReturnType<typeof setTimeout> | undefined;
+    // Only URA's backend decides the order is paid (it checks with Payluk);
+    // this page just asks until it is. Timers are cancelled on unmount so
+    // leaving the page doesn't get yanked back to orders later.
     let cancelled = false;
-    API.post('/orders/confirm', { paymentId })
-      .then(({ data }) => {
-        if (cancelled) return;
-        setOrder(data.order);
-        if (data.pending) {
-          // Payluk hasn't confirmed the money yet; the webhook will finish it.
-          setStatus('pending');
-          return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const until = Date.now() + 3 * 60_000;
+
+    const load = async () => {
+      try {
+        const { data } = await API.get(`/orders/${orderId}`);
+        const o = data?.order;
+        if (!cancelled && o) {
+          setOrder({
+            _id: o._id,
+            orderNumber: o.orderNumber,
+            totalAmount: o.totalAmount,
+            status: o.status,
+            paymentStatus: o.paymentStatus,
+            business: o.business?._id ?? o.business,
+          });
         }
-        setStatus(data.alreadyConfirmed ? 'already_confirmed' : 'success');
-        // Take the buyer to their orders after a short pause.
-        redirectTimer = setTimeout(() => navigate(ORDERS_PATH), 4000);
-      })
-      .catch((error: any) => {
-        if (cancelled) return;
+        return o?.paymentStatus === 'paid';
+      } catch (error: any) {
+        if (cancelled) return false;
         setStatus('error');
         setErrorMessage(
-          error?.response?.data?.message ||
-            'We could not confirm your payment. Please check your orders or contact support.',
+          error?.response?.data?.message || 'We could not find this order. Please check your orders.',
         );
-      });
+        throw error;
+      }
+    };
+
+    const check = async (first: boolean) => {
+      if (cancelled) return;
+      try {
+        const s = await paymentsApi.status(orderId);
+        if (cancelled) return;
+        if (s.paymentStatus === 'paid') {
+          await load().catch(() => undefined);
+          if (cancelled) return;
+          setStatus(first ? 'already_confirmed' : 'success');
+          // Take the buyer to their orders after a short pause.
+          timer = setTimeout(() => navigate(ORDERS_PATH), 4000);
+          return;
+        }
+        setStatus('pending');
+      } catch {
+        /* network blip: keep trying */
+      }
+      if (Date.now() < until) timer = setTimeout(() => void check(false), 4000);
+    };
+
+    load()
+      .then(() => check(true))
+      .catch(() => undefined);
     return () => {
       cancelled = true;
-      if (redirectTimer) clearTimeout(redirectTimer);
+      if (timer) clearTimeout(timer);
     };
-  }, [paymentId, navigate]);
+  }, [orderId, navigate]);
 
   // Payment sent but Payluk hasn't confirmed it yet.
   if (status === 'pending') {
@@ -211,7 +243,7 @@ const PaymentCompletePage = () => {
           <h1 className="text-2xl font-black text-gray-900 mb-2">Confirming your payment</h1>
           <p className="text-sm text-gray-500">
             We&apos;re waiting for Payluk to confirm order {order?.orderNumber}. This usually takes under a
-            minute. You&apos;ll get a notification and an email as soon as it&apos;s confirmed.
+            minute. You don&apos;t need to pay again. You&apos;ll get a notification and an email as soon as it&apos;s confirmed.
           </p>
           <button
             onClick={() => navigate(ORDERS_PATH)}
@@ -252,12 +284,12 @@ const PaymentCompletePage = () => {
             <h1 className="text-2xl font-black text-gray-900 mb-2">Payment Not Confirmed</h1>
             <p className="text-sm text-gray-500 font-medium leading-relaxed">{errorMessage}</p>
           </div>
-          {paymentId && (
+          {orderId && (
             <div className="bg-gray-50 rounded-2xl p-4 text-left">
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">
-                Payment Reference
+                Order Reference
               </p>
-              <p className="text-xs font-mono font-bold text-gray-600 break-all">{paymentId}</p>
+              <p className="text-xs font-mono font-bold text-gray-600 break-all">{orderId}</p>
             </div>
           )}
           <div className="flex flex-col sm:flex-row gap-3">
@@ -340,12 +372,12 @@ const PaymentCompletePage = () => {
                   {order.status}
                 </span>
               </div>
-              {paymentId && (
+              {orderId && (
                 <div className="pt-3 border-t border-gray-100">
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">
-                    Payment Reference
+                    Order Reference
                   </p>
-                  <p className="text-xs font-mono text-gray-500 break-all">{paymentId}</p>
+                  <p className="text-xs font-mono text-gray-500 break-all">{orderId}</p>
                 </div>
               )}
             </div>

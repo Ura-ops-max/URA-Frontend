@@ -28,6 +28,7 @@ import { usePaylukGuard } from '@/hooks/use-payluk-guard';
 import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
 import DeliverySelectionModal from '@/components/checkout/DeliverySelectionModal';
 import CheckoutPaymentModal from '@/components/checkout/CheckoutPaymentModal';
+import { paymentsApi, type PaymentType, type StartPaymentResponse } from '@/lib/payments-api';
 import CheckoutAd from '@/components/ads/CheckoutAd';
 import ProductImage from '@/components/product/ProductImage';
 
@@ -47,6 +48,8 @@ const shippingSchema = z.object({
 type ShippingFormValues = z.infer<typeof shippingSchema>;
 
 // ──────────────────────────────────────────────────
+const MIN_ORDER_AMOUNT = 1000;
+
 const CheckoutPage = () => {
   const { cart, totalPrice } = useCartContext();
   const { user, related } = useAuthContext();
@@ -60,13 +63,10 @@ const CheckoutPage = () => {
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
   const [pendingForm, setPendingForm] = useState<ShippingFormValues | null>(null);
   const [transfer, setTransfer] = useState<{
-    customerId: string;
-    escrowId: string;
-    paymentToken: string;
-    amount: number;
     orderId: string;
     orderNumber?: string;
-    mode: 'normal' | 'escrow';
+    paymentType: PaymentType;
+    payment: StartPaymentResponse;
   } | null>(null);
   const { guard, showModal, onModalSuccess, onModalDismiss } = usePaylukGuard();
   const hasShippingAddress = !!(
@@ -165,7 +165,8 @@ const CheckoutPage = () => {
     };
   }, [selectedState, firstProductId]);
 
-  const orderTotal = totalPrice + (deliveryFee ?? 0);
+  // Every Payluk payment is an escrow, and Payluk's minimum escrow is ₦1,000.
+  const belowMinimum = totalPrice > 0 && totalPrice < MIN_ORDER_AMOUNT;
 
   const formattedPrice = (price: number) =>
     new Intl.NumberFormat('en-NG', {
@@ -202,19 +203,17 @@ const CheckoutPage = () => {
         // With delivery adds the Fez fee; without delivery charges product only.
         deliveryFee: withDelivery ? (deliveryFee ?? 0) : 0,
         deliveryMethod: withDelivery ? 'delivery' : 'pickup',
-        paymentMethod: mode === 'normal' ? 'card' : 'escrow',
-        // 'normal' → seller absorbs Payluk's fee (buyer pays clean price).
-        escrowMode: mode,
+        paymentMethod: 'card',
+        // normal = paid straight to the seller; protected = held until you confirm.
+        paymentType: mode === 'normal' ? 'normal' : 'protected',
       });
-
-      const { escrowId, customerId, payableAmount, paymentToken } = response.data?.payluk || {};
       const order = response.data?.order;
-      const buyerCustomerId = user?.paylukCustomerId ?? customerId;
-
-      if (!escrowId || !buyerCustomerId) {
+      if (!order?._id) {
         toast.error('Could not start payment. Please try again.');
         return;
       }
+      // URA's backend creates the Payluk escrow and returns the payment token.
+      const payment = await paymentsApi.start(order._id);
 
       // Persist shipping address for next time (fire-and-forget).
       API.patch('/users/me/shipping', {
@@ -225,19 +224,20 @@ const CheckoutPage = () => {
       }).catch((e) => console.warn('[checkout] shipping save failed:', e));
 
       setTransfer({
-        customerId: buyerCustomerId,
-        escrowId,
-        paymentToken: paymentToken ?? '',
-        amount: payableAmount ?? (withDelivery ? orderTotal : totalPrice),
         orderId: order._id,
         orderNumber: order.orderNumber,
-        mode,
+        paymentType: payment.paymentType,
+        payment,
       });
     } catch (error: any) {
       const code = error?.response?.data?.code;
       if (code === 'PAYLUK_PROFILE_REQUIRED') {
         onModalDismiss();
         guard(() => {});
+        return;
+      }
+      if (code === 'PAYMENTS_BUSY') {
+        toast.error('Payments are busy. Please try again in a moment.');
         return;
       }
       if (code === 'PRODUCT_NOT_AVAILABLE' || code === 'PAYLUK_SETUP_REQUIRED') {
@@ -486,7 +486,7 @@ const CheckoutPage = () => {
                 <Button
                   type="button"
                   onClick={handleSubmit(onProceed)}
-                  disabled={isLoading || !cart?.items?.length}
+                  disabled={isLoading || !cart?.items?.length || belowMinimum}
                   className="w-full h-16 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-base gap-3 px-3 transition-all active:scale-95 shadow-xl shadow-orange-200"
                 >
                   {isLoading ? (
@@ -498,9 +498,15 @@ const CheckoutPage = () => {
                     </>
                   )}
                 </Button>
-                <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
-                  Choose delivery next, then pay by card or from your wallet.
-                </p>
+                {belowMinimum ? (
+                  <p className="mt-2 text-center text-xs font-semibold text-red-600">
+                    The minimum order is {formattedPrice(MIN_ORDER_AMOUNT)}. Please add more items.
+                  </p>
+                ) : (
+                  <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
+                    Choose delivery next, then pay securely with Payluk without leaving URA.
+                  </p>
+                )}
 
                 <CheckoutAd businessId={sellerBusinessId} />
 
@@ -540,25 +546,17 @@ const CheckoutPage = () => {
 
       {transfer && (
         <CheckoutPaymentModal
-          customerId={transfer.customerId}
-          escrowId={transfer.escrowId}
-          paymentToken={transfer.paymentToken}
-          mode={transfer.mode}
-          amount={transfer.amount}
           orderId={transfer.orderId}
           orderNumber={transfer.orderNumber}
+          paymentType={transfer.paymentType}
+          payment={transfer.payment}
           businessId={sellerBusinessId}
+          // Closing leaves the order unpaid; it can be paid from the order page.
           onClose={() => setTransfer(null)}
           onPaid={() => {
-            // Ask our backend to confirm now (it double-checks with Payluk), so the
-            // order shows as paid right away instead of waiting for the webhook.
-            const ref = transfer.paymentToken || transfer.orderNumber;
-            API.post('/orders/confirm', { paymentId: ref })
-              .catch((e) => console.warn('[checkout] confirm after pay failed (webhook will finish):', e))
-              .finally(() => {
-                setTransfer(null);
-                navigate(`/dashboard/orders/${transfer.orderId}`);
-              });
+            const id = transfer.orderId;
+            setTransfer(null);
+            navigate(`/dashboard/orders/${id}`);
           }}
         />
       )}

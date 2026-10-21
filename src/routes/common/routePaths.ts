@@ -43,4 +43,6 @@ export const BASE_ROUTE = {
   FAQ: '/faq',
   INVITE_URL: '/invite/workspace/:inviteCode/join',
   PAYLUK_PAYMENT_COMPLETE: '/payments/complete',
+  // Where Payluk's widget returns the buyer: /payment-complete?orderId=<id>
+  PAYMENT_COMPLETE: '/payment-complete',
 } as const;

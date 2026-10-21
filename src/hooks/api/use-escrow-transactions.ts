@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import paylukAPI from '@/lib/payluk-axios';
+import API from '@/lib/axios-client';
 
 export type EscrowStatus =
   | 'PENDING'
@@ -8,7 +8,8 @@ export type EscrowStatus =
   | 'REFUNDED'
   | 'CLAIMED'
   | 'DISPUTED'
-  | 'INVESTIGATING';
+  | 'INVESTIGATING'
+  | 'SPLIT';
 
 export interface EscrowPaymentDetails {
   id: string;
@@ -21,32 +22,29 @@ export interface EscrowPaymentDetails {
   createdAt: string;
 }
 
+/** An escrow as URA's backend returns it (no payment token: act via its order). */
 export interface EscrowTransaction {
   id: string;
   amount: number;
   purpose: string;
   description: string;
   whoPays: string;
-  imageUrl: string | null;
   fee: number;
-  paymentToken: string;
-  paidAt: string;
   status: EscrowStatus;
   state: string;
-  logs: unknown[];
   channel: string;
-  isSeller: boolean;
-  dispute: unknown | null;
-  paymentDetails: EscrowPaymentDetails | null;
-  category: string | null;
+  paidAt: string | null;
   completedAt: string | null;
-  approvedClaimBy: string | null;
-  refundedBy: string | null;
   maxDelivery: number;
   deliveryTimeline: string;
   totalQuantity: number;
   createdAt: string;
   updatedAt: string;
+  paymentDetails: Pick<EscrowPaymentDetails, 'amount' | 'status'> | null;
+  /** The URA order this escrow belongs to, when there is one. */
+  orderId: string | null;
+  orderNumber: string | null;
+  paymentType: 'normal' | 'protected' | null;
 }
 
 export interface EscrowReport {
@@ -69,28 +67,19 @@ export interface EscrowHistoryResponse {
   report: EscrowReport;
 }
 
+// URA's backend lists the signed-in user's own escrows, linked to their orders.
 async function fetchEscrowTransactions(
-  customerId: string,
   type: 'sales' | 'buy',
   status: EscrowStatus | undefined,
   page: number,
-  limit: number,
 ): Promise<EscrowHistoryResponse> {
-  const params: Record<string, string | number> = { page, limit, type };
-  if (status) params.status = status;
-
-  // The seller escrow endpoint identifies the merchant via the Bearer token (secret key).
-  // Sending customer-id causes the API to scope results to that customer and ignore status.
-  // Only buyer (type=buy) needs customer-id to identify the buyer.
-  const headers: Record<string, string> =
-    type === 'buy'
-      ? { 'customer-id': customerId, accept: 'application/json' }
-      : { accept: 'application/json' };
-
-  const { data } = await paylukAPI.get('/escrow/transactions', { headers, params });
-  return data?.data ?? data;
+  const { data } = await API.get('/wallet/escrows', {
+    params: { type, page, ...(status ? { status } : {}) },
+  });
+  return { data: data?.data ?? [], pagination: data?.pagination, report: data?.report };
 }
 
+/** `customerId` only switches the query on once the user has a payment profile. */
 export function useEscrowTransactions(
   customerId: string | undefined | null,
   type: 'sales' | 'buy' = 'sales',
@@ -99,12 +88,10 @@ export function useEscrowTransactions(
   limit = 10,
 ) {
   return useQuery({
-    queryKey: ['payluk', 'escrow-transactions', customerId, type, status ?? 'ALL', page, limit],
-    queryFn: () => fetchEscrowTransactions(customerId!, type, status, page, limit),
+    queryKey: ['wallet', 'escrows', customerId, type, status ?? 'ALL', page, limit],
+    queryFn: () => fetchEscrowTransactions(type, status, page),
     enabled: Boolean(customerId),
-    // No placeholderData — we want the list to fully clear and show a spinner
-    // when the status filter or page changes, so the user sees clear feedback.
-    staleTime: 0,
+    staleTime: 1000 * 30,
     gcTime: 1000 * 60 * 5,
     retry: 1,
   });

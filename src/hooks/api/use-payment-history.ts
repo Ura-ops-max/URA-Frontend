@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import paylukAPI from '@/lib/payluk-axios';
+import API from '@/lib/axios-client';
 
 export interface PaylukTransaction {
   id: string;
@@ -34,24 +34,19 @@ export interface PaylukPaymentHistory {
   data: PaylukTransaction[];
 }
 
-async function fetchPaymentHistory(
-  customerId: string,
-  page = 1,
-  limit = 10,
-): Promise<PaylukPaymentHistory> {
-  const { data } = await paylukAPI.get('/payment/history', {
-    headers: { 'customer-id': customerId },
-    params: { page, limit },
-  });
-  return data?.data ?? data;
+// URA's backend reads the signed-in user's own history (same field names).
+async function fetchPaymentHistory(page = 1, limit = 10): Promise<PaylukPaymentHistory> {
+  const { data } = await API.get('/wallet/transactions', { params: { page, limit } });
+  return { pagination: data?.pagination, data: data?.data ?? [] };
 }
 
+/** `customerId` only switches the query on once the user has a payment profile. */
 export function usePaymentHistory(customerId: string | undefined | null, page = 1, limit = 10) {
   return useQuery({
-    queryKey: ['payluk', 'payment-history', customerId, page, limit],
-    queryFn: () => fetchPaymentHistory(customerId!, page, limit),
+    queryKey: ['wallet', 'payment-history', customerId, page, limit],
+    queryFn: () => fetchPaymentHistory(page, limit),
     enabled: Boolean(customerId),
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 60,
     retry: 1,
   });
 }

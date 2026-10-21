@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Loader2, ChevronLeft, ChevronRight, Package, Copy, Check, BadgeCheck } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import {
@@ -14,8 +14,7 @@ function safeFormat(dateStr: string | null | undefined, fmt: string): string {
   const d = new Date(dateStr);
   return isValid(d) ? format(d, fmt) : '—';
 }
-import { toast } from 'sonner';
-import paylukAPI from '@/lib/payluk-axios';
+import { OrderLink } from './OrderLink';
 
 function formatNGN(amount: number) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
@@ -29,6 +28,7 @@ export const STATUS_OPTIONS: EscrowStatus[] = [
   'CLAIMED',
   'DISPUTED',
   'INVESTIGATING',
+  'SPLIT',
 ];
 
 export const STATUS_STYLES: Record<EscrowStatus, string> = {
@@ -39,6 +39,7 @@ export const STATUS_STYLES: Record<EscrowStatus, string> = {
   CLAIMED: 'bg-teal-50 text-teal-600',
   DISPUTED: 'bg-red-50 text-red-600',
   INVESTIGATING: 'bg-orange-50 text-orange-600',
+  SPLIT: 'bg-indigo-50 text-indigo-600',
 };
 
 export function StatusBadge({ status }: { status: EscrowStatus }) {
@@ -114,69 +115,6 @@ export function Pagination({
   );
 }
 
-function CopyTokenButton({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-  const copy = async () => {
-    await navigator.clipboard.writeText(value);
-    setCopied(true);
-    toast.success('Payment token copied!');
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <button
-      onClick={copy}
-      className="inline-flex items-center gap-1 text-[10px] font-bold text-gray-400 hover:text-orange-500 transition-colors"
-    >
-      {copied ? <Check size={10} className="text-green-500" /> : <Copy size={10} />}
-      {copied ? 'Copied' : 'Copy token'}
-    </button>
-  );
-}
-
-function ClaimButton({
-  paymentToken,
-  customerId,
-  status,
-}: {
-  paymentToken: string;
-  customerId: string;
-  status: EscrowStatus;
-}) {
-  const [loading, setLoading] = useState(false);
-  const claimable = status === 'COMPLETED';
-
-  const handleClaim = async () => {
-    setLoading(true);
-    try {
-      const { data } = await paylukAPI.get(`/escrow/claim-funds/${paymentToken}`, {
-        headers: { 'customer-id': customerId, accept: 'application/json' },
-      });
-      toast.success(data?.message ?? 'Funds claimed successfully!');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? 'Failed to claim funds.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Button
-      size="sm"
-      onClick={handleClaim}
-      disabled={loading || !claimable}
-      title={!claimable ? `Status must be COMPLETED to claim (currently ${status})` : undefined}
-      className={`h-8 rounded-xl text-xs font-bold gap-1.5 ${
-        claimable
-          ? 'bg-orange-500 hover:bg-orange-600 text-white'
-          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-      }`}
-    >
-      {loading ? <Loader2 size={12} className="animate-spin" /> : <BadgeCheck size={12} />}
-      Claim Funds
-    </Button>
-  );
-}
-
 function Detail({
   label,
   value,
@@ -196,7 +134,7 @@ function Detail({
   );
 }
 
-function TransactionCard({ tx, customerId }: { tx: EscrowTransaction; customerId: string }) {
+function TransactionCard({ tx }: { tx: EscrowTransaction }) {
   return (
     <div className="p-5 rounded-2xl border border-gray-100 hover:border-orange-100 hover:shadow-sm transition-all space-y-4">
       <div className="flex items-start justify-between gap-3">
@@ -230,16 +168,6 @@ function TransactionCard({ tx, customerId }: { tx: EscrowTransaction; customerId
         )}
       </div>
 
-      <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">
-            Payment Token
-          </p>
-          <p className="text-xs font-mono font-bold text-gray-700">{tx.paymentToken}</p>
-        </div>
-        <CopyTokenButton value={tx.paymentToken} />
-      </div>
-
       <p className="text-[11px] text-gray-400">
         Created {safeFormat(tx.createdAt, 'dd MMM yyyy · h:mm a')}
         {tx.updatedAt && tx.updatedAt !== tx.createdAt && (
@@ -250,7 +178,8 @@ function TransactionCard({ tx, customerId }: { tx: EscrowTransaction; customerId
       </p>
 
       <div className="pt-2 border-t border-gray-50">
-        <ClaimButton paymentToken={tx.paymentToken} customerId={customerId} status={tx.status} />
+        {/* Claiming happens on the order (through URA's backend). */}
+        <OrderLink tx={tx} />
       </div>
     </div>
   );
@@ -359,7 +288,7 @@ export default function SellerTransactionsPage() {
         <>
           <div className="space-y-4">
             {transactions.map((tx) => (
-              <TransactionCard key={tx.id} tx={tx} customerId={user.paylukCustomerId!} />
+              <TransactionCard key={tx.id} tx={tx} />
             ))}
           </div>
           {pagination && (

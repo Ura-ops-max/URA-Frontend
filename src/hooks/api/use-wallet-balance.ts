@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import paylukAPI from '@/lib/payluk-axios';
+import API from '@/lib/axios-client';
 
 export interface PaylukWalletBalance {
   mainBalance: number;
@@ -7,26 +7,23 @@ export interface PaylukWalletBalance {
   currency: string;
 }
 
-async function fetchWalletBalance(customerId: string): Promise<PaylukWalletBalance> {
-  const { data } = await paylukAPI.get('/wallet', {
-    headers: { 'customer-id': customerId },
-  });
-  console.log('Fetching wallet balance for customer:', customerId); // Debugging log
-  // Normalise whatever shape the API returns
-  const payload = data?.data ?? data;
+// URA's backend reads the signed-in user's own Payluk wallet.
+async function fetchWalletBalance(): Promise<PaylukWalletBalance> {
+  const { data } = await API.get('/wallet');
   return {
-    mainBalance: payload?.mainBalance ?? payload?.balance ?? 0,
-    escrowBalance: payload?.escrowBalance ?? 0,
-    currency: payload?.currency === 'NG' ? 'NGN' : (payload?.currency ?? 'NGN'),
+    mainBalance: Number(data?.mainBalance) || 0,
+    escrowBalance: Number(data?.escrowBalance) || 0,
+    currency: data?.currency || 'NGN',
   };
 }
 
+/** `customerId` only switches the query on once the user has a payment profile. */
 export function useWalletBalance(customerId: string | undefined | null) {
   return useQuery({
-    queryKey: ['payluk', 'wallet', customerId],
-    queryFn: () => fetchWalletBalance(customerId!),
+    queryKey: ['wallet', 'balance', customerId],
+    queryFn: fetchWalletBalance,
     enabled: Boolean(customerId),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: 1000 * 60, // the backend also caches; Payluk allows 10 calls a minute
     retry: 1,
   });
 }

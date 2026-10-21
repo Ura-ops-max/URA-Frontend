@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import paylukAPI from '@/lib/payluk-axios';
+import API from '@/lib/axios-client';
 
 export interface Bank {
   id: number;
@@ -14,12 +14,9 @@ export interface Bank {
 }
 
 async function fetchBanks(): Promise<Bank[]> {
-  const { data } = await paylukAPI.get('/payment/bank-list');
-  // Payluk returns each bank as just { name, code } — it does NOT send
-  // `active`/`supports_transfer`, so filtering on those wiped out every bank.
-  // The bank-list endpoint already only returns transfer-capable banks, so we
-  // just normalise the shape the UI expects.
-  const list = (data?.data ?? []) as Array<{ name?: string; code?: string }>;
+  // URA's backend returns Payluk's bank list as { name, code }.
+  const { data } = await API.get('/wallet/banks');
+  const list = (data?.banks ?? []) as Array<{ name?: string; code?: string }>;
   return list
     .filter((b) => b?.name && b?.code)
     .map((b, i) => ({
@@ -37,7 +34,7 @@ async function fetchBanks(): Promise<Bank[]> {
 
 export function useBanks() {
   return useQuery({
-    queryKey: ['payluk', 'banks'],
+    queryKey: ['wallet', 'banks'],
     queryFn: fetchBanks,
     staleTime: 1000 * 60 * 60, // 1 hour — bank list rarely changes
   });

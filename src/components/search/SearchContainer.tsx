@@ -18,6 +18,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { searchAPI, fetchProductCategories } from '@/lib/api';
+import ProductImage from '@/components/product/ProductImage';
 
 interface SearchContainerProps {
   isSearchOpen: boolean;
@@ -146,7 +147,9 @@ const ResultCard = ({
         className="group w-full flex items-center gap-3 px-4 py-3 hover:bg-orange-50/60 transition-colors duration-150 text-left"
       >
         <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-100 flex items-center justify-center">
-          {result.image ? (
+          {result.type === 'product' ? (
+            <ProductImage src={result.image} name={result.name} className="w-full h-full object-cover" />
+          ) : result.image ? (
             <img
               src={result.image}
               alt={result.name}

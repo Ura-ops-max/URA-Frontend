@@ -9,6 +9,7 @@ import { EditItemModal } from './EditItemModal';
 import type { ProductType } from '@/types/feed.types';
 import { useCartContext } from '@/context/cart-provider';
 import ProductImage from '@/components/product/ProductImage';
+import { visibleDescription } from '@/lib/product-placeholder';
 
 // interface Product {
 //   _id: string;
@@ -76,9 +77,8 @@ export const ProductCard = ({
 
   // Bulk-uploaded items often have no description, or one that just repeats
   // the name. Don't show it twice.
-  const description = (product.description ?? '').trim();
-  const showDescription =
-    description.length > 0 && description.toLowerCase() !== (product.name ?? '').trim().toLowerCase();
+  const description = visibleDescription(product.description, product.name);
+  const showDescription = description.length > 0;
 
   const formattedPrice = new Intl.NumberFormat('en-NG', {
     style: 'currency',

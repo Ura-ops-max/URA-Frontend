@@ -27,9 +27,9 @@ import {
   type StartPaymentResponse,
 } from '@/lib/payments-api';
 import CheckoutPaymentModal from '@/components/checkout/CheckoutPaymentModal';
-import { ProductThumb } from '@/components/product/shared/ProductThumb';
 import { formatNaira, getStatusConfig } from '@/lib/order-status';
 import CheckoutAd from '@/components/ads/CheckoutAd';
+import ProductImage from '@/components/product/ProductImage';
 
 /** Best-effort one-line summary of a Fez tracking response. */
 const summariseTracking = (data: any): string => {
@@ -332,7 +332,7 @@ const OrderDetailsPage = () => {
           {order.items.map((item: any, idx: number) => (
             <div key={idx} className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-xl overflow-hidden bg-gray-100 shrink-0">
-                {item.image ? <ProductThumb url={item.image} alt="" /> : null}
+                <ProductImage src={item.image} name={item.name} alt="" className="h-full w-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-gray-900 truncate">{item.name}</p>

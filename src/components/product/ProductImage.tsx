@@ -1,29 +1,51 @@
 import { useState, type ImgHTMLAttributes } from 'react';
+import { Play } from 'lucide-react';
+import { productPlaceholderDataUrl } from '@/lib/product-placeholder';
+import { isVideoUrl } from '@/components/product/shared/ProductThumb';
 
-// Neutral "No photo yet" picture, inline so it never 404s.
-export const NO_PHOTO_URL = `data:image/svg+xml;utf8,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
-    <rect width="400" height="400" fill="#f3f4f6"/>
-    <g fill="none" stroke="#d1d5db" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="130" y="125" width="140" height="110" rx="14"/>
-      <circle cx="170" cy="162" r="12"/>
-      <path d="M140 225l40-38 30 26 22-18 38 30"/>
-    </g>
-    <text x="200" y="285" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" font-weight="600" fill="#9ca3af">No photo yet</text>
-  </svg>`,
-)}`;
+type Props = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
+  src?: string | null;
+  /** The product's name: shown on the tile when there is no photo. */
+  name?: string | null;
+};
 
-type Props = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & { src?: string | null };
-
-/** Product photo that shows "No photo yet" instead of a broken image. */
-export default function ProductImage({ src, alt = '', ...rest }: Props) {
+/**
+ * The one component for a product photo, everywhere (cards, shop, search,
+ * cart, checkout, orders, inventory, product page). A video shows its first
+ * frame with a play badge. No photo, or a photo that fails to load, shows a
+ * tile with the product's name initials (see lib/product-placeholder).
+ */
+export default function ProductImage({ src, name, alt, className, ...rest }: Props) {
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  const usable = src && src !== failedSrc ? src : NO_PHOTO_URL;
+  const label = name ?? alt ?? '';
+
+  if (src && isVideoUrl(src) && src !== failedSrc) {
+    return (
+      <div className={`relative ${className ?? ''}`}>
+        <video
+          src={`${src}#t=0.1`}
+          preload="metadata"
+          muted
+          playsInline
+          className="h-full w-full object-cover"
+          onError={() => setFailedSrc(src)}
+        />
+        <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/15">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm">
+            <Play size={16} className="text-white fill-white" />
+          </span>
+        </span>
+      </div>
+    );
+  }
+
+  const usable = src && src !== failedSrc ? src : productPlaceholderDataUrl(label);
   return (
     <img
       {...rest}
+      className={className}
       src={usable}
-      alt={alt}
+      alt={alt ?? label}
       onError={(e) => {
         if (src && usable === src) setFailedSrc(src);
         rest.onError?.(e);

@@ -26,6 +26,7 @@ import { VideoPlayer } from '@/components/feed/VideoPlayer';
 import { categoryColor } from '@/lib/category-colors';
 import { EditItemModal } from '@/components/feed/EditItemModal';
 import ProductImage from '@/components/product/ProductImage';
+import { visibleDescription } from '@/lib/product-placeholder';
 
 /** True when a media URL points to a video file rather than an image. */
 const isVideoUrl = (u?: string) => !!u && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(u);
@@ -279,14 +280,16 @@ const ProductDetailsPage = () => {
             </div>
           </div>
 
-          <div className="space-y-4 mb-10">
-            <h3 className="text-[11px] font-black uppercase text-gray-400 tracking-widest">
-              Description
-            </h3>
-            <p className="text-gray-600 leading-relaxed whitespace-pre-line text-base">
-              {product.description}
-            </p>
-          </div>
+          {visibleDescription(product.description, product.name) && (
+            <div className="space-y-4 mb-10">
+              <h3 className="text-[11px] font-black uppercase text-gray-400 tracking-widest">
+                Description
+              </h3>
+              <p className="text-gray-600 leading-relaxed whitespace-pre-line text-base">
+                {visibleDescription(product.description, product.name)}
+              </p>
+            </div>
+          )}
 
           {/* VENDOR CARD */}
           <div className="p-6 rounded-3xl bg-orange-50/30 border border-orange-100 flex items-center justify-between mb-10">

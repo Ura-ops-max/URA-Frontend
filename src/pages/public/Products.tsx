@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Loader2, Search, BadgeCheck, Store, ShoppingBag } from 'lucide-react';
 import { useSeo } from '@/hooks/useSeo';
 import { categoryColor } from '@/lib/category-colors';
-import { ProductThumb } from '@/components/product/shared/ProductThumb';
+import ProductImage from '@/components/product/ProductImage';
 import { getPublicProductsFn, fetchProductCategories } from '@/lib/api';
 import { FadeIn, Stagger, FadeItem } from '@/components/shared/Motion';
 
@@ -138,17 +138,11 @@ const ProductsPage = () => {
                 <div className="group overflow-hidden rounded-2xl border border-slate-100 bg-white transition hover:shadow-lg hover:shadow-slate-100">
                 <Link to={`/dashboard/product/${p._id}`} className="block">
                   <div className="aspect-square overflow-hidden bg-slate-100">
-                    {p.media?.[0] ? (
-                      <ProductThumb
-                        url={p.media[0]}
-                        alt={p.name}
-                        imgClassName="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-slate-300">
-                        <ShoppingBag className="h-10 w-10" />
-                      </div>
-                    )}
+                    <ProductImage
+                      src={p.media?.[0]}
+                      name={p.name}
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                    />
                   </div>
                   <div className="p-4">
                     {p.category && (

@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useToggleLike } from '@/hooks/api/use-feed';
 import ProductImage from '@/components/product/ProductImage';
+import { visibleDescription } from '@/lib/product-placeholder';
 
 export const ProductDetailsModal = ({
   isOpen,
@@ -168,15 +169,17 @@ export const ProductDetailsModal = ({
                   </div>
                 </div>
 
-                {/* DESCRIPTION */}
-                <div className="mb-8">
-                  <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">
-                    Product Story
-                  </h3>
-                  <p className="text-gray-600 text-sm lg:text-base leading-relaxed whitespace-pre-line">
-                    {product.description}
-                  </p>
-                </div>
+                {/* DESCRIPTION (hidden when there is none) */}
+                {visibleDescription(product.description, product.name) && (
+                  <div className="mb-8">
+                    <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-3">
+                      Product Story
+                    </h3>
+                    <p className="text-gray-600 text-sm lg:text-base leading-relaxed whitespace-pre-line">
+                      {visibleDescription(product.description, product.name)}
+                    </p>
+                  </div>
+                )}
 
                 {/* BUSINESS INFO SECTION */}
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-orange-50/50 border border-orange-100 mb-8">

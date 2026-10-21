@@ -292,7 +292,7 @@ export default function StockTab({ products, loading, onReload, onPatched }: Pro
                   aria-label={`Add a photo for ${p.name}`}
                   className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-gray-100"
                 >
-                  <ProductImage src={p.media?.[0]} alt="" className="h-full w-full object-cover" />
+                  <ProductImage src={p.media?.[0]} name={p.name} alt="" className="h-full w-full object-cover" />
                   <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition hover:bg-black/30 hover:opacity-100">
                     {photoBusy[p._id] ? (
                       <Loader2 size={16} className="animate-spin opacity-100" />

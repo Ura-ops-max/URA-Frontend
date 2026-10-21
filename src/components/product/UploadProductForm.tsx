@@ -27,7 +27,8 @@ import { cn } from '@/lib/utils';
 const integratedSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
   price: z.string().min(1, 'Price is required'),
-  description: z.string().min(10, 'Description is required'),
+  // Optional: shops with many items often have no description.
+  description: z.string().max(2000, 'Description is too long').optional().or(z.literal('')),
   stock: z.string().min(1, 'Let us know how many stocks you have'),
   category: z.string().min(1, 'Please select a category'),
   size: z.string().optional(),
@@ -110,7 +111,9 @@ const UploadProductForm = () => {
   };
 
   const onSubmit = async (data: FormValues) => {
-    if (media.length === 0) return toast.error('Product images are required');
+    // A photo is optional (the shop shows a name tile without one), but a
+    // social post needs something to show.
+    if (makePost && media.length === 0) return toast.error('Add a photo to share this as a post');
     if (makePost && !data.caption) return toast.error('Caption is required for social post');
 
     const payload = {
@@ -242,7 +245,7 @@ const UploadProductForm = () => {
           </FormField>
         </div>
 
-        <FormField label="Product Description" error={errors.description?.message as string}>
+        <FormField label="Description (optional)" error={errors.description?.message as string}>
           <textarea
             {...register('description')}
             className="w-full p-4 bg-gray-50 border border-gray-200 rounded-[24px] h-32 resize-none outline-none focus:border-orange-500 transition-all text-sm"

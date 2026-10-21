@@ -14,10 +14,10 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ProductThumb } from '@/components/product/shared/ProductThumb';
 import { useAuthContext } from '@/context/auth-provider';
 import { orderAPI } from '@/lib/api';
 import { formatNaira, getStatusConfig } from '@/lib/order-status';
+import ProductImage from '@/components/product/ProductImage';
 
 const STATUS_FILTERS = [
   { label: 'All', value: 'all' },
@@ -200,7 +200,7 @@ const OrdersPage = () => {
                           key={idx}
                           className="inline-block h-14 w-14 rounded-xl border-2 border-white bg-gray-100 overflow-hidden shadow-sm"
                         >
-                          {item.image ? <ProductThumb url={item.image} alt="" /> : null}
+                          <ProductImage src={item.image} name={item.name} alt="" className="h-full w-full object-cover" />
                         </div>
                       ))}
                       {order.items.length > 3 && (

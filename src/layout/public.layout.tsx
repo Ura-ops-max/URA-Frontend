@@ -5,6 +5,7 @@ import { AuthProvider } from '@/context/auth-provider';
 import { CartProvider } from '@/context/cart-provider';
 import { Outlet, useLocation } from 'react-router-dom';
 import PageLoader from '@/components/shared/PageLoader';
+import PageErrorBoundary from '@/components/shared/PageErrorBoundary';
 
 // The general website pages that live at a single path segment. Anything else
 // that is a single segment (e.g. /xtreme-food-truck) is a business link page,
@@ -30,9 +31,11 @@ const PublichLayout = () => {
         <div>
           <NavBar variant={isBusinessLinkPage ? 'shop' : 'site'} />
           <div className="min-h-dvh">
-            <Suspense fallback={<PageLoader />}>
-              <Outlet />
-            </Suspense>
+            <PageErrorBoundary resetKey={pathname}>
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
+            </PageErrorBoundary>
           </div>
           <Footer />
         </div>

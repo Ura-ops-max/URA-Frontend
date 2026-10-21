@@ -13,11 +13,14 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { usePaymentHistory, type PaylukTransaction } from '@/hooks/api/use-payment-history';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { formatMoney, toDate } from '@/lib/money';
 
-function formatAmount(amount: number, currency = 'NGN') {
-  const c = currency === 'NG' ? 'NGN' : currency;
-  return new Intl.NumberFormat('en-NG', { style: 'currency', currency: c }).format(amount);
-}
+// Never throws on a bad currency code (Payluk sometimes sends "NG").
+const formatAmount = (amount: number, currency = 'NGN') => formatMoney(amount, currency);
+const formatWhen = (v: unknown) => {
+  const d = toDate(v);
+  return d ? format(d, 'dd MMM yyyy · h:mm a') : '';
+};
 
 const STATUS_STYLES: Record<string, string> = {
   success: 'bg-green-50 text-green-600',
@@ -26,7 +29,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const style = STATUS_STYLES[status.toLowerCase()] ?? 'bg-gray-100 text-gray-500';
+  const style = STATUS_STYLES[String(status ?? '').toLowerCase()] ?? 'bg-gray-100 text-gray-500';
   return (
     <span
       className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${style}`}
@@ -84,10 +87,10 @@ function TransactionRow({ tx }: { tx: PaylukTransaction }) {
           <CopyButton value={tx.reference} />
         </div>
         <p className="text-[11px] text-gray-400 mt-1">
-          {format(new Date(tx.createdAt), 'dd MMM yyyy · h:mm a')}
+          {formatWhen(tx.createdAt)}
         </p>
         <p className="text-[11px] text-gray-400">
-          Updated {format(new Date(tx.updatedAt), 'dd MMM yyyy · h:mm a')}
+          Updated {formatWhen(tx.updatedAt)}
         </p>
       </div>
 

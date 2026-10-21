@@ -1,10 +1,10 @@
 import { Briefcase, Loader2, Wallet } from 'lucide-react';
 import { useWalletBalance } from '@/hooks/api/use-wallet-balance';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { formatMoney } from '@/lib/money';
 
-function formatAmount(amount: number, currency = 'NGN') {
-  return new Intl.NumberFormat('en-NG', { style: 'currency', currency }).format(amount);
-}
+// Never throws on a bad currency code (Payluk sometimes sends "NG").
+const formatAmount = (amount: number, currency = 'NGN') => formatMoney(amount, currency);
 
 export const EscrowOverview = () => {
   const { user } = useCurrentUser();

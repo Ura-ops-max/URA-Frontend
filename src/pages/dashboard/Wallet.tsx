@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { walletsGroups } from '@/components/wallets/wallets.configs';
 import PageLoader from '@/components/shared/PageLoader';
+import PageErrorBoundary from '@/components/shared/PageErrorBoundary';
 
 const WalletPage = () => {
   const navigate = useNavigate();
@@ -84,9 +85,11 @@ const WalletPage = () => {
 
         <div className="w-full max-w-4xl mx-auto p-6 md:p-10">
           {/* THE OUTLET: This renders ProfileSettings, ActivityLog, etc. */}
-          <Suspense fallback={<PageLoader />}>
-            <Outlet />
-          </Suspense>
+          <PageErrorBoundary resetKey={pathname}>
+            <Suspense fallback={<PageLoader />}>
+              <Outlet />
+            </Suspense>
+          </PageErrorBoundary>
         </div>
       </div>
     </div>

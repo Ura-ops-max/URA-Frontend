@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import API from '@/lib/axios-client';
+import { toCurrencyCode } from '@/lib/money';
 
 export interface PaylukWalletBalance {
   mainBalance: number;
@@ -13,7 +14,7 @@ async function fetchWalletBalance(): Promise<PaylukWalletBalance> {
   return {
     mainBalance: Number(data?.mainBalance) || 0,
     escrowBalance: Number(data?.escrowBalance) || 0,
-    currency: data?.currency || 'NGN',
+    currency: toCurrencyCode(data?.currency),
   };
 }
 

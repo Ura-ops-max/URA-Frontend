@@ -1,5 +1,6 @@
 import { useState, Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import PageErrorBoundary from '@/components/shared/PageErrorBoundary';
 
 import { AuthProvider } from '@/context/auth-provider';
 import { useAuthContext } from '@/context/auth-provider';
@@ -17,6 +18,7 @@ import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
 import PageLoader from '@/components/shared/PageLoader';
 
 const AppLayoutContent = () => {
+  const { pathname } = useLocation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [paylukDismissed, setPaylukDismissed] = useState(false);
   const { user, isAuthenticated, refetchAuth } = useAuthContext();
@@ -46,9 +48,11 @@ const AppLayoutContent = () => {
 
                   <main className="flex-1 pb-24 lg:pb-10">
                     <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 mt-6">
-                      <Suspense fallback={<PageLoader />}>
-                        <Outlet />
-                      </Suspense>
+                      <PageErrorBoundary resetKey={pathname}>
+                        <Suspense fallback={<PageLoader />}>
+                          <Outlet />
+                        </Suspense>
+                      </PageErrorBoundary>
                     </div>
                   </main>
 

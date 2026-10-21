@@ -2,10 +2,10 @@ import { ArrowDownLeft, ArrowUpRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePaymentHistory, type PaylukTransaction } from '@/hooks/api/use-payment-history';
 import { formatDistanceToNow } from 'date-fns';
+import { formatMoney, toDate } from '@/lib/money';
 
-function formatAmount(amount: number, currency = 'NGN') {
-  return new Intl.NumberFormat('en-NG', { style: 'currency', currency }).format(amount);
-}
+// Never throws on a bad currency code (Payluk sometimes sends "NG").
+const formatAmount = (amount: number, currency = 'NGN') => formatMoney(amount, currency);
 
 function StatusBadge({ status }: { status: PaylukTransaction['status'] }) {
   const styles = {
@@ -120,7 +120,10 @@ export default function RecentTransactions({ customerId }: RecentTransactionsPro
                     <StatusBadge status={tx.status} />
                   </td>
                   <td className="px-4 py-3 text-right text-xs text-gray-400 hidden md:table-cell">
-                    {formatDistanceToNow(new Date(tx.createdAt), { addSuffix: true })}
+                    {(() => {
+                      const d = toDate(tx.createdAt);
+                      return d ? formatDistanceToNow(d, { addSuffix: true }) : '';
+                    })()}
                   </td>
                 </tr>
               ))}

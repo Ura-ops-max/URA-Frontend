@@ -7,6 +7,8 @@ import { formatNaira, getStatusConfig } from '@/lib/order-status';
 import { itemsSummary, NORMAL_PAYMENT_NOTE, type ListOrder } from '@/lib/order-lists';
 import ProductImage from '@/components/product/ProductImage';
 import OrderActionButtons from './OrderActionButtons';
+import WhatsAppButton from './WhatsAppButton';
+import { buyerPaidMessage } from '@/lib/whatsapp';
 
 const STEPS = ['Paid', 'Ready', 'Delivered'];
 
@@ -23,6 +25,8 @@ export default function OrderCard({ order, onChanged }: { order: ListOrder; onCh
   const step = progressStep(order);
   const shopName = order.shop?.businessName ?? 'the shop';
   const showProgress = order.paymentStatus === 'paid' && !['refunded', 'cancelled'].includes(order.status);
+  const canMessageShop =
+    !isSeller && order.paymentStatus === 'paid' && ['processing', 'shipped'].includes(order.status);
 
   return (
     <div className="rounded-3xl border border-gray-100 bg-white p-4 sm:p-5 hover:shadow-md transition-shadow">
@@ -90,6 +94,15 @@ export default function OrderCard({ order, onChanged }: { order: ListOrder; onCh
       )}
 
       {/* Buttons */}
+      {canMessageShop && (
+        <div className="mt-4">
+          <WhatsAppButton
+            phone={order.shop?.phone}
+            text={buyerPaidMessage(order.orderNumber, itemsSummary(order.items))}
+            label={`Message ${shopName} about order ${order.orderNumber}`}
+          />
+        </div>
+      )}
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <OrderActionButtons
           order={{

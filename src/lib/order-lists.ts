@@ -47,7 +47,8 @@ export interface ListOrder {
   disputeStatus: string | null;
   rejectedAt: string | null;
   trackingNumber: string | null;
-  shop: { _id: string; businessName: string; slug?: string } | null;
+  /** `phone` is sent to the buyer only (for the WhatsApp button). */
+  shop: { _id: string; businessName: string; slug?: string; phone?: string | null } | null;
   buyerName: string | null;
   role: 'buyer' | 'seller';
   actions: OrderActions;

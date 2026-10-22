@@ -19,6 +19,9 @@ import { formatNaira, getStatusConfig } from '@/lib/order-status';
 import CheckoutAd from '@/components/ads/CheckoutAd';
 import ProductImage from '@/components/product/ProductImage';
 import OrderActionButtons from '@/components/orders/OrderActionButtons';
+import WhatsAppButton from '@/components/orders/WhatsAppButton';
+import { buyerPaidMessage, sellerBringingMessage, sellerReadyMessage } from '@/lib/whatsapp';
+import { itemsSummary } from '@/lib/order-lists';
 import { NO_ACTIONS, NORMAL_PAYMENT_NOTE, type OrderActions } from '@/lib/order-lists';
 
 /** Best-effort one-line summary of a Fez tracking response. */
@@ -108,6 +111,10 @@ const OrderDetailsPage = () => {
   const isPaid = order.paymentStatus === 'paid';
   const disputed = ['open', 'investigating'].includes(order.disputeStatus ?? '');
   const listPath = role === 'seller' ? '/dashboard/shop-orders' : '/dashboard/my-orders';
+  // WhatsApp: only while the order is paid and still going.
+  const ongoing = isPaid && ['processing', 'shipped'].includes(order.status);
+  const shopName: string = shop?.businessName ?? 'the shop';
+  const buyerFirstName: string = order.user?.firstName ?? '';
 
   const steps = [
     { key: 'paid', label: 'Paid', done: order.paymentStatus === 'paid' },
@@ -193,6 +200,27 @@ const OrderDetailsPage = () => {
 
         {/* Next action: which buttons show is decided by the server. */}
         <div className="mt-6 space-y-2">
+          {ongoing && role === 'buyer' && (
+            <WhatsAppButton
+              phone={shop?.contact?.phone}
+              text={buyerPaidMessage(order.orderNumber, itemsSummary(order.items))}
+              label={`Message ${shopName} about order ${order.orderNumber}`}
+            />
+          )}
+          {ongoing && role === 'seller' && !isDelivery && !shopDelivers && (
+            <WhatsAppButton
+              phone={order.shippingAddress?.phone}
+              text={sellerReadyMessage(buyerFirstName, order.orderNumber, shopName)}
+              label="Message buyer: your order is ready"
+            />
+          )}
+          {ongoing && role === 'seller' && shopDelivers && (
+            <WhatsAppButton
+              phone={order.shippingAddress?.phone}
+              text={sellerBringingMessage(buyerFirstName, order.orderNumber, shopName)}
+              label="Message buyer: I'm bringing your order"
+            />
+          )}
           <OrderActionButtons
             order={{
               _id: order._id,

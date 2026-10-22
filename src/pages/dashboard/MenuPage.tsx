@@ -65,7 +65,7 @@ const MenuPage = () => {
     items: [
       { title: 'List a Product', icon: PlusCircle, path: '/dashboard/post/create?type=product' },
       { title: 'Inventory', icon: Boxes, path: '/dashboard/inventory' },
-      { title: 'Store Orders', icon: Store, path: '/dashboard/orders?view=received' },
+      { title: 'Shop Orders', icon: Store, path: '/dashboard/shop-orders' },
       // { title: 'Business Loan', icon: BadgePercent, path: '/dashboard/loans' },
     ],
   };

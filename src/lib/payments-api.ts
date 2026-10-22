@@ -57,6 +57,14 @@ export const paymentsApi = {
     orderId: string,
   ): Promise<{ dispute: { status: string; openedAt: string | null; entries: DisputeEntry[] } | null }> =>
     (await API.get(`/orders/${orderId}/dispute`)).data,
+  /** Buyer: cancel an order that is not paid yet. */
+  cancel: async (orderId: string) => (await API.post(`/orders/${orderId}/cancel`)).data,
+  /** Seller: can't fill a Buyer-Protected order. Stock goes back on sale. */
+  reject: async (orderId: string, reason?: string) =>
+    (await API.post(`/orders/${orderId}/reject`, reason ? { reason } : {})).data,
+  /** Buyer: money back after the shop rejected the order. */
+  refund: async (orderId: string): Promise<{ refunded: boolean; pending?: boolean }> =>
+    (await API.post(`/orders/${orderId}/refund`)).data,
 };
 
 /** A readable message from an API error. */

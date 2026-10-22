@@ -26,6 +26,7 @@ export const PROTECTED_ROUTES = {
   CART: '/dashboard/product/cart',
   CHECKOUT: '/dashboard/checkout',
   ORDER: '/dashboard/my-orders',
+  SHOP_ORDERS: '/dashboard/shop-orders',
   CHAT_CONVERSATION: '/dashboard/chat/:conversationId',
   PRODUCT_DETAIL: '/dashboard/product/:productId',
   IMAGE_SEARCH: '/dashboard/search/image',

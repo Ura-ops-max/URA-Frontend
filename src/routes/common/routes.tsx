@@ -48,7 +48,9 @@ const ChatPlaceholder = lazy(() => import('@/components/chat/ChatPlaceholder'));
 const DealsAndOffers = lazy(() => import('@/pages/dashboard/Deals&Offer'));
 const CartPage = lazy(() => import('@/pages/dashboard/CartPage'));
 const CheckoutPage = lazy(() => import('@/pages/dashboard/CheckoutPage'));
-const OrdersPage = lazy(() => import('@/pages/dashboard/Orders'));
+const MyOrdersPage = lazy(() => import('@/pages/dashboard/MyOrders'));
+const ShopOrdersPage = lazy(() => import('@/pages/dashboard/ShopOrders'));
+const OrdersRedirect = lazy(() => import('@/pages/dashboard/OrdersRedirect'));
 const OrderDetailsPage = lazy(() => import('@/pages/dashboard/OrderDetails'));
 const ProductDetailsPage = lazy(() => import('@/pages/dashboard/ProductDetails'));
 const BookmarkPage = lazy(() => import('@/pages/dashboard/BookmarkPage'));
@@ -134,9 +136,10 @@ export const protectedRoutePaths = [
   { path: PROTECTED_ROUTES.NOTIFICATION, element: <NotificationsPage /> },
   { path: PROTECTED_ROUTES.CART, element: <CartPage /> },
   { path: PROTECTED_ROUTES.CHECKOUT, element: <CheckoutPage /> },
-  { path: PROTECTED_ROUTES.ORDER, element: <OrdersPage /> },
-  // Checkout and the payment page send buyers here; details link to /:orderId.
-  { path: '/dashboard/orders', element: <OrdersPage /> },
+  { path: PROTECTED_ROUTES.ORDER, element: <MyOrdersPage /> },
+  { path: PROTECTED_ROUTES.SHOP_ORDERS, element: <ShopOrdersPage /> },
+  // Checkout and old links still use /dashboard/orders(?view=received).
+  { path: '/dashboard/orders', element: <OrdersRedirect /> },
   { path: '/dashboard/orders/:orderId', element: <OrderDetailsPage /> },
   { path: PROTECTED_ROUTES.IMAGE_SEARCH, element: <ImageSearch /> },
   { path: PROTECTED_ROUTES.INVENTORY, element: <InventoryPage /> },

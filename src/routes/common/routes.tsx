@@ -64,12 +64,7 @@ const WalletOverviewPage = lazy(() => import('@/components/wallets/pages/WalletO
 const TransactionHistoryPage = lazy(
   () => import('@/components/wallets/pages/TransactionHistoryPage'),
 );
-const SellerTransactionsPage = lazy(
-  () => import('@/components/wallets/pages/SellerTransactionsPage'),
-);
-const BuyerTransactionsPage = lazy(
-  () => import('@/components/wallets/pages/BuyerTransactionsPage'),
-);
+const HeldOrdersPage = lazy(() => import('@/components/wallets/pages/HeldOrdersPage'));
 const WithdrawalPage = lazy(() => import('@/components/wallets/pages/WithdrawalPage'));
 const InventoryPage = lazy(() => import('@/pages/dashboard/Inventory'));
 
@@ -101,16 +96,13 @@ export const protectedRoutePaths = [
     children: [
       { index: true, element: <WalletOverviewPage /> },
       { path: 'overview', element: <WalletOverviewPage /> },
-      { path: 'activities', element: <TransactionHistoryPage /> },
       { path: 'transactions', element: <TransactionHistoryPage /> },
-      { path: 'seller-transactions', element: <SellerTransactionsPage /> },
-      // Claim / dispute / confirm now happen on each order, through URA's backend.
-      { path: 'claim-funds', element: <Navigate to="/dashboard/orders?view=received" replace /> },
-      { path: 'respond-to-dispute', element: <Navigate to="/dashboard/orders?view=received" replace /> },
-      { path: 'buyer-transactions', element: <BuyerTransactionsPage /> },
-      { path: 'open-dispute', element: <Navigate to="/dashboard/orders" replace /> },
-      { path: 'confirm-payment', element: <Navigate to="/dashboard/orders" replace /> },
+      { path: 'held', element: <HeldOrdersPage /> },
       { path: 'withdraw', element: <WithdrawalPage /> },
+      // Old wallet pages: orders now live in My Orders and Shop Orders.
+      ...['activities', 'seller-transactions', 'buyer-transactions', 'claim-funds', 'respond-to-dispute', 'open-dispute', 'confirm-payment'].map(
+        (path) => ({ path, element: <Navigate to="/dashboard/wallet/overview" replace /> }),
+      ),
     ],
   },
   {

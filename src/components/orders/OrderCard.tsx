@@ -19,21 +19,28 @@ function progressStep(o: ListOrder): number {
   return 1;
 }
 
-export default function OrderCard({ order, onChanged }: { order: ListOrder; onChanged: () => void }) {
+export default function OrderCard({
+  order,
+  onChanged,
+}: {
+  order: ListOrder;
+  onChanged: () => void;
+}) {
   const status = getStatusConfig(order.status, order.deliveryMethod, order.fulfilment ?? undefined);
   const isSeller = order.role === 'seller';
   const step = progressStep(order);
   const shopName = order.shop?.businessName ?? 'the shop';
-  const showProgress = order.paymentStatus === 'paid' && !['refunded', 'cancelled'].includes(order.status);
+  const showProgress =
+    order.paymentStatus === 'paid' && !['refunded', 'cancelled'].includes(order.status);
   const canMessageShop =
     !isSeller && order.paymentStatus === 'paid' && ['processing', 'shipped'].includes(order.status);
 
   return (
     <div className="rounded-3xl border border-gray-100 bg-white p-4 sm:p-5 hover:shadow-md transition-shadow">
       {/* Who and where it is */}
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between min-[420px]:gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-black text-gray-900">
+          <p className="line-clamp-2 text-sm font-black text-gray-900">
             {isSeller ? (order.buyerName ?? 'A customer') : shopName}
           </p>
           <p className="text-xs text-gray-500">
@@ -42,7 +49,7 @@ export default function OrderCard({ order, onChanged }: { order: ListOrder; onCh
         </div>
         <span
           className={cn(
-            'flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-black',
+            'flex shrink-0 items-center gap-1.5 self-start rounded-full px-2.5 py-1 text-[11px] font-black',
             status.color,
           )}
         >
@@ -55,16 +62,30 @@ export default function OrderCard({ order, onChanged }: { order: ListOrder; onCh
       <div className="mt-4 flex items-center gap-3">
         <div className="flex -space-x-3 shrink-0">
           {order.items.slice(0, 3).map((item, idx) => (
-            <div key={idx} className="h-12 w-12 overflow-hidden rounded-xl border-2 border-white bg-gray-100 shadow-sm">
-              <ProductImage src={item.image ?? undefined} name={item.name} alt="" className="h-full w-full object-cover" />
+            <div
+              key={idx}
+              className="h-12 w-12 overflow-hidden rounded-xl border-2 border-white bg-gray-100 shadow-sm"
+            >
+              <ProductImage
+                src={item.image ?? undefined}
+                name={item.name}
+                alt=""
+                className="h-full w-full object-cover"
+              />
             </div>
           ))}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-sm font-semibold text-gray-800">{itemsSummary(order.items)}</p>
+          <p className="line-clamp-2 text-sm font-semibold text-gray-800">
+            {itemsSummary(order.items)}
+          </p>
           <p className="text-xs text-gray-500">
-            {formatNaira(isSeller ? order.itemsTotal : order.totalAmount)} ·{' '}
-            {order.deliveryMethod === 'delivery' ? 'Delivery' : 'Pickup'} ·{' '}
+            <span className="font-bold text-gray-700">
+              {formatNaira(isSeller ? order.itemsTotal : order.totalAmount)}
+            </span>{' '}
+            · {order.deliveryMethod === 'delivery' ? 'Delivery' : 'Pickup'}
+          </p>
+          <p className="text-xs text-gray-500">
             {order.paymentType === 'normal' ? 'Normal Payment' : 'Buyer-Protected Payment'}
           </p>
         </div>
@@ -75,8 +96,17 @@ export default function OrderCard({ order, onChanged }: { order: ListOrder; onCh
         <div className="mt-4 flex gap-1.5" aria-label={`Step ${step} of 3`}>
           {STEPS.map((label, i) => (
             <div key={label} className="flex-1">
-              <div className={cn('h-1.5 rounded-full', i < step ? 'bg-green-500' : 'bg-gray-200')} />
-              <p className={cn('mt-1 text-[10px] font-bold', i < step ? 'text-gray-700' : 'text-gray-400')}>{label}</p>
+              <div
+                className={cn('h-1.5 rounded-full', i < step ? 'bg-green-500' : 'bg-gray-200')}
+              />
+              <p
+                className={cn(
+                  'mt-1 text-[10px] font-bold',
+                  i < step ? 'text-gray-700' : 'text-gray-400',
+                )}
+              >
+                {label}
+              </p>
             </div>
           ))}
         </div>
@@ -99,7 +129,12 @@ export default function OrderCard({ order, onChanged }: { order: ListOrder; onCh
           <WhatsAppButton
             phone={order.shop?.phone}
             text={buyerPaidMessage(order.orderNumber, itemsSummary(order.items))}
-            label={`Message ${shopName} about order ${order.orderNumber}`}
+            label={
+              <>
+                Message {shopName} about order{' '}
+                <span className="whitespace-nowrap">{order.orderNumber}</span>
+              </>
+            }
           />
         </div>
       )}

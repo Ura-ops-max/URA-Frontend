@@ -9,7 +9,9 @@ interface Notification {
   message: string;
   type: string;
   isRead: boolean;
-  relatedId?: string;
+  relatedId?: string | { _id?: string; orderNumber?: string };
+  /** What relatedId points at, e.g. 'Order'. */
+  modelType?: string;
   createdAt: string;
 }
 

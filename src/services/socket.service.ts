@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import { tokenStorage } from '@/lib/token-storage';
 
 const SOCKET_URL = import.meta.env.VITE_API_ROOT_URL || 'http://localhost:5000';
 
@@ -8,6 +9,9 @@ class SocketService {
   public connect() {
     if (!this.socket) {
       this.socket = io(SOCKET_URL, {
+        // The server only accepts signed-in connections. A function (not a
+        // value) so every reconnect sends the latest token after a refresh.
+        auth: (cb) => cb({ token: tokenStorage.getToken() ?? '' }),
         reconnectionAttempts: Infinity,
         reconnectionDelay: 1000,
         // Prefer WebSocket but fall back to HTTP long-polling. Without the
@@ -22,6 +26,11 @@ class SocketService {
         if (this.currentProfileId) {
           this.setup(this.currentProfileId);
         }
+      });
+
+      // Signed out or token expired: stop retrying until the next connect().
+      this.socket.on('connect_error', (err) => {
+        if (err?.message === 'unauthorized' && !tokenStorage.getToken()) this.disconnect();
       });
 
       window.addEventListener('beforeunload', () => {

@@ -12,6 +12,7 @@ import MobileBottomNav from '@/components/nav/MobileBottomNav';
 import VerificationBanner from '@/components/nav/VerificationBanner';
 import { CartProvider } from '@/context/cart-provider';
 import { NotificationProvider } from '@/context/notification-provider';
+import { OrderAlertsProvider } from '@/context/order-alerts-provider';
 import { SocketSync } from '@/context/socket-sync';
 import { ChatProvider } from '@/context/chat-provider';
 import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
@@ -31,6 +32,7 @@ const AppLayoutContent = () => {
     <>
       <SocketSync />
       <NotificationProvider>
+        <OrderAlertsProvider>
         <ChatProvider>
           <CartProvider>
             <SidebarProvider>
@@ -64,6 +66,7 @@ const AppLayoutContent = () => {
             </SidebarProvider>
           </CartProvider>
         </ChatProvider>
+        </OrderAlertsProvider>
       </NotificationProvider>
 
       {/* Payluk onboarding — shown until profile is created or dismissed */}

@@ -17,7 +17,7 @@ export default function GuestWelcomeCard() {
         Look around freely. Sign in when you&apos;re ready to buy, chat or post.
       </p>
       <ul className="mt-4 space-y-2 text-left text-xs font-medium text-gray-600">
-        <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-orange-500" /> Money held in escrow</li>
+        <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-orange-500" /> Buyer-Protected Payment</li>
         <li className="flex items-center gap-2"><Store className="h-4 w-4 text-orange-500" /> Verified local vendors</li>
         <li className="flex items-center gap-2"><Truck className="h-4 w-4 text-orange-500" /> Delivery to your door</li>
       </ul>

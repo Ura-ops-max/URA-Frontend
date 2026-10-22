@@ -2,19 +2,7 @@
 // delivery/pickup details, and the next action for whoever is looking.
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-  AlertTriangle,
-  ArrowLeft,
-  BadgeCheck,
-  Check,
-  CreditCard,
-  Loader2,
-  MapPin,
-  PackageCheck,
-  Phone,
-  Store,
-  Truck,
-} from 'lucide-react';
+import { ArrowLeft, Check, Loader2, MapPin, Phone, ShieldCheck, Store, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -30,6 +18,11 @@ import CheckoutPaymentModal from '@/components/checkout/CheckoutPaymentModal';
 import { formatNaira, getStatusConfig } from '@/lib/order-status';
 import CheckoutAd from '@/components/ads/CheckoutAd';
 import ProductImage from '@/components/product/ProductImage';
+import OrderActionButtons from '@/components/orders/OrderActionButtons';
+import WhatsAppButton from '@/components/orders/WhatsAppButton';
+import { buyerPaidMessage, sellerBringingMessage, sellerReadyMessage } from '@/lib/whatsapp';
+import { itemsSummary } from '@/lib/order-lists';
+import { NO_ACTIONS, NORMAL_PAYMENT_NOTE, type OrderActions } from '@/lib/order-lists';
 
 /** Best-effort one-line summary of a Fez tracking response. */
 const summariseTracking = (data: any): string => {
@@ -52,9 +45,10 @@ const OrderDetailsPage = () => {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [tracking, setTracking] = useState<string | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [disputeOpen, setDisputeOpen] = useState(false);
   const [dispute, setDispute] = useState<DisputeEntry[] | null>(null);
+  // Which buttons apply: decided by the server, same as in the order lists.
+  const [actions, setActions] = useState<OrderActions>(NO_ACTIONS);
+  const [moneyNote, setMoneyNote] = useState<string | null>(null);
   // "Pay now" for an order that is still unpaid (the widget was closed).
   const [payment, setPayment] = useState<StartPaymentResponse | null>(null);
 
@@ -64,6 +58,8 @@ const OrderDetailsPage = () => {
       const { data } = await orderAPI.getOrderById(orderId);
       setOrder(data.order);
       setRole(data.role === 'seller' ? 'seller' : 'buyer');
+      setActions({ ...NO_ACTIONS, ...(data.actions ?? {}) });
+      setMoneyNote(data.moneyNote ?? null);
       setError('');
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Could not load this order.');
@@ -97,8 +93,8 @@ const OrderDetailsPage = () => {
     return (
       <div className="max-w-xl mx-auto py-20 text-center">
         <p className="font-bold text-gray-900">{error || 'Order not found.'}</p>
-        <Link to="/dashboard/orders" className="mt-4 inline-block text-orange-600 underline">
-          Back to orders
+        <Link to="/dashboard/my-orders" className="mt-4 inline-block text-orange-600 underline">
+          Back to My Orders
         </Link>
       </div>
     );
@@ -113,11 +109,12 @@ const OrderDetailsPage = () => {
   // until the buyer confirms. Orders from before this had no type: protected.
   const isNormal = order.paymentType === 'normal';
   const isPaid = order.paymentStatus === 'paid';
-  const released = Boolean(order.payoutReleasedAt);
   const disputed = ['open', 'investigating'].includes(order.disputeStatus ?? '');
-  const canPayNow = role === 'buyer' && !isPaid && !['cancelled', 'refunded'].includes(order.status);
-  const protectedActive =
-    !isNormal && isPaid && !released && !disputed && ['processing', 'shipped'].includes(order.status);
+  const listPath = role === 'seller' ? '/dashboard/shop-orders' : '/dashboard/my-orders';
+  // WhatsApp: only while the order is paid and still going.
+  const ongoing = isPaid && ['processing', 'shipped'].includes(order.status);
+  const shopName: string = shop?.businessName ?? 'the shop';
+  const buyerFirstName: string = order.user?.firstName ?? '';
 
   const steps = [
     { key: 'paid', label: 'Paid', done: order.paymentStatus === 'paid' },
@@ -129,25 +126,6 @@ const OrderDetailsPage = () => {
     { key: 'done', label: 'Completed', done: order.status === 'delivered' },
   ];
 
-  const markReady = async (mode?: 'pickup' | 'self_delivery') => {
-    setBusy(true);
-    try {
-      await orderAPI.markOrderReady(order._id, isDelivery ? undefined : mode);
-      toast.success(
-        isDelivery
-          ? 'Delivery booked. The buyer has been told.'
-          : mode === 'self_delivery'
-            ? "The buyer has been told you're bringing it."
-            : 'The buyer has been told it is ready.',
-      );
-      await load();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Could not update the order.');
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const checkTracking = async () => {
     setBusy(true);
     try {
@@ -155,36 +133,6 @@ const OrderDetailsPage = () => {
       setTracking(summariseTracking(data));
     } catch {
       setTracking('Could not reach the courier right now. Try again shortly.');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  // Buyer confirms they got the goods → URA's backend asks Payluk to release
-  // the escrow to the seller (Buyer-Protected only).
-  const confirmReceived = async () => {
-    setConfirmOpen(false);
-    setBusy(true);
-    try {
-      await paymentsApi.confirmReceived(order._id);
-      toast.success('Thanks! The seller has been paid.');
-      await load();
-    } catch (err: any) {
-      toast.error(paymentErrorMessage(err, 'Could not confirm right now. Please try again.'));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  // Seller: claim the money one day after the delivery window (Payluk's rule).
-  const claim = async () => {
-    setBusy(true);
-    try {
-      await paymentsApi.claim(order._id);
-      toast.success('Payment claimed. It has been paid to your wallet.');
-      await load();
-    } catch (err: any) {
-      toast.error(paymentErrorMessage(err, 'Could not claim right now. Please try again.'));
     } finally {
       setBusy(false);
     }
@@ -205,8 +153,8 @@ const OrderDetailsPage = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 lg:py-12 space-y-6">
-      <Link to="/dashboard/orders" className="inline-flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-orange-600">
-        <ArrowLeft size={16} /> All orders
+      <Link to={listPath} className="inline-flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-orange-600">
+        <ArrowLeft size={16} /> {role === 'seller' ? 'Shop Orders' : 'My Orders'}
       </Link>
 
       {/* Header */}
@@ -250,46 +198,44 @@ const OrderDetailsPage = () => {
           </div>
         )}
 
-        {/* Next action */}
-        {/* Phones: one full-width button per row. Larger screens: in a row. */}
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap [&>button]:w-full sm:[&>button]:w-auto [&>button]:h-11 sm:[&>button]:h-9">
-          {canPayNow && (
-            <Button onClick={payNow} disabled={busy} className="rounded-xl bg-orange-600 hover:bg-orange-700 font-bold">
-              {busy ? <Loader2 size={16} className="animate-spin" /> : <><CreditCard size={16} className="mr-1" /> Pay now</>}
-            </Button>
+        {/* Next action: which buttons show is decided by the server. */}
+        <div className="mt-6 space-y-2">
+          {ongoing && role === 'buyer' && (
+            <WhatsAppButton
+              phone={shop?.contact?.phone}
+              text={buyerPaidMessage(order.orderNumber, itemsSummary(order.items))}
+              label={`Message ${shopName} about order ${order.orderNumber}`}
+            />
           )}
-          {role === 'seller' && order.status === 'processing' && !disputed && (
-            <Button onClick={() => markReady('pickup')} disabled={busy} className="rounded-xl bg-orange-600 hover:bg-orange-700 font-bold">
-              {busy ? <Loader2 size={16} className="animate-spin" /> : isDelivery ? (<><Truck size={16} className="mr-1" /> Book delivery</>) : (<><Store size={16} className="mr-1" /> Ready for pickup</>)}
-            </Button>
+          {ongoing && role === 'seller' && !isDelivery && !shopDelivers && (
+            <WhatsAppButton
+              phone={order.shippingAddress?.phone}
+              text={sellerReadyMessage(buyerFirstName, order.orderNumber, shopName)}
+              label="Message buyer: your order is ready"
+            />
           )}
-          {role === 'seller' && order.status === 'processing' && !isDelivery && !disputed && (
-            <Button variant="outline" onClick={() => markReady('self_delivery')} disabled={busy} className="rounded-xl border-orange-200 text-orange-700 font-bold">
-              <Truck size={16} className="mr-1" /> I&apos;ll deliver it myself
-            </Button>
+          {ongoing && role === 'seller' && shopDelivers && (
+            <WhatsAppButton
+              phone={order.shippingAddress?.phone}
+              text={sellerBringingMessage(buyerFirstName, order.orderNumber, shopName)}
+              label="Message buyer: I'm bringing your order"
+            />
           )}
-          {role === 'buyer' && protectedActive && (
-            <>
-              <Button onClick={() => setConfirmOpen(true)} disabled={busy} className="rounded-xl bg-green-600 hover:bg-green-700 font-bold">
-                <PackageCheck size={16} className="mr-1" /> I&apos;ve received my order
-              </Button>
-              <Button variant="outline" onClick={() => setDisputeOpen(true)} disabled={busy} className="rounded-xl border-red-200 text-red-600 font-bold">
-                <AlertTriangle size={16} className="mr-1" /> Report a problem
-              </Button>
-            </>
-          )}
-          {role === 'seller' && protectedActive && (
-            <Button variant="outline" onClick={claim} disabled={busy} className="rounded-xl font-bold">
-              <BadgeCheck size={16} className="mr-1" /> Claim payment
-            </Button>
-          )}
-          {role === 'seller' && disputed && (
-            <Button variant="outline" onClick={() => setDisputeOpen(true)} disabled={busy} className="rounded-xl border-red-200 text-red-600 font-bold">
-              <AlertTriangle size={16} className="mr-1" /> Reply to the dispute
-            </Button>
-          )}
+          <OrderActionButtons
+            order={{
+              _id: order._id,
+              orderNumber: order.orderNumber,
+              deliveryMethod: order.deliveryMethod,
+              itemsTotal: order.itemsTotal ?? subtotal,
+              shopName: shop?.businessName ?? 'the shop',
+              role,
+              actions,
+            }}
+            onChanged={load}
+            onPay={payNow}
+          />
           {order.trackingNumber && (
-            <Button variant="outline" onClick={checkTracking} disabled={busy} className="rounded-xl font-bold">
+            <Button variant="outline" onClick={checkTracking} disabled={busy} className="h-11 w-full sm:h-9 sm:w-auto rounded-xl font-bold">
               <Truck size={16} className="mr-1" /> Track delivery
             </Button>
           )}
@@ -300,28 +246,37 @@ const OrderDetailsPage = () => {
             {tracking && <span className="block mt-1">Latest update: {tracking}</span>}
           </p>
         )}
-        {role === 'buyer' && isPaid && order.status === 'processing' && (
-          <p className="mt-3 text-xs text-gray-500">
-            {isNormal
-              ? 'Normal Payment: your payment went straight to the seller.'
-              : 'Your money is held safely with buyer protection. Only tap "I\'ve received my order" once you have the items.'}
+        {moneyNote && (
+          <p className="mt-3 flex items-start gap-1.5 text-xs text-gray-600">
+            <ShieldCheck size={14} className="mt-px shrink-0 text-green-600" />
+            {moneyNote}
           </p>
         )}
-        {role === 'seller' && isPaid && (
-          <p className="mt-3 text-xs text-gray-500">
-            {released
-              ? `Paid to your wallet: ${formatNaira(subtotal)} for the items.`
-              : isNormal
-                ? 'Normal Payment: being paid to your wallet now.'
-                : 'Buyer-Protected: you are paid when the buyer confirms, or when you claim after the delivery window.'}
+        {actions.confirmDelivery && (
+          <p className="mt-2 text-xs text-gray-500">
+            Only tap &quot;Confirm delivery&quot; once you have everything.
           </p>
         )}
-        {canPayNow && (
-          <p className="mt-3 text-xs text-gray-500">This order is not paid yet. Tap &quot;Pay now&quot; to finish.</p>
+        {actions.getRefund && (
+          <p className="mt-2 text-xs text-gray-500">
+            {shop?.businessName ?? 'The shop'} could not fill this order. Tap &quot;Get my money back&quot;.
+          </p>
+        )}
+        {role === 'buyer' && isNormal && isPaid && <p className="mt-2 text-xs text-gray-500">{NORMAL_PAYMENT_NOTE}</p>}
+        {role === 'seller' && isNormal && isPaid && order.status === 'processing' && (
+          <p className="mt-2 text-xs text-gray-500">
+            Can&apos;t fill this order?{' '}
+            <Link to="/contact" className="font-bold text-orange-600">
+              Contact URA
+            </Link>
+          </p>
+        )}
+        {actions.pay && (
+          <p className="mt-2 text-xs text-gray-500">This order is not paid yet. Tap &quot;Pay now&quot; to finish.</p>
         )}
         {disputed && (
           <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
-            A dispute is open on this order. Payluk is reviewing it, and the money stays on hold until it is resolved.
+            A problem was reported on this order. URA is looking into it, and the money stays on hold until it is sorted out.
           </p>
         )}
       </div>
@@ -383,7 +338,7 @@ const OrderDetailsPage = () => {
       {/* Dispute conversation */}
       {order.disputeStatus && dispute && dispute.length > 0 && (
         <div className="bg-white border border-gray-100 rounded-[24px] p-6 space-y-3">
-          <h2 className="font-black text-gray-900">Dispute</h2>
+          <h2 className="font-black text-gray-900">Problem reported</h2>
           {dispute.map((d, i) => (
             <div key={i} className={cn('rounded-xl p-3 text-sm', d.from === 'seller' ? 'bg-gray-50' : 'bg-red-50')}>
               <p className="text-[11px] font-bold uppercase text-gray-400">
@@ -403,18 +358,6 @@ const OrderDetailsPage = () => {
 
       {role === 'buyer' && <CheckoutAd businessId={shop?._id || shop} />}
 
-      {disputeOpen && (
-        <DisputeDialog
-          orderId={order._id}
-          asSeller={role === 'seller'}
-          onClose={() => setDisputeOpen(false)}
-          onDone={() => {
-            setDisputeOpen(false);
-            load();
-          }}
-        />
-      )}
-
       {payment && (
         <CheckoutPaymentModal
           orderId={order._id}
@@ -430,105 +373,8 @@ const OrderDetailsPage = () => {
         />
       )}
 
-      {/* Confirm receipt dialog */}
-
-      {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4" onClick={() => setConfirmOpen(false)}>
-          <div className="w-full max-w-sm rounded-t-3xl bg-white p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] text-center sm:rounded-3xl sm:pb-6" onClick={(e) => e.stopPropagation()}>
-            <PackageCheck className="mx-auto h-10 w-10 text-green-600" />
-            <h3 className="mt-3 text-lg font-black">Did you receive everything?</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Confirming releases {formatNaira(subtotal)} to {shop?.businessName ?? 'the seller'}. This can&apos;t be undone.
-            </p>
-            <div className="mt-6 flex flex-col-reverse gap-3 min-[380px]:flex-row">
-              <Button variant="outline" className="flex-1 h-11 rounded-xl" onClick={() => setConfirmOpen(false)}>Not yet</Button>
-              <Button className="flex-1 h-11 rounded-xl bg-green-600 hover:bg-green-700" onClick={confirmReceived}>Yes, release payment</Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
-
-/** Buyer opens a dispute (Buyer-Protected); the seller replies once one is open. */
-function DisputeDialog({
-  orderId,
-  asSeller,
-  onClose,
-  onDone,
-}: {
-  orderId: string;
-  asSeller: boolean;
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  const [message, setMessage] = useState('');
-  const [file, setFile] = useState<File | null>(null);
-  const [sending, setSending] = useState(false);
-
-  const submit = async () => {
-    if (!message.trim()) return;
-    setSending(true);
-    try {
-      await paymentsApi.submitDispute(orderId, message.trim(), file);
-      toast.success(asSeller ? 'Your reply was sent.' : 'Dispute opened. Payluk will review it.');
-      onDone();
-    } catch (err: any) {
-      toast.error(paymentErrorMessage(err, 'Could not send. Please try again.'));
-    } finally {
-      setSending(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4" onClick={onClose}>
-      <div
-        className="w-full max-w-md max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:rounded-3xl sm:p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="text-lg font-black">{asSeller ? 'Reply to the dispute' : 'Report a problem'}</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          {asSeller
-            ? 'Explain your side. You can reply once.'
-            : 'The money stays on hold while Payluk reviews it. You can submit once.'}
-        </p>
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          maxLength={2000}
-          rows={5}
-          placeholder={asSeller ? 'Your reply' : 'What went wrong?'}
-          className="mt-4 w-full rounded-xl border border-gray-200 p-3 text-base sm:text-sm outline-none focus:ring-2 focus:ring-orange-300"
-        />
-        <label className="mt-3 block text-xs font-semibold text-gray-600">
-          Photo or PDF (optional, up to 5 MB)
-          <input
-            type="file"
-            accept="image/*,application/pdf"
-            className="mt-1 block w-full text-xs"
-            onChange={(e) => {
-              const f = e.target.files?.[0] ?? null;
-              if (f && f.size > 5 * 1024 * 1024) {
-                toast.error('That file is over 5 MB.');
-                e.target.value = '';
-                return;
-              }
-              setFile(f);
-            }}
-          />
-        </label>
-        <div className="mt-6 flex flex-col-reverse gap-3 min-[380px]:flex-row">
-          <Button variant="outline" className="flex-1 h-11 rounded-xl" onClick={onClose} disabled={sending}>
-            Cancel
-          </Button>
-          <Button className="flex-1 h-11 rounded-xl bg-red-600 hover:bg-red-700" onClick={submit} disabled={sending || !message.trim()}>
-            {sending ? <Loader2 size={16} className="animate-spin" /> : 'Send'}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default OrderDetailsPage;

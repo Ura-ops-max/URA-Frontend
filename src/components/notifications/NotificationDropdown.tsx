@@ -2,6 +2,7 @@ import { Bell, MessageCircle, Heart, Star, ShoppingBag } from 'lucide-react';
 import { useNotificationContext } from '@/context/notification-provider';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { notificationLink } from '@/lib/notification-link';
 
 const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
   const { notifications, markAsRead, unreadCount } = useNotificationContext();
@@ -40,7 +41,8 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
               key={notif._id}
               onClick={() => {
                 markAsRead(notif._id);
-                if (notif.relatedId) navigate(`/dashboard/chat/${notif.relatedId}`);
+                const to = notificationLink(notif);
+                if (to) navigate(to);
                 onClose();
               }}
               className={`p-4 flex gap-3 border-b dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors ${!notif.isRead ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}

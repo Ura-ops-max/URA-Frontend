@@ -1,56 +1,23 @@
-import {
-  Activity,
-  History,
-  Grid,
-  ShoppingBag,
-  ShoppingCart,
-  ArrowUpRight,
-} from 'lucide-react';
+import { Grid, History, ArrowUpRight } from 'lucide-react';
 
+// The wallet is money only. Orders (confirm, report a problem, claim) live in
+// My Orders and Shop Orders.
 export const walletsGroups = [
   {
-    label: 'Buyer-Protected Payments',
+    label: 'Wallet',
     items: [
-      { id: 'overview', title: 'Overview', icon: Grid, desc: 'Wallet overview' },
-      { id: 'activities', title: 'Recent Activity', icon: Activity, desc: 'Transaction logs' },
-    ],
-  },
-  {
-    label: 'Activity & Finances',
-    items: [
+      { id: 'overview', title: 'Overview', icon: Grid, desc: 'Your balances' },
       {
         id: 'transactions',
         title: 'Transaction History',
         icon: History,
-        desc: 'All payments and withdrawals',
+        desc: 'Payments, refunds and withdrawals',
       },
       {
         id: 'withdraw',
         title: 'Withdraw Funds',
         icon: ArrowUpRight,
-        desc: 'Transfer funds to your bank account',
-      },
-    ],
-  },
-  {
-    label: 'My Sales',
-    items: [
-      {
-        id: 'seller-transactions',
-        title: 'My Sales Transactions',
-        icon: ShoppingBag,
-        desc: 'Your sales. Claim or reply to a dispute from the order.',
-      },
-    ],
-  },
-  {
-    label: 'My Purchases',
-    items: [
-      {
-        id: 'buyer-transactions',
-        title: 'My Transactions',
-        icon: ShoppingCart,
-        desc: 'Your purchases. Confirm or dispute from the order.',
+        desc: 'Send money to your bank account',
       },
     ],
   },

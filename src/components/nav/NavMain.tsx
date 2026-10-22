@@ -91,8 +91,8 @@ export function NavMain() {
       icon: PlusCircle,
     },
     { title: 'Inventory', url: '/dashboard/inventory', icon: Boxes },
-    // Orders customers placed with this shop (the Orders page's "received" view).
-    { title: 'Store Orders', url: '/dashboard/orders?view=received', icon: Store },
+    // Paid orders customers placed with this shop.
+    { title: 'Shop Orders', url: '/dashboard/shop-orders', icon: Store },
     // { title: 'Business Loan', url: '/dashboard/loans', icon: BadgePercent },
     // Inside businessItems array in NavMain.tsx
   ];

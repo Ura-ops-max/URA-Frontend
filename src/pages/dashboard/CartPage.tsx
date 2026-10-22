@@ -6,10 +6,24 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import CheckoutAd from '@/components/ads/CheckoutAd';
 import ProductImage from '@/components/product/ProductImage';
+import { useQuery } from '@tanstack/react-query';
+import { getBusinessQueryFn } from '@/lib/api';
+import { shopOpenState } from '@/lib/opening-hours';
 
 const CartPage = () => {
   const { cart, totalItems, totalPrice, updateQty, removeItem, isLoading, isUpdating } =
     useCartContext();
+
+  // Checkout is blocked while the shop is closed (by its opening hours).
+  const firstProduct: any = cart?.items?.[0]?.product;
+  const shopId: string | undefined = firstProduct?.business?._id || firstProduct?.business;
+  const { data: shopData } = useQuery({
+    queryKey: ['shop-hours', shopId],
+    queryFn: () => getBusinessQueryFn(shopId!),
+    enabled: Boolean(shopId),
+    staleTime: 5 * 60_000,
+  });
+  const shopState = shopOpenState((shopData as any)?.business?.operatingHours);
 
   const formattedPrice = (price: number) =>
     new Intl.NumberFormat('en-NG', {
@@ -142,12 +156,24 @@ const CartPage = () => {
               </div>
             </div>
 
-            <Link to="/dashboard/checkout">
-              <Button className="w-full h-14 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black gap-2 transition-all shadow-xl shadow-gray-200">
-                Proceed to Checkout
-                <ArrowRight size={18} />
-              </Button>
-            </Link>
+            {shopState.open ? (
+              <Link to="/dashboard/checkout">
+                <Button className="w-full h-14 bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black gap-2 transition-all shadow-xl shadow-gray-200">
+                  Proceed to Checkout
+                  <ArrowRight size={18} />
+                </Button>
+              </Link>
+            ) : (
+              <div className="space-y-2">
+                <Button disabled className="w-full h-14 rounded-2xl font-black gap-2">
+                  Shop is closed now
+                </Button>
+                <p className="text-center text-sm font-semibold text-gray-600">
+                  {(shopData as any)?.business?.businessName ?? 'This shop'} is closed now.
+                  {shopState.opensLabel ? ` ${shopState.opensLabel}.` : ''} You can check out then.
+                </p>
+              </div>
+            )}
 
             <CheckoutAd
               businessId={

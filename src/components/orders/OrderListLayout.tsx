@@ -16,9 +16,12 @@ export default function OrderListLayout<T extends string>({
   error,
   empty,
   onChanged,
+  header,
 }: {
   title: string;
   subtitle: string;
+  /** Shown under the title (Shop Orders: order alert settings). */
+  header?: ReactNode;
   tabs: { value: T; label: string }[];
   tabOf: (o: ListOrder) => T;
   orders: ListOrder[] | undefined;
@@ -69,6 +72,7 @@ export default function OrderListLayout<T extends string>({
     <div className="mx-auto max-w-3xl px-4 py-6 lg:py-10">
       <h1 className="text-2xl font-black text-gray-900 sm:text-3xl">{title}</h1>
       <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
+      {header}
 
       <div role="tablist" className="no-scrollbar mt-5 mb-5 flex gap-2 overflow-x-auto">
         {tabs.map((t) => (

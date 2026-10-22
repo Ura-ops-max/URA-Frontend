@@ -157,7 +157,7 @@ const AboutPage = () => {
               {
                 icon: <ShieldCheck className="h-6 w-6 text-blue-500" />,
                 title: 'Trust & Safety',
-                desc: 'Every payment is protected by escrow and every vendor can be verified. Your money and your reputation are safe with us.',
+                desc: 'Every payment can use Buyer-Protected Payment and every vendor can be verified. Your money and your reputation are safe with us.',
               },
               {
                 icon: <Heart className="h-6 w-6 text-rose-500" />,

@@ -36,7 +36,7 @@ const KB: { keywords: string[]; answer: string }[] = [
   {
     keywords: ['escrow', 'protect', 'buyer protection'],
     answer:
-      'Buyer-Protected Payment holds your payment safely until you confirm you received your order as described — protecting both buyers and sellers from fraud.',
+      'Buyer-Protected Payment holds your payment safely until you confirm you received your order as described. It protects both buyers and sellers from fraud.',
   },
   {
     keywords: ['wallet', 'fund', 'balance', 'deposit', 'top up', 'top-up'],
@@ -61,7 +61,7 @@ const KB: { keywords: string[]; answer: string }[] = [
   {
     keywords: ['refund', 'dispute', 'problem', 'not received'],
     answer:
-      'If something goes wrong with a buyer-protected order, you can open a dispute from your Wallet under "Respond to Dispute". Our team helps resolve it fairly.',
+      'If something goes wrong with a Buyer-Protected order, open it in My Orders and tap "Report a problem". The money stays on hold while our team sorts it out.',
   },
   {
     keywords: ['safe', 'secure', 'privacy', 'data'],

@@ -204,7 +204,11 @@ const OrderDetailsPage = () => {
             <WhatsAppButton
               phone={shop?.contact?.phone}
               text={buyerPaidMessage(order.orderNumber, itemsSummary(order.items))}
-              label={`Message ${shopName} about order ${order.orderNumber}`}
+              label={
+                <>
+                  Message {shopName} about order <span className="whitespace-nowrap">{order.orderNumber}</span>
+                </>
+              }
             />
           )}
           {ongoing && role === 'seller' && !isDelivery && !shopDelivers && (

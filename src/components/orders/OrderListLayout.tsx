@@ -74,7 +74,7 @@ export default function OrderListLayout<T extends string>({
       <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
       {header}
 
-      <div role="tablist" className="no-scrollbar mt-5 mb-5 flex gap-2 overflow-x-auto">
+      <div role="tablist" className="no-scrollbar -mx-1 mt-5 mb-5 flex gap-1.5 overflow-x-auto px-1 sm:gap-2">
         {tabs.map((t) => (
           <button
             key={t.value}
@@ -82,7 +82,7 @@ export default function OrderListLayout<T extends string>({
             aria-selected={tab === t.value}
             onClick={() => setParams({ tab: t.value }, { replace: true })}
             className={cn(
-              'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition',
+              'flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-bold transition sm:gap-2 sm:px-4 sm:py-2 sm:text-sm',
               tab === t.value
                 ? 'border-gray-900 bg-gray-900 text-white'
                 : 'border-gray-200 bg-white text-gray-500 hover:border-orange-200 hover:text-orange-600',

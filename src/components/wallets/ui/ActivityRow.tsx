@@ -37,25 +37,26 @@ export function ActivityRow({ row }: { row: WalletActivityRow }) {
       <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', credit ? 'bg-green-50' : 'bg-red-50')}>
         {credit ? <ArrowDownLeft size={16} className="text-green-600" /> : <ArrowUpRight size={16} className="text-red-500" />}
       </div>
+      {/* Phones: amount on the top line, details get the full width below. */}
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-bold text-gray-900">{row.type}</p>
-          <ActivityStatusBadge status={row.status} />
+          <p className={cn('shrink-0 text-sm font-black sm:text-base', credit ? 'text-green-600' : 'text-gray-900')}>
+            {credit ? '+' : '-'}
+            {formatMoney(row.amount, row.currency)}
+          </p>
         </div>
-        <p className="mt-0.5 truncate text-xs text-gray-500">{row.details}</p>
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <ActivityStatusBadge status={row.status} />
+          {row.fee > 0 && <span className="text-[10px] text-gray-400">Fee {formatMoney(row.fee, row.currency)}</span>}
+        </div>
+        <p className="mt-1 line-clamp-2 text-xs text-gray-500">{row.details}</p>
         <p className="mt-0.5 text-[11px] text-gray-400">{when(row.date)}</p>
       </div>
-      <div className="shrink-0 text-right">
-        <p className={cn('text-sm font-black sm:text-base', credit ? 'text-green-600' : 'text-gray-900')}>
-          {credit ? '+' : '-'}
-          {formatMoney(row.amount, row.currency)}
-        </p>
-        {row.fee > 0 && <p className="text-[10px] text-gray-400">Fee {formatMoney(row.fee, row.currency)}</p>}
-      </div>
-      {row.orderId && <ChevronRight size={16} className="shrink-0 text-gray-300" />}
+      {row.orderId && <ChevronRight size={16} className="mt-0.5 shrink-0 text-gray-300 sm:mt-0" />}
     </>
   );
-  const cls = 'flex items-center gap-3 rounded-2xl p-3 sm:gap-4 sm:p-4';
+  const cls = 'flex items-start gap-3 rounded-2xl p-3 sm:items-center sm:gap-4 sm:p-4';
   return row.orderId ? (
     <Link to={`/dashboard/orders/${row.orderId}`} className={cn(cls, 'hover:bg-gray-50 transition-colors')} aria-label={`${row.type}, ${row.details}`}>
       {body}

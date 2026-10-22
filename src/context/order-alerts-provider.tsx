@@ -37,7 +37,7 @@ export function OrderAlertsProvider({ children }: { children: ReactNode }) {
   settingsRef.current = settings;
   useEffect(() => setSettings(readSettings(isSeller)), [isSeller]);
 
-  const [banner, setBanner] = useState<{ orderId: string; text: string } | null>(null);
+  const [banner, setBanner] = useState<{ orderId: string; orderNumber: string; text: string } | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated || !isSeller) return;
@@ -45,7 +45,8 @@ export function OrderAlertsProvider({ children }: { children: ReactNode }) {
     const onPaid = (d: { orderId?: string; orderNumber?: string; buyerFirstName?: string }) => {
       const orderId = String(d?.orderId ?? '');
       if (!firstTimeFor(orderId)) return; // once per order, even if the event repeats
-      setBanner({ orderId, text: bannerText(String(d.orderNumber ?? ''), d.buyerFirstName) });
+      const orderNumber = String(d.orderNumber ?? '');
+      setBanner({ orderId, orderNumber, text: bannerText(orderNumber, d.buyerFirstName) });
       queryClient.invalidateQueries({ queryKey: ['orders', 'shop'] });
       const s = settingsRef.current;
       if (s.enabled && s.sound) void playHorn();
@@ -87,7 +88,14 @@ export function OrderAlertsProvider({ children }: { children: ReactNode }) {
           className="fixed inset-x-0 top-3 z-[60] mx-auto flex w-[calc(100%-2rem)] max-w-md items-center gap-3 rounded-2xl bg-gray-900 px-4 py-3 text-white shadow-2xl"
         >
           <BellRing size={20} className="shrink-0 text-orange-400" />
-          <p className="flex-1 text-sm font-bold">{banner.text}</p>
+          {/* The order number never breaks across lines on a phone. */}
+          <p className="min-w-0 flex-1 text-sm font-bold">
+            {banner.orderNumber
+              ? banner.text.split(banner.orderNumber).flatMap((part, i) =>
+                  i === 0 ? [part] : [<span key={i} className="whitespace-nowrap">{banner.orderNumber}</span>, part],
+                )
+              : banner.text}
+          </p>
           <Link
             to={`/dashboard/orders/${banner.orderId}`}
             onClick={() => setBanner(null)}

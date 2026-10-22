@@ -39,12 +39,16 @@ function Section({ title, rows }: { title: string; rows: HeldOrder[] }) {
         {rows.map((o) => {
           const release = toDate(o.autoReleaseAt);
           return (
-            <Link key={o.orderId} to={`/dashboard/orders/${o.orderId}`} className="flex items-center gap-3 p-4 hover:bg-gray-50">
+            <Link key={o.orderId} to={`/dashboard/orders/${o.orderId}`} className="flex items-start gap-3 p-4 hover:bg-gray-50 sm:items-center">
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-gray-900">
-                  {o.role === 'seller' ? `From ${o.name}` : `To ${o.name}`} · {o.orderNumber}
-                </p>
-                <p className="text-xs text-gray-500">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="min-w-0 truncate text-sm font-bold text-gray-900">
+                    {o.role === 'seller' ? `From ${o.name}` : `To ${o.name}`}
+                  </p>
+                  <p className="shrink-0 text-sm font-black text-gray-900">{formatMoney(o.amount)}</p>
+                </div>
+                <p className="text-xs font-semibold text-gray-400">{o.orderNumber}</p>
+                <p className="mt-0.5 text-xs text-gray-500">
                   {o.problem
                     ? 'A problem was reported. Payment is on hold.'
                     : release
@@ -52,8 +56,7 @@ function Section({ title, rows }: { title: string; rows: HeldOrder[] }) {
                       : 'Waiting for the buyer to confirm delivery'}
                 </p>
               </div>
-              <p className="shrink-0 text-sm font-black text-gray-900">{formatMoney(o.amount)}</p>
-              <ChevronRight size={16} className="shrink-0 text-gray-300" />
+              <ChevronRight size={16} className="mt-0.5 shrink-0 text-gray-300 sm:mt-0" />
             </Link>
           );
         })}

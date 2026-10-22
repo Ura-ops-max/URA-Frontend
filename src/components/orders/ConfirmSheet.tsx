@@ -1,5 +1,6 @@
 // A yes/no question: a bottom sheet on phones, a centred card on larger screens.
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -27,16 +28,17 @@ export default function ConfirmSheet({
   onConfirm: () => void;
   onClose: () => void;
 }) {
-  return (
+  // Rendered at the end of <body>, above the phone bottom nav.
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4"
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-black/40 sm:items-center sm:p-4"
       onClick={() => !busy && onClose()}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="w-full max-w-sm rounded-t-3xl bg-white p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] text-center sm:rounded-3xl sm:pb-6"
+        className="max-h-[92dvh] w-full max-w-sm overflow-y-auto rounded-t-3xl bg-white p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] text-center sm:rounded-3xl sm:pb-6"
         onClick={(e) => e.stopPropagation()}
       >
         {icon && <div className="mx-auto flex justify-center">{icon}</div>}
@@ -61,6 +63,7 @@ export default function ConfirmSheet({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -1,6 +1,6 @@
-
 // Buyer reports a problem (Buyer-Protected); the seller responds once one is open.
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -35,8 +35,9 @@ export default function ProblemDialog({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4" onClick={onClose}>
+  // Rendered at the end of <body>, above the phone bottom nav.
+  return createPortal(
+    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/40 sm:items-center sm:p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -83,6 +84,7 @@ export default function ProblemDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

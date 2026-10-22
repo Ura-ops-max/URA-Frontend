@@ -11,11 +11,13 @@ import { useAuthContext } from '@/context/auth-provider';
 import { useIsDesktop } from '@/hooks/use-is-desktop';
 import { useChat } from '@/hooks/use-chat';
 import { cn } from '@/lib/utils';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { notificationLink } from '@/lib/notification-link';
 
 const NotificationsPage = () => {
   const { user, related } = useAuthContext();
   const isDesktop = useIsDesktop();
+  const navigate = useNavigate();
   const { notifications, markAllAsRead, clearAll, markAsRead, deleteNotification } =
     useNotificationContext();
 
@@ -203,8 +205,13 @@ const NotificationsPage = () => {
 
                     <div
                       onClick={() => {
-                        if (isSelectionMode) toggleSelect(notif._id);
-                        else if (!notif.isRead) markAsRead(notif._id);
+                        if (isSelectionMode) return toggleSelect(notif._id);
+                        if (!notif.isRead) markAsRead(notif._id);
+                        // Order notices ("Tap here if there is a problem") open the order.
+                        if (notif.modelType === 'Order') {
+                          const to = notificationLink(notif);
+                          if (to) navigate(to);
+                        }
                       }}
                       className={cn(
                         'flex-1 relative p-4 md:p-5 bg-white rounded-[24px] border transition-all duration-300 cursor-pointer overflow-hidden',

@@ -14,6 +14,7 @@ import {
   saveSettings,
   type AlertSettings,
 } from '@/lib/order-alerts';
+import { enablePush } from '@/lib/web-push';
 
 interface OrderAlertsContextValue {
   settings: AlertSettings;
@@ -65,10 +66,14 @@ export function OrderAlertsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const turnOn = useCallback(async () => {
+    // Ask for push in the same tap (browsers only allow it from a tap).
+    // Best effort: the horn and banner work without it.
+    const push = isSeller ? enablePush() : Promise.resolve('not-supported');
     const played = await playHorn();
     update({ enabled: true, sound: true });
+    await push;
     return played;
-  }, [update]);
+  }, [update, isSeller]);
 
   const setSound = useCallback((on: boolean) => update({ ...settingsRef.current, sound: on }), [update]);
 

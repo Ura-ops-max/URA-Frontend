@@ -1,5 +1,5 @@
-// Alerts for new notifications: one short car horn (Web Audio), the "Turn on
-// alerts" unlock, the horn setting, and the unread count in the tab title.
+// Alerts for new notifications: a pop-up, one short car horn (Web Audio), the
+// "Turn on alerts" unlock, the horn setting, and the unread count in the tab title.
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { socketService } from '@/services/socket.service';
@@ -17,6 +17,8 @@ import {
   type HornMode,
 } from '@/lib/horn';
 import { enablePush } from '@/lib/web-push';
+import { addPopup, popupFromNotification, removePopup, type Popup } from '@/lib/popups';
+import PopupStack from '@/components/alerts/PopupStack';
 
 interface AlertsContextValue {
   prefs: AlertPrefs;
@@ -54,6 +56,8 @@ export function AlertsProvider({ children }: { children: ReactNode }) {
   locationRef.current = location;
   const gate = useRef(createHornGate());
   const lastActionAt = useRef(0);
+  const [popups, setPopups] = useState<Popup[]>([]);
+  const closePopup = useCallback((id: string) => setPopups((list) => removePopup(list, id)), []);
 
   // Remember when the person last tapped or typed.
   useEffect(() => {
@@ -71,6 +75,8 @@ export function AlertsProvider({ children }: { children: ReactNode }) {
     if (!isAuthenticated) return;
     socketService.connect();
     const onNotification = (n: any) => {
+      // The pop-up always shows, even when sound is off or blocked.
+      setPopups((list) => addPopup(list, popupFromNotification(n)));
       const p = prefsRef.current;
       if (!p.unlocked || !hornAllowed(n, p.mode)) return;
       // They just caused this, on the page that shows it: no horn.
@@ -111,7 +117,12 @@ export function AlertsProvider({ children }: { children: ReactNode }) {
 
   const setMode = useCallback((mode: HornMode) => update({ ...prefsRef.current, mode }), [update]);
 
-  return <AlertsContext.Provider value={{ prefs, turnOn, setMode }}>{children}</AlertsContext.Provider>;
+  return (
+    <AlertsContext.Provider value={{ prefs, turnOn, setMode }}>
+      {children}
+      <PopupStack popups={popups} onClose={closePopup} />
+    </AlertsContext.Provider>
+  );
 }
 
 export function useAlerts(): AlertsContextValue {

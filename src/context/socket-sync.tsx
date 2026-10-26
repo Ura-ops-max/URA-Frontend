@@ -17,9 +17,7 @@ export const SocketSync = () => {
       socketService.setup(profileId.toString());
 
       // 3. Listen for Live Notifications
-      socketService.on('notification_received', (data) => {
-        toast.info(data.message || 'You have a new notification');
-      });
+      // New notifications show as pop-ups (AlertsProvider).
 
       // 4. Listen for Real-time Messages
       socketService.on('message:received', (newMessage) => {

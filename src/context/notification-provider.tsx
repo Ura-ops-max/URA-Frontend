@@ -10,6 +10,8 @@ interface Notification {
   type: string;
   isRead: boolean;
   relatedId?: string | { _id?: string; orderNumber?: string };
+  /** One line for the pop-up, e.g. "Amaka O. just paid for ...". */
+  summary?: string;
   /** What relatedId points at, e.g. 'Order'. */
   modelType?: string;
   createdAt: string;

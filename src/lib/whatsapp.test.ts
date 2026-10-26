@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buyerOrderMessage,
   buyerPaidMessage,
   sellerBringingMessage,
   sellerReadyMessage,
@@ -40,5 +41,41 @@ describe('messages', () => {
     expect(sellerReadyMessage('Amaka', 'UR-1042', 'Mama Put')).toBe('Hi Amaka, your order UR-1042 from Mama Put is ready for pickup.');
     expect(sellerBringingMessage('Amaka', 'UR-1042', 'Mama Put')).toBe("Hi Amaka, I'm bringing your order UR-1042 from Mama Put to you now.");
     expect(sellerReadyMessage('', 'UR-1042', 'Mama Put')).toBe('Hi, your order UR-1042 from Mama Put is ready for pickup.');
+  });
+});
+
+describe('buyerOrderMessage', () => {
+  const base = {
+    shopName: 'Mama Put',
+    orderNumber: 'UR-1042',
+    items: [
+      { name: 'Chicken shawarma', quantity: 2 },
+      { name: 'Fanta', quantity: 1 },
+    ],
+    totalText: '₦12,000',
+    includeItems: true,
+  };
+  it('paid, pickup', () => {
+    expect(buyerOrderMessage({ ...base, paid: true, deliveryMethod: 'pickup' })).toBe(
+      'Hi Mama Put, I just paid for order UR-1042: 2x Chicken shawarma, 1x Fanta. Total ₦12,000. I will pick it up.',
+    );
+  });
+  it('paid, delivery with the address', () => {
+    expect(buyerOrderMessage({ ...base, paid: true, deliveryMethod: 'delivery', address: '12 Admiralty Way, Lekki' })).toBe(
+      'Hi Mama Put, I just paid for order UR-1042: 2x Chicken shawarma, 1x Fanta. Total ₦12,000. My address is 12 Admiralty Way, Lekki.',
+    );
+  });
+  it('failed or cancelled', () => {
+    expect(buyerOrderMessage({ ...base, paid: false })).toBe(
+      'Hi Mama Put, I tried to pay for order UR-1042: 2x Chicken shawarma, 1x Fanta. Total ₦12,000. My payment did not go through. Can you help?',
+    );
+  });
+  it('"Include what I ordered" off: only the order number and the total', () => {
+    expect(buyerOrderMessage({ ...base, includeItems: false, paid: true, deliveryMethod: 'delivery', address: '12 Admiralty Way' })).toBe(
+      'Hi Mama Put, I just paid for order UR-1042. Total ₦12,000.',
+    );
+    expect(buyerOrderMessage({ ...base, includeItems: false, paid: false })).toBe(
+      'Hi Mama Put, I tried to pay for order UR-1042. Total ₦12,000. My payment did not go through. Can you help?',
+    );
   });
 });

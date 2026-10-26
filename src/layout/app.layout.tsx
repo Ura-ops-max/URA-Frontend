@@ -12,7 +12,8 @@ import MobileBottomNav from '@/components/nav/MobileBottomNav';
 import VerificationBanner from '@/components/nav/VerificationBanner';
 import { CartProvider } from '@/context/cart-provider';
 import { NotificationProvider } from '@/context/notification-provider';
-import { OrderAlertsProvider } from '@/context/order-alerts-provider';
+import { AlertsProvider } from '@/context/alerts-provider';
+import AlertsUnlockBanner from '@/components/alerts/AlertsUnlockBanner';
 import { SocketSync } from '@/context/socket-sync';
 import { ChatProvider } from '@/context/chat-provider';
 import PaylukOnboardingModal from '@/components/shared/PaylukOnboardingModal';
@@ -32,7 +33,7 @@ const AppLayoutContent = () => {
     <>
       <SocketSync />
       <NotificationProvider>
-        <OrderAlertsProvider>
+        <AlertsProvider>
         <ChatProvider>
           <CartProvider>
             <SidebarProvider>
@@ -50,6 +51,7 @@ const AppLayoutContent = () => {
 
                   <main className="flex-1 pb-24 lg:pb-10">
                     <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 mt-6">
+                      <AlertsUnlockBanner />
                       <PageErrorBoundary resetKey={pathname}>
                         <Suspense fallback={<PageLoader />}>
                           <Outlet />
@@ -66,7 +68,7 @@ const AppLayoutContent = () => {
             </SidebarProvider>
           </CartProvider>
         </ChatProvider>
-        </OrderAlertsProvider>
+        </AlertsProvider>
       </NotificationProvider>
 
       {/* Payluk onboarding — shown until profile is created or dismissed */}

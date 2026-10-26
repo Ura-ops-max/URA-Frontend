@@ -1,8 +1,0 @@
-order-horn.wav
-
-Made for URA from scratch: synthesised in code (two sine-based tones with
-harmonics, about 1 second, two short honks). No recordings or samples from
-anyone else were used.
-
-Licence: CC0 1.0 Universal (public domain dedication).
-https://creativecommons.org/publicdomain/zero/1.0/

@@ -127,17 +127,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   useEffect(() => {
+    const onNew = (newNotif: Notification) => {
+      setNotifications((prev) => [newNotif, ...prev]);
+      setUnreadCount((prev) => prev + 1);
+    };
     if (isAuthenticated && user) {
       fetchNotifications();
 
-      socketService.on('notification_received', (newNotif) => {
-        setNotifications((prev) => [newNotif, ...prev]);
-        setUnreadCount((prev) => prev + 1);
-      });
+      socketService.on('notification_received', onNew);
     }
 
+    // Remove only this listener: others (alerts, pop-ups) listen too.
     return () => {
-      socketService.off('notification_received');
+      socketService.off('notification_received', onNew);
     };
   }, [isAuthenticated, user, fetchNotifications]);
 

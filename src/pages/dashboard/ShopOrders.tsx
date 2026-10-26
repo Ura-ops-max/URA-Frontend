@@ -4,7 +4,6 @@ import { useAuthContext } from '@/context/auth-provider';
 import { useShopOrders } from '@/hooks/api/use-orders';
 import { SELLER_TABS, sellerTab } from '@/lib/order-lists';
 import OrderListLayout from '@/components/orders/OrderListLayout';
-import OrderAlertsPanel from '@/components/orders/OrderAlertsPanel';
 
 export default function ShopOrdersPage() {
   const { user } = useAuthContext();
@@ -17,7 +16,6 @@ export default function ShopOrdersPage() {
     <OrderListLayout
       title="Shop Orders"
       subtitle="Paid orders from your customers."
-      header={<OrderAlertsPanel />}
       tabs={SELLER_TABS}
       tabOf={sellerTab}
       orders={data}

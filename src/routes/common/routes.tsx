@@ -38,6 +38,7 @@ const ActivityLog = lazyNamed(
   () => import('@/components/settings/pages/ActivityLog'),
   'ActivityLog',
 );
+const AlertSettings = lazy(() => import('@/components/settings/pages/AlertSettings'));
 const SettingsHome = lazyNamed(
   () => import('@/components/settings/pages/SettingsHome'),
   'SettingsHome',
@@ -90,6 +91,7 @@ export const protectedRoutePaths = [
       { path: 'profile', element: <ProfileSettings /> },
       { path: 'activities', element: <ActivityLog activities={[]} /> },
       { path: 'security', element: <PasswordSecurity /> },
+      { path: 'alerts', element: <AlertSettings /> },
     ],
   },
   {

@@ -109,7 +109,7 @@ const WriteReviewForm: React.FC<WriteReviewFormProps> = ({
             </p>
           </div>
         </div>
-        <button
+        <button aria-label="Close" title="Close"
           type="button"
           onClick={onClose}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"

@@ -38,7 +38,7 @@ export const BookmarkBusinessCard = ({ biz }: { biz: any }) => {
       </div>
 
       <div className="flex items-center gap-2">
-        <button
+        <button aria-label="Remove from saved" title="Remove from saved"
           onClick={(e) => {
             e.preventDefault();
             toggleBookmark(); // ✅ No arguments needed here, hook already has them
@@ -48,8 +48,8 @@ export const BookmarkBusinessCard = ({ biz }: { biz: any }) => {
           <Bookmark size={20} fill="currentColor" />
         </button>
 
-        <Link to={`/dashboard/profile/business/${biz._id}`}>
-          <Button variant="ghost" className="rounded-xl h-11 w-11 p-0 text-gray-400">
+        <Link aria-label="Open shop" title="Open shop" to={`/dashboard/profile/business/${biz._id}`}>
+          <Button aria-label="Open shop" title="Open shop" variant="ghost" className="rounded-xl h-11 w-11 p-0 text-gray-400">
             <ExternalLink size={18} />
           </Button>
         </Link>

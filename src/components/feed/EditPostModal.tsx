@@ -137,7 +137,7 @@ export function EditPostModal({
                   className="relative w-20 h-20 rounded-lg overflow-hidden border group"
                 >
                   <img src={url} className="w-full h-full object-cover" alt="" />
-                  <button
+                  <button aria-label="Remove photo" title="Remove photo"
                     type="button"
                     onClick={() => removeExistingMedia(idx)}
                     className="absolute top-1 right-1 bg-black/60 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -155,7 +155,7 @@ export function EditPostModal({
                     className="relative w-20 h-20 rounded-lg overflow-hidden border group"
                   >
                     <img src={previewUrl} className="w-full h-full object-cover" alt="preview" />
-                    <button
+                    <button aria-label="Remove photo" title="Remove photo"
                       type="button"
                       onClick={() => removeNewMedia(idx)}
                       className="absolute top-1 right-1 bg-black/60 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"

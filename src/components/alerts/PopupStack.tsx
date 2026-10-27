@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Bell, ShoppingBag, X } from 'lucide-react';
 import { POPUP_MS, type Popup } from '@/lib/popups';
+import { IconButton } from '@/components/ui/icon-button';
 
 function PopupCard({ popup, onClose }: { popup: Popup; onClose: (id: string) => void }) {
   const navigate = useNavigate();
@@ -27,15 +28,9 @@ function PopupCard({ popup, onClose }: { popup: Popup; onClose: (id: string) => 
         <Icon size={20} className="shrink-0 text-orange-400" aria-hidden />
         <span className="line-clamp-2 text-[13px] font-bold leading-snug sm:text-sm">{popup.text}</span>
       </button>
-      <button
-        type="button"
-        onClick={() => onClose(popup.id)}
-        aria-label="Close notification"
-        title="Close notification"
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-gray-400 hover:text-white"
-      >
+      <IconButton label="Close notification" onClick={() => onClose(popup.id)} className="text-gray-400 hover:text-white">
         <X size={18} aria-hidden />
-      </button>
+      </IconButton>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useOutletContext, Link } from 'react-router-dom';
-import { ChevronLeft, Send, Plus, Smile, Check, CheckCheck, Clock, X } from 'lucide-react';
+import { ChevronLeft, Send, Paperclip, Smile, Check, CheckCheck, Clock, X } from 'lucide-react';
 import { chatAPI } from '@/lib/chat-api';
 import { socketService } from '@/services/socket.service';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -233,7 +233,7 @@ const MessageWindow = () => {
     <div className="flex flex-col h-full bg-white dark:bg-slate-950">
       <header className="flex items-center justify-between p-4 border-b dark:border-slate-800 bg-white dark:bg-slate-900 z-10">
         <div className="flex items-center gap-3">
-          <button
+          <button aria-label="Back to chats" title="Back to chats"
             onClick={() => navigate('/dashboard/chat')}
             className="md:hidden p-2 text-slate-500"
           >
@@ -361,7 +361,7 @@ const MessageWindow = () => {
                   alt="preview"
                 />
               )}
-              <button
+              <button aria-label="Remove file" title="Remove file"
                 onClick={() => setPendingFile(null)}
                 className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5"
               >
@@ -403,12 +403,12 @@ const MessageWindow = () => {
           className="flex items-center gap-2 md:gap-3 max-w-6xl mx-auto w-full"
         >
           {/* PLUS BUTTON */}
-          <button
+          <button aria-label="Attach a file" title="Attach a file"
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="p-2 text-[#4A3F35] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors shrink-0"
           >
-            <Plus className="w-5 h-5 md:w-6 md:h-6" />
+            <Paperclip className="w-5 h-5 md:w-6 md:h-6" />
           </button>
 
           {/* INPUT WRAPPER */}
@@ -421,7 +421,7 @@ const MessageWindow = () => {
               className="flex-1 py-2.5 md:py-3 bg-transparent border-none text-base outline-none text-[#4A3F35] dark:text-white min-w-0"
             />
 
-            <button
+            <button aria-label="Emoji" title="Emoji"
               type="button"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               className={`p-1.5 md:p-2 shrink-0 transition-colors ${showEmojiPicker ? 'text-[#FF6B35]' : 'text-[#4A3F35] dark:text-gray-400'}`}
@@ -431,7 +431,7 @@ const MessageWindow = () => {
           </div>
 
           {/* SEND BUTTON */}
-          <button
+          <button aria-label="Send message" title="Send message"
             type="submit"
             disabled={!inputText.trim() && !pendingFile}
             className="p-2.5 md:p-3 bg-[#FF6B35] text-white rounded-xl md:rounded-2xl hover:bg-[#E85A24] disabled:opacity-50 transition-all shadow-md shrink-0 flex items-center justify-center"

@@ -39,7 +39,7 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile, isBusinessPage }) 
                 <p className="text-sm font-bold text-gray-900">{business.businessName}</p>
               </div>
             </div>
-            <Link to={`/dashboard/profile/business/${business._id}`}>
+            <Link aria-label="Open shop" title="Open shop" to={`/dashboard/profile/business/${business._id}`}>
               <ChevronRight
                 size={18}
                 className="text-orange-400 group-hover:translate-x-1 transition-transform"

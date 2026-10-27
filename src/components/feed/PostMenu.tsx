@@ -25,11 +25,11 @@ interface PostMenuProps {
 export const PostMenu = ({ actions, triggerClassName }: PostMenuProps) => {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger aria-label="More options" title="More options" asChild>
         {/* <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors">
             <MoreHorizontal size={20} />
           </button> */}
-        <button
+        <button aria-label="More options" title="More options"
           className={cn(
             'text-gray-400 p-1.5 hover:bg-gray-100 rounded-full transition-colors',
             triggerClassName,

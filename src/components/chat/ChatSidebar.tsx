@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Edit3, Search, User, Briefcase, MessageSquare, UserIcon } from 'lucide-react';
+import { MessageCirclePlus, Search, User, Briefcase, MessageSquare, UserIcon } from 'lucide-react';
 import { socketService } from '@/services/socket.service';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuthContext } from '@/context/auth-provider';
@@ -34,11 +34,11 @@ const ChatSidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, chatData
       <div className="p-6 pb-2 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Chats</h1>
-          <button
+          <button aria-label="New message" title="New message"
             onClick={() => navigate('/dashboard/chat/new')}
             className="p-2 bg-white text-[#FF6B35] rounded-full shadow-sm hover:scale-105 transition-all border border-gray-100"
           >
-            <Edit3 size={18} />
+            <MessageCirclePlus size={18} />
           </button>
         </div>
 

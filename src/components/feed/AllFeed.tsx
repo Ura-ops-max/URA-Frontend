@@ -166,7 +166,7 @@ export default function AllFeed({ userId, onRequireAuth, onCreatePostClick }: Al
         </div>
 
         {/* Floating Scroll Top */}
-        <button
+        <button aria-label="Back to top" title="Back to top"
           onClick={scrollToTop}
           className={cn(
             'fixed bottom-24 right-6 p-3 bg-orange-600 text-white rounded-full shadow-2xl transition-all duration-300 transform z-50 hover:scale-110 active:scale-95',

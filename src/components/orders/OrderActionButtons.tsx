@@ -10,7 +10,7 @@ import {
   Loader2,
   PackageCheck,
   RotateCcw,
-  Store,
+  PackageOpen,
   Truck,
   XCircle,
 } from 'lucide-react';
@@ -153,7 +153,7 @@ export default function OrderActionButtons({
             {busy ? spin : isDelivery ? (
               <><Truck size={16} className="mr-1" /> Book a rider</>
             ) : (
-              <><Store size={16} className="mr-1" /> Ready for pickup</>
+              <><PackageOpen size={16} className="mr-1" /> Ready for pickup</>
             )}
           </Button>
         )}

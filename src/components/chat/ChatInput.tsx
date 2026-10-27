@@ -60,7 +60,7 @@ export const ChatInput = ({ onSendMessage, onSendMedia, onTyping }: ChatInputPro
         {/* Note: text-[16px] prevents iOS from auto-zooming on focus */}
 
         {/* 4. shrink-0 ensures the button never loses its shape or width */}
-        <Button
+        <Button aria-label="Send message" title="Send message"
           onClick={handleSend}
           disabled={!text.trim() && !isUploading}
           className={cn(

@@ -156,7 +156,7 @@ export const EditItemModal = ({ open, onClose, item }: EditItemModalProps) => {
               <h2 className="text-xl font-black text-gray-900">
                 Edit {isProduct ? 'Product' : 'Post'}
               </h2>
-              <button
+              <button aria-label="Close" title="Close"
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
@@ -251,7 +251,7 @@ export const EditItemModal = ({ open, onClose, item }: EditItemModalProps) => {
                       className="relative w-20 h-20 rounded-lg overflow-hidden border group"
                     >
                       <img src={url} className="w-full h-full object-cover" alt="" />
-                      <button
+                      <button aria-label="Remove photo" title="Remove photo"
                         type="button"
                         onClick={() => removeExistingMedia(idx)}
                         className="absolute top-1 right-1 bg-black/60 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -273,7 +273,7 @@ export const EditItemModal = ({ open, onClose, item }: EditItemModalProps) => {
                           className="w-full h-full object-cover"
                           alt="preview"
                         />
-                        <button
+                        <button aria-label="Remove photo" title="Remove photo"
                           type="button"
                           onClick={() => removeNewMedia(idx)}
                           className="absolute top-1 right-1 bg-black/60 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"

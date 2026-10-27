@@ -71,7 +71,7 @@ const WalletPage = () => {
         {/* Mobile Header: Back button and Title */}
         {!isMenuRoot && (
           <div className="md:hidden p-4 flex items-center border-b sticky top-0 bg-white z-10">
-            <Button
+            <Button aria-label="Back to wallet" title="Back to wallet"
               variant="ghost"
               size="icon"
               onClick={() => navigate('/dashboard/wallet')}

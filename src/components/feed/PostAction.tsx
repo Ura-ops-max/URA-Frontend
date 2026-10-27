@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, MessageCircle, Share2, Bookmark } from 'lucide-react';
+import { Heart, MessageSquareText, Share2, Bookmark } from 'lucide-react';
 import { CommentDrawer } from './CommentDrawer';
 import { useToggleLike, useToggleBookmark } from '@/hooks/api/use-feed';
 import { motion } from 'framer-motion';
@@ -166,7 +166,7 @@ export const PostActions = ({
             className="flex items-center lg:gap-2 group outline-none"
           >
             <div className="p-2 rounded-full group-hover:bg-blue-50 transition-colors">
-              <MessageCircle className="w-6 h-6 text-gray-600 group-hover:text-blue-500 transition-colors" />
+              <MessageSquareText className="w-6 h-6 text-gray-600 group-hover:text-blue-500 transition-colors" />
             </div>
             <span className="text-xs font-bold text-gray-600 group-hover:text-gray-900">
               {initialComments}
@@ -174,7 +174,7 @@ export const PostActions = ({
           </button>
 
           {/* Share Button with Hover Effect */}
-          <button onClick={handleShare} className="group outline-none">
+          <button aria-label="Share" title="Share" onClick={handleShare} className="group outline-none">
             <div className="p-2 rounded-full group-hover:bg-orange-50 transition-colors">
               <Share2 className="w-6 h-6 text-gray-600 group-hover:text-orange-500 transition-colors" />
             </div>
@@ -182,7 +182,7 @@ export const PostActions = ({
         </div>
 
         {/* Bookmark Button with Hover Effect */}
-        <button onClick={handleBookmark} className="group outline-none">
+        <button aria-label="Save for later" title="Save for later" onClick={handleBookmark} className="group outline-none">
           <motion.div
             className={cn(
               'p-2 rounded-full transition-colors',

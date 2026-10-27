@@ -5,6 +5,7 @@ import { BellRing, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAlerts } from '@/context/alerts-provider';
 import { needsHomeScreenHint } from '@/lib/horn';
+import { IconButton } from '@/components/ui/icon-button';
 
 export default function AlertsUnlockBanner() {
   const { prefs, turnOn } = useAlerts();
@@ -41,15 +42,9 @@ export default function AlertsUnlockBanner() {
         >
           Turn on alerts
         </button>
-        <button
-          type="button"
-          onClick={() => setHidden(true)}
-          aria-label="Not now"
-          title="Not now"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-gray-500 hover:bg-orange-100"
-        >
+        <IconButton label="Not now" onClick={() => setHidden(true)} className="text-gray-500 hover:bg-orange-100">
           <X size={18} aria-hidden />
-        </button>
+        </IconButton>
       </div>
     </div>
   );

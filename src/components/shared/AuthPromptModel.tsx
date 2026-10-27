@@ -42,7 +42,7 @@ export const AuthPromptModal = ({
           className="relative w-full max-w-sm bg-white rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
         >
           {/* Close Button */}
-          <button
+          <button aria-label="Close" title="Close"
             onClick={onClose}
             className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-colors"
           >

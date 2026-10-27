@@ -275,7 +275,7 @@ export const CommentDrawer = ({ postId, user_image, isOpen, onClose }: any) => {
                     @{replyingTo.author.businessName || replyingTo.author.firstName}
                   </span>
                 </p>
-                <button onClick={() => setReplyingTo(null)}>
+                <button aria-label="Cancel reply" title="Cancel reply" onClick={() => setReplyingTo(null)}>
                   <X size={14} className="text-orange-700" />
                 </button>
               </div>
@@ -302,7 +302,7 @@ export const CommentDrawer = ({ postId, user_image, isOpen, onClose }: any) => {
               />
 
               <div className="flex items-center gap-1 sm:gap-2 border-l pl-2 sm:pl-3 shrink-0">
-                <button type="button" className="p-1">
+                <button aria-label="Emoji" title="Emoji" type="button" className="p-1">
                   <Smile size={18} className="text-gray-400" />
                 </button>
                 <button

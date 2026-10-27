@@ -62,7 +62,7 @@ const NewChatSelector = () => {
       {/* HEADER */}
       <header className="p-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <button
+          <button aria-label="Close" title="Close"
             onClick={() => navigate('/dashboard/chat')}
             className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full"
           >

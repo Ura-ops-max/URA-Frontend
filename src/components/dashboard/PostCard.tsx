@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bookmark, Heart, MessageCircle, Share2, Star } from 'lucide-react';
+import { Bookmark, Heart, MessageSquareText, Share2, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useAuth from '@/hooks/api/use-auth';
 
@@ -135,22 +135,22 @@ export default function PostCard({ post, onRequireAuth }: PostCardProps) {
       {/* ACTIONS */}
       <div className="flex items-center justify-between px-4 py-4 mt-2 border-t">
         <div className="flex items-center gap-5">
-          <button onClick={toggleLike} className="flex items-center gap-1">
+          <button aria-label="Like" title="Like" onClick={toggleLike} className="flex items-center gap-1">
             <Heart
               className={`w-5 h-5 ${liked ? 'fill-red-500 stroke-red-500' : 'stroke-gray-600'}`}
             />
           </button>
 
-          <button onClick={requireAuth}>
-            <MessageCircle className="w-5 h-5 stroke-gray-600" />
+          <button aria-label="Comments" title="Comments" onClick={requireAuth}>
+            <MessageSquareText className="w-5 h-5 stroke-gray-600" />
           </button>
 
-          <button onClick={requireAuth}>
+          <button aria-label="Share" title="Share" onClick={requireAuth}>
             <Share2 className="w-5 h-5 stroke-gray-600" />
           </button>
         </div>
 
-        <button onClick={requireAuth}>
+        <button aria-label="Save for later" title="Save for later" onClick={requireAuth}>
           <Bookmark className="w-5 h-5 stroke-gray-600" />
         </button>
       </div>

@@ -133,7 +133,7 @@ const ProductDetailsPage = () => {
     <div className="min-h-screen bg-white pb-20">
       {/* 1. TOP NAVIGATION */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-gray-50">
-        <button
+        <button aria-label="Back" title="Back"
           onClick={() => navigate(-1)}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
@@ -159,7 +159,7 @@ const ProductDetailsPage = () => {
               </button>
             </>
           )}
-          <button
+          <button aria-label="Like" title="Like"
             onClick={handleLikeClick}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >

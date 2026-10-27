@@ -24,7 +24,7 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+    <div className="relative w-full lg:absolute lg:right-0 lg:mt-2 lg:w-96 bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
       <div className="p-4 border-b dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
         <h3 className="font-bold text-slate-800 dark:text-white">Notifications</h3>
         {unreadCount > 0 && (

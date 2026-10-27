@@ -11,7 +11,8 @@ import {
   ShoppingCart,
   ShoppingBag,
   Store,
-  PlusCircle,
+  PackagePlus,
+  Plus,
   Wallet,
   Boxes,
 } from 'lucide-react';
@@ -41,7 +42,8 @@ const MenuPage = () => {
           path: '/dashboard/notifications',
           badge: unreadCount,
         },
-        { title: 'Bookmarks', icon: Bookmark, path: '/dashboard/bookmarks' },
+        { title: 'New post', icon: Plus, path: '/dashboard/post/create?type=post' },
+        { title: 'Saved', icon: Bookmark, path: '/dashboard/bookmarks' },
         { title: 'Wallet & Payments', icon: Wallet, path: '/dashboard/wallet' },
       ],
     },
@@ -63,7 +65,7 @@ const MenuPage = () => {
   } = {
     label: 'Business Tools',
     items: [
-      { title: 'List a Product', icon: PlusCircle, path: '/dashboard/post/create?type=product' },
+      { title: 'List a Product', icon: PackagePlus, path: '/dashboard/post/create?type=product' },
       { title: 'Inventory', icon: Boxes, path: '/dashboard/inventory' },
       { title: 'Shop Orders', icon: Store, path: '/dashboard/shop-orders' },
       // { title: 'Business Loan', icon: BadgePercent, path: '/dashboard/loans' },

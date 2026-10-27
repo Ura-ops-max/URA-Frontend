@@ -23,7 +23,7 @@ export const SearchInputOverlay: React.FC<Props> = ({
   return (
     <div className="w-full h-full bg-white p-4 lg:rounded-xl">
       <div className="flex items-center space-x-2 mb-6">
-        <button onClick={onBack}>
+        <button aria-label="Back" title="Back" onClick={onBack}>
           <ArrowLeft className="w-6 h-6" />
         </button>
         <div className="flex-grow relative">
@@ -60,7 +60,7 @@ export const SearchInputOverlay: React.FC<Props> = ({
               <History className="w-4 h-4 text-gray-400" />
               <span>{item.query}</span>
             </button>
-            <button
+            <button aria-label="Remove from history" title="Remove from history"
               onClick={() => onDeleteHistory(item._id)}
               className="p-1 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500"
             >

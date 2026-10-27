@@ -90,7 +90,7 @@ const CartPage = () => {
                   <h3 className="font-bold text-gray-900 text-sm md:text-base truncate pr-6">
                     {item.product.name}
                   </h3>
-                  <button
+                  <button aria-label="Remove from cart" title="Remove from cart"
                     onClick={() => removeItem(item.product._id)}
                     className="text-gray-400 hover:text-red-500 transition-colors"
                   >
@@ -107,7 +107,7 @@ const CartPage = () => {
                 <div className="mt-auto flex items-center justify-between">
                   {/* Quantity Controller */}
                   <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden h-10 bg-white">
-                    <button
+                    <button aria-label="Remove one" title="Remove one"
                       onClick={() => updateQty(item.product._id, item.quantity - 1)}
                       className="px-3 h-full hover:bg-orange-50 hover:text-orange-600 text-gray-600 transition-colors"
                     >
@@ -116,7 +116,7 @@ const CartPage = () => {
                     <span className="w-10 text-center text-sm font-black text-gray-900">
                       {item.quantity}
                     </span>
-                    <button
+                    <button aria-label="Add one" title="Add one"
                       onClick={() => updateQty(item.product._id, item.quantity + 1)}
                       className="px-3 h-full hover:bg-orange-50 hover:text-orange-600 text-gray-600 transition-colors"
                     >

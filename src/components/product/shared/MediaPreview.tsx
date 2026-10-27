@@ -25,7 +25,7 @@ export const MediaPreview = ({
           ) : (
             <img src={file.preview} alt="preview" className="w-full h-full object-cover" />
           )}
-          <button
+          <button aria-label="Remove photo" title="Remove photo"
             type="button"
             onClick={() => onRemove(index)}
             className="absolute top-1 right-1 p-1 bg-white/90 text-red-500 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"

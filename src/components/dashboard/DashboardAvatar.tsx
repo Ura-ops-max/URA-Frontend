@@ -38,7 +38,11 @@ export const DashboardAvatar = () => {
       <DropdownMenu>
         {/* Removed <Link>. The Trigger handles the click now. */}
         <DropdownMenuTrigger asChild>
-          <button className="outline-none block rounded-full hover:ring-2 hover:ring-orange-100 transition-all">
+          <button
+            aria-label="My account"
+            title="My account"
+            className="flex h-11 w-11 items-center justify-center rounded-full outline-none transition-all hover:ring-2 hover:ring-orange-100"
+          >
             <Avatar className="h-9 w-9 border border-gray-200">
               <AvatarImage
                 src={

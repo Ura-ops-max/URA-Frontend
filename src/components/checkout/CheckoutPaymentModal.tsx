@@ -2,8 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { X, Check, Loader2, Wallet, ShieldCheck, CreditCard, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEscrowCheckout } from 'payluk-escrow-inline-checkout/react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import CheckoutAd from '@/components/ads/CheckoutAd';
+import SendOrderToShop from '@/components/orders/SendOrderToShop';
+import { orderAPI } from '@/lib/api';
 import { useWalletBalance } from '@/hooks/api/use-wallet-balance';
 import {
   paymentsApi,
@@ -57,6 +60,14 @@ export default function CheckoutPaymentModal({
   // While the Payluk widget is open we hide our overlay so it isn't covered.
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [walletBusy, setWalletBusy] = useState(false);
+  // The buyer closed the payment window without paying: offer WhatsApp.
+  const [attemptFailed, setAttemptFailed] = useState(false);
+  const { data: orderData } = useQuery({
+    queryKey: ['order', orderId, 'for-whatsapp'],
+    queryFn: async () => (await orderAPI.getOrderById(orderId)).data?.order,
+    enabled: attemptFailed,
+    staleTime: 60_000,
+  });
   const { pay } = useEscrowCheckout();
   const { data: wallet } = useWalletBalance(payment.customerId);
 
@@ -135,6 +146,7 @@ export default function CheckoutPaymentModal({
         },
         onClose: () => {
           setWidgetOpen(false);
+          setAttemptFailed(true);
           setPhase('ready');
           toast.info('Payment window closed. Your order is saved; you can pay again.');
         },
@@ -301,6 +313,19 @@ export default function CheckoutPaymentModal({
                 </div>
               )}
             </>
+          )}
+
+          {showChoices && attemptFailed && orderData?.business?.businessName && (
+            <div className="mt-5 border-t border-gray-100 pt-4">
+              <SendOrderToShop
+                shopName={orderData.business.businessName}
+                shopPhone={orderData.business.contact?.phone}
+                orderNumber={orderData.orderNumber}
+                items={orderData.items ?? []}
+                total={orderData.totalAmount}
+                paid={false}
+              />
+            </div>
           )}
 
           {(showChoices || phase === 'confirming') && <CheckoutAd businessId={businessId} compact />}

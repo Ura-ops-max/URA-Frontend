@@ -9,7 +9,7 @@ const aiSearchClient = axios.create({
   timeout: 15000,
 });
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────
 
 export interface TextSearchRequest {
     q: string;

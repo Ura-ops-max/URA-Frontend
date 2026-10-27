@@ -47,21 +47,27 @@ const AppSideBar = () => {
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="h-auto p-0 hover:bg-transparent">
                 <Button
+                  aria-label="New post"
+                  title="New post"
                   onClick={() => navigate('/dashboard/post/create?type=post')}
                   className="bg-gray-950 text-white hover:bg-black cursor-pointer shadow-lg shadow-gray-200 transition-all active:scale-[0.97] border-none h-11 w-full rounded-xl gap-2 flex items-center justify-center"
                 >
-                  <Plus size={18} strokeWidth={2.5} className="text-white" />
+                  <Plus size={18} strokeWidth={2.5} className="text-white" aria-hidden />
                   <span className="text-sm font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
-                    Create Post
+                    New post
                   </span>
                 </Button>
               </SidebarMenuButton>
+              {/* Collapsed sidebar: the word under the round button. */}
+              <span className="mt-1 hidden text-center text-[10px] font-semibold text-gray-700 group-data-[collapsible=icon]:block">
+                Post
+              </span>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
 
         {/* Applied custom scrollbar here too */}
-        <SidebarContent className="bg-transparent px-3 scrollbar-base scrollbar-main">
+        <SidebarContent className="bg-transparent px-3 scrollbar-base scrollbar-main group-data-[collapsible=icon]:px-1">
           <NavMain />
         </SidebarContent>
 

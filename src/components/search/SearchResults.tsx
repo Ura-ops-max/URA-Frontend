@@ -45,7 +45,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       {/* 1. HEADER */}
       <div className="sticky top-0 bg-white z-30 border-b">
         <div className="flex items-center space-x-2 p-4">
-          <button onClick={onBack} className="p-1">
+          <button aria-label="Back" title="Back" onClick={onBack} className="p-1">
             <ArrowLeft />
           </button>
           <div className="flex-grow relative">
@@ -58,7 +58,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
             <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           </div>
           {/* Filter Button - Now visible on all screens */}
-          <button
+          <button aria-label="Filters" title="Filters"
             onClick={onFilterToggle}
             className={`p-2 rounded-full transition-colors ${isFilterVisible ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'}`}
           >
@@ -173,7 +173,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
             {/* Pull-down handle UI */}
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-gray-900">Filters</h3>
-              <button onClick={onFilterToggle} className="p-2 bg-gray-50 rounded-full">
+              <button aria-label="Close filters" title="Close filters" onClick={onFilterToggle} className="p-2 bg-gray-50 rounded-full">
                 <X size={20} />
               </button>
             </div>

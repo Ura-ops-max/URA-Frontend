@@ -64,8 +64,9 @@ const Logo = forwardRef<HTMLAnchorElement, LogoProps>(
     const sizes = sizeConfig[size];
     const hoverClass = hoverEffects[hoverEffect];
 
+    // At least 44 x 44 px to tap; the picture keeps its size.
     const containerClasses = `
-      flex items-center
+      flex min-h-11 min-w-11 items-center justify-center
       ${sizes.gap}
       focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
       rounded

@@ -82,7 +82,7 @@ const DashboardNav: React.FC<DashboardNavProps> = ({ onSearchClick }) => {
             <Search className="w-5 h-5" />
           </button>
 
-          <Link to="/dashboard/settings">
+          <Link aria-label="Settings" title="Settings" to="/dashboard/settings">
             <Settings className="text-orange-400" />
           </Link>
           <DashboardAvatar />

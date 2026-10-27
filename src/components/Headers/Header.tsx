@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Home, Search, Image as ImageIcon, Bell, ShoppingCart } from 'lucide-react';
+import { House, Search, Camera, Bell, ShoppingCart } from 'lucide-react';
+import { NavItem } from '@/components/nav/NavItem';
 import { cn } from '@/lib/utils';
 import Logo from '../shared/Logo';
 import { DashboardAvatar } from '../dashboard/DashboardAvatar';
@@ -43,10 +44,10 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
   const pageHeading = getPageLabel(pathname);
 
   const desktopMenu = [
-    { name: 'Home', to: '/dashboard', icon: Home },
+    { name: 'Home', to: '/dashboard', icon: House },
     // { name: 'About', to: '/about', icon: Info },
     { name: 'Search', onClick: onSearchClick, icon: Search },
-    { name: 'Image Search', to: '/dashboard/search/image', icon: ImageIcon },
+    { name: 'Photo search', to: '/dashboard/search/image', icon: Camera },
     { name: 'Cart', to: '/dashboard/product/cart', icon: ShoppingCart },
   ];
 
@@ -138,43 +139,49 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
           })}
         </nav>
 
-        {/* RIGHT SECTION: Icons & Avatar */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
-          {/* Mobile Cart */}
-           {/* Image Search */}
-          <Link
-            to='/dashboard/search/image'
-            className="lg:hidden relative p-2.5 text-gray-600 hover:bg-gray-100/50 rounded-full transition-all"
-          >
-            <ImageIcon size={20} />
-          </Link>
-          <Link
+        {/* RIGHT SECTION: every icon has its word under it on phones. */}
+        <div className="flex items-center gap-0.5 sm:gap-2">
+          <NavItem icon={Search} label="Search" onClick={onSearchClick} className="lg:hidden" />
+          <NavItem
+            icon={Camera}
+            label="Photo"
+            to="/dashboard/search/image"
+            active={pathname === '/dashboard/search/image'}
+            className="lg:hidden"
+          />
+          <NavItem
+            icon={ShoppingCart}
+            label="Cart"
             to="/dashboard/product/cart"
-            className="lg:hidden relative p-2.5 text-gray-600 hover:bg-gray-100/50 rounded-full transition-all"
-          >
-            <ShoppingCart size={20} />
-            {cartItemCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#f97316] text-[9px] font-black text-white border-2 border-white shadow-sm">
-                {cartItemCount}
-              </span>
-            )}
-          </Link>
+            active={pathname === '/dashboard/product/cart'}
+            badge={cartItemCount}
+            className="lg:hidden"
+          />
 
           {/* Notifications */}
           <div className="relative" ref={dropdownRef}>
            
+            {/* Phones: "Alerts" under the bell. Computers: "Notifications" beside it. */}
+            <NavItem
+              icon={Bell}
+              label="Alerts"
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              active={isNotifOpen}
+              badge={unreadCount}
+              className="lg:hidden"
+            />
             <button
+              type="button"
               onClick={() => setIsNotifOpen(!isNotifOpen)}
               className={cn(
-                'relative p-2.5 rounded-full transition-all duration-200',
-                isNotifOpen
-                  ? 'bg-gray-950 text-white shadow-lg shadow-gray-200'
-                  : 'text-gray-600 hover:bg-gray-100/50',
+                'relative hidden h-10 items-center gap-2 rounded-xl px-3 text-[13px] font-bold transition-all duration-200 lg:flex',
+                isNotifOpen ? 'bg-gray-950 text-white shadow-lg shadow-gray-200' : 'text-gray-600 hover:bg-gray-100/50',
               )}
             >
-              <Bell size={20} strokeWidth={2} />
+              <Bell size={18} strokeWidth={2} aria-hidden />
+              Notifications
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white border-2 border-white">
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-black text-white">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -182,7 +189,7 @@ export default function Header({ onSearchClick }: { onSearchClick: () => void })
 
             {isNotifOpen && (
               /* Dropdown: High depth shadow and rounded edges */
-              <div className="absolute right-0 mt-3 w-80 origin-top-right">
+              <div className="fixed inset-x-2 top-[calc(env(safe-area-inset-top)+4.25rem)] z-50 origin-top-right lg:absolute lg:inset-x-auto lg:right-0 lg:top-auto lg:mt-3 lg:w-80">
                 <NotificationDropdown onClose={() => setIsNotifOpen(false)} />
               </div>
             )}

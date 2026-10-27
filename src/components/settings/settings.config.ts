@@ -1,5 +1,5 @@
 // src/common/settings.config.ts
-import { User, Lock, Activity, History, CreditCard } from 'lucide-react';
+import { User, Lock, Activity, History, CreditCard, BellRing } from 'lucide-react';
 
 export const settingsGroups = [
   {
@@ -7,6 +7,7 @@ export const settingsGroups = [
     items: [
       { id: 'profile', title: 'Edit Profile', icon: User, desc: 'Change avatar, name, and bio' },
       { id: 'security', title: 'Password & Security', icon: Lock, desc: '2FA, password updates' },
+      { id: 'alerts', title: 'Alerts', icon: BellRing, desc: 'Horn for new notifications' },
       // { id: 'notifications', title: 'Notifications', icon: Bell, desc: 'Push and email alerts' },
     ],
   },

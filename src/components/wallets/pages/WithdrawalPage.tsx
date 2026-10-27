@@ -341,7 +341,7 @@ export default function WithdrawalPage() {
             className="pl-9 h-11 rounded-xl border-gray-100 bg-gray-50 focus:bg-white text-sm"
           />
           {query && (
-            <button
+            <button aria-label="Clear search" title="Clear search"
               onClick={() => setQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
@@ -420,7 +420,7 @@ export default function WithdrawalPage() {
     return (
       <div>
         <div className="mb-6 flex items-center gap-3">
-          <button
+          <button aria-label="Back" title="Back"
             onClick={() => setStep('bank')}
             className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
           >
@@ -608,7 +608,7 @@ export default function WithdrawalPage() {
     return (
       <div>
         <div className="mb-6 flex items-center gap-3">
-          <button
+          <button aria-label="Back" title="Back"
             onClick={() => setStep('details')}
             className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
           >

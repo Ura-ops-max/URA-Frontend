@@ -118,7 +118,7 @@ const ShareBox = ({ onRequireAuth }: { onRequireAuth?: () => void } = {}) => {
         {/* Previews */}
         {previewUrl && (
           <div className="relative rounded-[24px] overflow-hidden border border-white/60 bg-white/20 animate-in zoom-in-95 duration-300">
-            <button
+            <button aria-label="Remove photo" title="Remove photo"
               onClick={() => {
                 setRawFiles([]);
                 setPreviewUrl(null);

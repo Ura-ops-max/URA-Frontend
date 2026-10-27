@@ -20,8 +20,8 @@ import CheckoutAd from '@/components/ads/CheckoutAd';
 import ProductImage from '@/components/product/ProductImage';
 import OrderActionButtons from '@/components/orders/OrderActionButtons';
 import WhatsAppButton from '@/components/orders/WhatsAppButton';
-import { buyerPaidMessage, sellerBringingMessage, sellerReadyMessage } from '@/lib/whatsapp';
-import { itemsSummary } from '@/lib/order-lists';
+import { sellerBringingMessage, sellerReadyMessage } from '@/lib/whatsapp';
+import SendOrderToShop from '@/components/orders/SendOrderToShop';
 import { NO_ACTIONS, NORMAL_PAYMENT_NOTE, type OrderActions } from '@/lib/order-lists';
 
 /** Best-effort one-line summary of a Fez tracking response. */
@@ -111,7 +111,7 @@ const OrderDetailsPage = () => {
   const isPaid = order.paymentStatus === 'paid';
   const disputed = ['open', 'investigating'].includes(order.disputeStatus ?? '');
   const listPath = role === 'seller' ? '/dashboard/shop-orders' : '/dashboard/my-orders';
-  // WhatsApp: only while the order is paid and still going.
+  // WhatsApp: while the order is paid and still going (or not paid yet).
   const ongoing = isPaid && ['processing', 'shipped'].includes(order.status);
   const shopName: string = shop?.businessName ?? 'the shop';
   const buyerFirstName: string = order.user?.firstName ?? '';
@@ -200,15 +200,16 @@ const OrderDetailsPage = () => {
 
         {/* Next action: which buttons show is decided by the server. */}
         <div className="mt-6 space-y-2">
-          {ongoing && role === 'buyer' && (
-            <WhatsAppButton
-              phone={shop?.contact?.phone}
-              text={buyerPaidMessage(order.orderNumber, itemsSummary(order.items))}
-              label={
-                <>
-                  Message {shopName} about order <span className="whitespace-nowrap">{order.orderNumber}</span>
-                </>
-              }
+          {role === 'buyer' && (ongoing || (!isPaid && order.status === 'pending')) && (
+            <SendOrderToShop
+              shopName={shopName}
+              shopPhone={shop?.contact?.phone}
+              orderNumber={order.orderNumber}
+              items={order.items}
+              total={order.totalAmount}
+              paid={isPaid}
+              deliveryMethod={order.deliveryMethod}
+              address={[order.shippingAddress?.fullAddress, order.shippingAddress?.city].filter(Boolean).join(', ')}
             />
           )}
           {ongoing && role === 'seller' && !isDelivery && !shopDelivers && (

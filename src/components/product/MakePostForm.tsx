@@ -191,7 +191,7 @@ const MakePostForm = () => {
                   In Stock: {selectedProduct.stock}
                 </p>
               </div>
-              <button
+              <button aria-label="Remove product" title="Remove product"
                 type="button"
                 onClick={() => setSelectedProduct(null)}
                 className="text-gray-400 hover:text-red-500"

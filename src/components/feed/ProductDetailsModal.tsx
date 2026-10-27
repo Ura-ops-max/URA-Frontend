@@ -92,13 +92,13 @@ export const ProductDetailsModal = ({
           >
             {/* MOBILE FLOATING BUTTONS */}
             <div className="lg:hidden flex items-center justify-between px-6 py-4 absolute top-0 left-0 right-0 z-30 pointer-events-none">
-              <button
+              <button aria-label="Close" title="Close"
                 onClick={onClose}
                 className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center pointer-events-auto shadow-md"
               >
                 <X size={20} />
               </button>
-              <button
+              <button aria-label="Like" title="Like"
                 onClick={handleLikeClick}
                 className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center pointer-events-auto shadow-md"
               >
@@ -122,7 +122,7 @@ export const ProductDetailsModal = ({
 
               {/* DETAILS SECTION */}
               <div className="w-full lg:w-[55%] p-6 lg:p-12 flex flex-col">
-                <button
+                <button aria-label="Close" title="Close"
                   onClick={onClose}
                   className="hidden lg:flex absolute top-6 right-6 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
                 >

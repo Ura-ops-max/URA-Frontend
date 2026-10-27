@@ -1,85 +1,33 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, PlusSquare, MessageCircle, MoreHorizontal } from 'lucide-react';
-import { cn } from '@/lib/utils';
+// Phone bottom menu: Home, Orders, Wallet, Chats, More. Each icon has its word
+// under it. Search stays in the top bar; New post is in More.
+import { useLocation } from 'react-router-dom';
+import { useGlobalChat } from '@/context/chat-provider';
+import { NavItem } from './NavItem';
+import { BOTTOM_NAV, isActiveEntry } from './nav-items';
 
-export default function MobileBottomNav({ onSearchClick }: { onSearchClick: () => void }) {
+// `onSearchClick` is kept for callers; search now lives in the top bar.
+export default function MobileBottomNav(_props: { onSearchClick?: () => void }) {
   const { pathname } = useLocation();
-
-  const navItems = [
-    {
-      name: 'Home',
-      to: '/dashboard',
-      icon: Home,
-      activePaths: ['/dashboard'],
-    },
-    {
-      name: 'Search',
-      onClick: onSearchClick,
-      icon: Search,
-      activePaths: ['/search', '/explore'],
-    },
-    {
-      name: 'Post',
-      to: '/dashboard/post/create?type=post',
-      icon: PlusSquare,
-      activePaths: ['/dashboard/post', '/dashboard/inventory/new'],
-    },
-    {
-      name: 'Chats',
-      to: '/dashboard/chat',
-      icon: MessageCircle,
-      activePaths: ['/dashboard/chat', '/dashboard/messages'],
-    },
-    {
-      name: 'More',
-      to: '/dashboard/menu',
-      icon: MoreHorizontal,
-      activePaths: ['/dashboard/menu', '/dashboard/settings', '/dashboard/profile'],
-    },
-  ];
+  const { totalUnreadCount } = useGlobalChat();
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/40 backdrop-blur-2xl border-t border-white/40 px-2 py-3 z-50 pb-[env(safe-area-inset-bottom)]">
-      <ul className="flex justify-around items-end">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = item.activePaths.some((path) =>
-            item.name === 'Home' ? pathname === path : pathname.startsWith(path),
-          );
-
-          return (
-            <li key={item.name} className="flex-1">
-              <Link
-                to={item.to || '#'}
-                onClick={item.onClick}
-                className="w-full flex flex-col items-center gap-1 group active:scale-95 transition-transform"
-              >
-                {/* ICON CONTAINER: 
-                    Added a subtle background ring to ensure icon visibility 
-                */}
-                <div
-                  className={cn(
-                    'p-2 rounded-2xl transition-all duration-300',
-                    isActive
-                      ? 'bg-gray-950 text-white shadow-lg shadow-gray-200'
-                      : 'bg-white/20 text-gray-900 group-hover:bg-white/40',
-                  )}
-                >
-                  <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                </div>
-
-                <span
-                  className={cn(
-                    'text-[10px] font-bold uppercase tracking-widest transition-colors',
-                    isActive ? 'text-gray-950' : 'text-gray-500',
-                  )}
-                >
-                  {item.name}
-                </span>
-              </Link>
-            </li>
-          );
-        })}
+    <nav
+      aria-label="Main menu"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/40 bg-white/80 px-1 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] backdrop-blur-2xl"
+    >
+      <ul className="flex items-stretch justify-around">
+        {BOTTOM_NAV.map((item) => (
+          <li key={item.title} className="flex flex-1 justify-center">
+            <NavItem
+              icon={item.icon}
+              label={item.title}
+              to={item.url}
+              active={isActiveEntry(item, pathname)}
+              badge={item.title === 'Chats' ? totalUnreadCount : 0}
+              className="w-full"
+            />
+          </li>
+        ))}
       </ul>
     </nav>
   );

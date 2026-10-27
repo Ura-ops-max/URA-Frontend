@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, Heart, MessageCircle, ArrowRight, Home } from 'lucide-react';
+import { Loader2, Heart, MessageSquareText, ArrowRight, Home } from 'lucide-react';
 import { getSinglePostQueryFn } from '@/lib/api';
 import { tokenStorage } from '@/lib/token-storage';
 import { generateAvatarUrl } from '@/utils/avatar-generator';
@@ -92,7 +92,7 @@ const PostDetail = () => {
               <Heart className="h-4 w-4" /> {p.likesCount ?? p.likes?.length ?? 0}
             </span>
             <span className="flex items-center gap-1.5 text-sm">
-              <MessageCircle className="h-4 w-4" /> {p.commentsCount ?? 0}
+              <MessageSquareText className="h-4 w-4" /> {p.commentsCount ?? 0}
             </span>
           </div>
         </article>

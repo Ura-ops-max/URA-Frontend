@@ -36,7 +36,7 @@ export const TagInput = ({ tags, setTags, tagInput, setTagInput, placeholder }: 
               className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none flex items-center gap-1 px-2 py-1 text-xs"
             >
               #{tag}
-              <button
+              <button aria-label={`Remove ${tag}`} title={`Remove ${tag}`}
                 type="button" // Critical: prevents form submission
                 onClick={(e) => {
                   e.preventDefault();

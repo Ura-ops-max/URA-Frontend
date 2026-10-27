@@ -297,7 +297,7 @@ export default function ProductPostCard({ post, onRequireAuth }: CardProps<Produ
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <button
+            <button aria-label="View product details"
               onClick={() => setShowDetails(true)}
               className="flex items-center justify-center w-12 h-12 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-orange-600 hover:border-orange-200 transition-all shadow-sm active:scale-90 shrink-0"
               title="View Product Details"

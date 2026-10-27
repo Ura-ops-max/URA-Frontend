@@ -33,3 +33,36 @@ export const sellerReadyMessage = (buyerFirstName: string, orderNumber: string, 
 /** Seller to buyer, the shop delivers it. */
 export const sellerBringingMessage = (buyerFirstName: string, orderNumber: string, shopName: string) =>
   `Hi${buyerFirstName ? ` ${buyerFirstName}` : ''}, I'm bringing your order ${orderNumber} from ${shopName} to you now.`;
+
+export interface OrderMessageInput {
+  shopName: string;
+  orderNumber: string;
+  items: { name: string; quantity: number }[];
+  /** What the buyer pays in total, e.g. "₦12,000". */
+  totalText: string;
+  /** true: the payment went through. false: it failed or was cancelled. */
+  paid: boolean;
+  /** "Include what I ordered" (on by default). */
+  includeItems: boolean;
+  deliveryMethod?: string;
+  /** The buyer's own address, for delivery orders. */
+  address?: string | null;
+}
+
+/**
+ * The buyer's message to the shop after a payment attempt.
+ * Paid:   "Hi Mama Put, I just paid for order ORD-1042: 2x Chicken shawarma,
+ *          1x Fanta. Total ₦12,000. I will pick it up."
+ * Failed: "Hi Mama Put, I tried to pay for order ORD-1042: 2x Chicken
+ *          shawarma, 1x Fanta. Total ₦12,000. My payment did not go through.
+ *          Can you help?"
+ * With "Include what I ordered" off: only the order number and the total.
+ */
+export function buyerOrderMessage(m: OrderMessageInput): string {
+  const what = m.includeItems && m.items.length ? `: ${m.items.map((i) => `${i.quantity}x ${i.name}`).join(', ')}` : '';
+  const start = `Hi ${m.shopName}, I ${m.paid ? 'just paid' : 'tried to pay'} for order ${m.orderNumber}${what}. Total ${m.totalText}.`;
+  if (!m.paid) return `${start} My payment did not go through. Can you help?`;
+  if (!m.includeItems) return start;
+  if (m.deliveryMethod === 'delivery') return m.address ? `${start} My address is ${m.address}.` : start;
+  return `${start} I will pick it up.`;
+}

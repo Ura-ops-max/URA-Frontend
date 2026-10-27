@@ -128,7 +128,7 @@ export default function PostsFeed({ targetId, onRequireAuth, type = 'feed' }: Po
       </div>
 
       {/* Floating Scroll Top */}
-      <button
+      <button aria-label="Back to top" title="Back to top"
         onClick={scrollToTop}
         className={cn(
           'fixed bottom-10 right-10 p-4 bg-orange-600 text-white rounded-full shadow-2xl transition-all duration-500 z-50 hover:scale-110',

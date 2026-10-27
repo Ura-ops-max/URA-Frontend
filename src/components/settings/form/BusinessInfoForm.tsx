@@ -159,7 +159,7 @@ const BusinessInfoForm: React.FC = () => {
                 className="w-full h-full object-cover"
                 alt="Cover"
               />
-              <button
+              <button aria-label="Remove cover photo" title="Remove cover photo"
                 type="button"
                 onClick={() => handleRemoveImage('businessCover')}
                 className="absolute top-3 right-3 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
@@ -200,7 +200,7 @@ const BusinessInfoForm: React.FC = () => {
               )}
             </div>
             {previews.businessLogo && (
-              <button
+              <button aria-label="Remove logo" title="Remove logo"
                 type="button"
                 onClick={() => handleRemoveImage('businessLogo')}
                 className="absolute -top-2 -left-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg border-2 border-white"

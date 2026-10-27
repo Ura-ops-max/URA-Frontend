@@ -39,7 +39,7 @@ export default function InstallAppButton({ className = '' }: { className?: strin
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-black text-gray-900">Add URA to Home Screen</h3>
-              <button onClick={() => setShowIosHelp(false)} className="text-gray-400">
+              <button aria-label="Close" title="Close" onClick={() => setShowIosHelp(false)} className="text-gray-400">
                 <X size={20} />
               </button>
             </div>

@@ -1,19 +1,6 @@
 // src/components/nav/NavMain.tsx
-import {
-  Settings,
-  LayoutDashboard,
-  Bell,
-  MessageCircle,
-  Tag,
-  Wallet,
-  ShoppingBag,
-  Store,
-  ShoppingCart,
-  Bookmark, // 🚨 Added Bookmark icon
-  type LucideIcon,
-  PlusCircle,
-  Boxes,
-} from 'lucide-react';
+// Left sidebar. Every entry shows its word: in full when open, and a short
+// word under the icon when the sidebar is collapsed (never the icon alone).
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -27,11 +14,15 @@ import { useAuthContext } from '@/context/auth-provider';
 import { useCartContext } from '@/context/cart-provider';
 import { useNotificationContext } from '@/context/notification-provider';
 import { useGlobalChat } from '@/context/chat-provider';
+import {
+  SIDEBAR_BUSINESS,
+  SIDEBAR_MAIN,
+  SIDEBAR_SETTINGS,
+  SIDEBAR_SHOPPING,
+  type MenuEntry,
+} from './nav-items';
 
-type NavItem = {
-  title: string;
-  url: string;
-  icon: LucideIcon;
+type NavItem = MenuEntry & {
   showBadge?: boolean;
   badgeValue?: any;
 };
@@ -48,54 +39,17 @@ export function NavMain() {
 
   const displayCount = totalUnreadCount > 99 ? '99+' : totalUnreadCount;
 
-  // 1. Shared Items
-  const mainItems: NavItem[] = [
-    { title: 'Feed', url: '/dashboard', icon: LayoutDashboard },
-    {
-      title: 'Chat',
-      url: '/dashboard/chat',
-      icon: MessageCircle,
-      showBadge: totalUnreadCount > 0,
-      badgeValue: String(displayCount),
-    },
-    { title: 'Bookmarks', url: '/dashboard/bookmarks', icon: Bookmark }, // 🚨 Added Bookmarks here
-    {
-      title: 'Notifications',
-      url: '/dashboard/notifications',
-      icon: Bell,
-      showBadge: unreadCount > 0,
-      badgeValue: String(unreadCount),
-    },
-  ];
+  const badges: Record<string, { show: boolean; value: string | number }> = {
+    Chats: { show: totalUnreadCount > 0, value: String(displayCount) },
+    Notifications: { show: unreadCount > 0, value: String(unreadCount) },
+    Cart: { show: totalItems > 0, value: totalItems },
+  };
+  const withBadges = (items: MenuEntry[]): NavItem[] =>
+    items.map((i) => ({ ...i, showBadge: badges[i.title]?.show, badgeValue: badges[i.title]?.value }));
 
-  // 2. Shopping & Savings Items
-  const shoppingItems: NavItem[] = [
-    {
-      title: 'Cart',
-      url: '/dashboard/product/cart',
-      icon: ShoppingCart,
-      showBadge: totalItems > 0,
-      badgeValue: totalItems,
-    },
-    { title: 'My Orders', url: '/dashboard/my-orders', icon: ShoppingBag },
-    { title: 'Deals', url: '/dashboard/deal-offer', icon: Tag },
-    { title: 'Wallet', url: '/dashboard/wallet', icon: Wallet },
-    // { title: 'Events', url: '/dashboard/events', icon: Calendar },
-  ];
-
-  // 3. Business Management
-  const businessItems: NavItem[] = [
-    {
-      title: 'List a Product',
-      url: '/dashboard/post/create?type=product',
-      icon: PlusCircle,
-    },
-    { title: 'Inventory', url: '/dashboard/inventory', icon: Boxes },
-    // Paid orders customers placed with this shop.
-    { title: 'Shop Orders', url: '/dashboard/shop-orders', icon: Store },
-    // { title: 'Business Loan', url: '/dashboard/loans', icon: BadgePercent },
-    // Inside businessItems array in NavMain.tsx
-  ];
+  const mainItems = withBadges(SIDEBAR_MAIN);
+  const shoppingItems = withBadges(SIDEBAR_SHOPPING);
+  const businessItems = withBadges(SIDEBAR_BUSINESS);
 
   const renderMenuItems = (items: NavItem[]) => (
     <SidebarMenu>
@@ -105,13 +59,16 @@ export function NavMain() {
             isActive={item.url === pathname}
             asChild
             tooltip={item.title}
-            className={`transition-all duration-200 h-11 ${
+            className={`transition-all duration-200 h-11 group-data-[collapsible=icon]:h-auto! group-data-[collapsible=icon]:w-full! group-data-[collapsible=icon]:py-1.5! ${
               item.url === pathname
                 ? 'bg-orange-50 text-orange-600 hover:bg-orange-50 hover:text-orange-600'
                 : 'hover:bg-gray-100'
             }`}
           >
-            <Link to={item.url} className="flex items-center gap-3">
+            <Link
+              to={item.url}
+              className="flex items-center gap-3 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-0.5"
+            >
               <div className="relative">
                 <item.icon
                   className={`${item.url === pathname ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`}
@@ -125,7 +82,11 @@ export function NavMain() {
                   </span>
                 )}
               </div>
-              <span className="font-medium text-[14px]">{item.title}</span>
+              {/* Collapsed sidebar: a short word under the icon. */}
+              <span className="hidden text-center text-[10px] font-semibold leading-tight group-data-[collapsible=icon]:block">
+                {item.short ?? item.title}
+              </span>
+              <span className="font-medium text-[14px] group-data-[collapsible=icon]:hidden">{item.title}</span>
             </Link>
           </SidebarMenuButton>
 
@@ -142,14 +103,14 @@ export function NavMain() {
 
   return (
     <>
-      <SidebarGroup>
+      <SidebarGroup className="group-data-[collapsible=icon]:px-0">
         <SidebarGroupLabel className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
           General
         </SidebarGroupLabel>
         {renderMenuItems(mainItems)}
       </SidebarGroup>
 
-      <SidebarGroup>
+      <SidebarGroup className="group-data-[collapsible=icon]:px-0">
         <SidebarGroupLabel className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
           Shopping
         </SidebarGroupLabel>
@@ -157,7 +118,7 @@ export function NavMain() {
       </SidebarGroup>
 
       {user?.isBusinessOwner && (
-        <SidebarGroup>
+        <SidebarGroup className="group-data-[collapsible=icon]:px-0">
           <SidebarGroupLabel className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
             Business
           </SidebarGroupLabel>
@@ -165,8 +126,8 @@ export function NavMain() {
         </SidebarGroup>
       )}
 
-      <SidebarGroup className="mt-auto">
-        {renderMenuItems([{ title: 'Settings', url: '/dashboard/settings', icon: Settings }])}
+      <SidebarGroup className="mt-auto group-data-[collapsible=icon]:px-0">
+        {renderMenuItems([SIDEBAR_SETTINGS])}
       </SidebarGroup>
     </>
   );

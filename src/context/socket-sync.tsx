@@ -17,13 +17,7 @@ export const SocketSync = () => {
       socketService.setup(profileId.toString());
 
       // 3. Listen for Live Notifications
-      // Buyers hear nothing: order notices (shipped, ready, delivered, paid
-      // to the shop) show as a toast only. Sellers' "New paid order" has its
-      // own banner and horn (OrderAlertsProvider), so no second toast.
-      socketService.on('notification_received', (data) => {
-        if (String(data?.title ?? '').startsWith('New paid order')) return;
-        toast.info(data.message || 'You have a new notification');
-      });
+      // New notifications show as pop-ups (AlertsProvider).
 
       // 4. Listen for Real-time Messages
       socketService.on('message:received', (newMessage) => {

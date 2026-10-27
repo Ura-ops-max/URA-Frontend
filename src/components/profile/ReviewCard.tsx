@@ -56,7 +56,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onLike, onDislike, onEd
         {/* 3-Dot Menu for Owner */}
         {isOwner && (
           <div className="relative">
-            <button
+            <button aria-label="More options" title="More options"
               onClick={() => setShowMenu(!showMenu)}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
             >

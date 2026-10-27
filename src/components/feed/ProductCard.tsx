@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, ShoppingCart, Info, Star, Pencil, Trash2, Loader2, Minus, Plus } from 'lucide-react';
+import { Bookmark, ShoppingCart, Info, Star, Pencil, Trash2, Loader2, Minus, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useToggleLike, useDeletePost } from '@/hooks/api/use-feed';
@@ -115,11 +115,13 @@ export const ProductCard = ({
         {/* Floating Actions */}
         <div className="absolute top-2 right-2 flex flex-col gap-2">
           <button
+            aria-label={isWishlisted ? 'Remove from saved' : 'Save for later'}
+            title={isWishlisted ? 'Remove from saved' : 'Save for later'}
             onClick={handleWishlist}
             className="p-2 bg-white/90 backdrop-blur-md rounded-full shadow-sm hover:bg-white text-gray-400 transition-all active:scale-90"
           >
             <motion.div animate={{ scale: isWishlisted ? [1, 1.4, 1] : 1 }}>
-              <Heart
+              <Bookmark
                 size={18}
                 className={cn(
                   'transition-colors',
@@ -133,7 +135,7 @@ export const ProductCard = ({
         {/* Owner actions — Edit / Delete (only the seller sees these) */}
         {isOwner && (
           <div className="absolute top-2 left-2 flex flex-col gap-2">
-            <button
+            <button aria-label="Edit product"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -144,7 +146,7 @@ export const ProductCard = ({
             >
               <Pencil size={16} />
             </button>
-            <button
+            <button aria-label="Delete product"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -210,7 +212,7 @@ export const ProductCard = ({
           </div>
 
           <div className="flex gap-2">
-            <button
+            <button aria-label="View details" title="View details"
               onClick={() => onViewDetails?.(product)}
               className="flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-orange-500 transition-all shrink-0"
             >

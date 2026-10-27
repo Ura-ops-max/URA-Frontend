@@ -78,7 +78,7 @@ export const MediaCarousel = ({ media }: { media: string[] }) => {
       {/* Navigation UI - Keep these high WITHIN the card, but below global app UI */}
       {media.length > 1 && (
         <>
-          <button
+          <button aria-label="Previous photo" title="Previous photo"
             onClick={(e) => {
               e.stopPropagation();
               scroll('left');
@@ -91,7 +91,7 @@ export const MediaCarousel = ({ media }: { media: string[] }) => {
             <ChevronLeft size={20} />
           </button>
 
-          <button
+          <button aria-label="Next photo" title="Next photo"
             onClick={(e) => {
               e.stopPropagation();
               scroll('right');

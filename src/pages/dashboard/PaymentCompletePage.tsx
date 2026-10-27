@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import API from '@/lib/axios-client';
 import CheckoutAd from '@/components/ads/CheckoutAd';
 import { paymentsApi } from '@/lib/payments-api';
+import SendOrderToShop from '@/components/orders/SendOrderToShop';
 
 type Status = 'loading' | 'success' | 'already_confirmed' | 'pending' | 'error';
 
@@ -16,6 +17,12 @@ interface OrderSummary {
   paymentStatus: string;
   /** The shop the order is with — used to fetch its checkout ad. */
   business?: string;
+  /** For "Send order details to <shop> on WhatsApp". */
+  shopName?: string;
+  shopPhone?: string | null;
+  items?: { name: string; quantity: number }[];
+  deliveryMethod?: string;
+  address?: string;
 }
 
 const formatNGN = (n: number) =>
@@ -190,6 +197,11 @@ const PaymentCompletePage = () => {
             status: o.status,
             paymentStatus: o.paymentStatus,
             business: o.business?._id ?? o.business,
+            shopName: o.business?.businessName,
+            shopPhone: o.business?.contact?.phone ?? null,
+            items: o.items ?? [],
+            deliveryMethod: o.deliveryMethod,
+            address: [o.shippingAddress?.fullAddress, o.shippingAddress?.city].filter(Boolean).join(', '),
           });
         }
         return o?.paymentStatus === 'paid';
@@ -211,9 +223,15 @@ const PaymentCompletePage = () => {
         if (s.paymentStatus === 'paid') {
           await load().catch(() => undefined);
           if (cancelled) return;
+          // Stay here so the buyer can send the order to the shop on WhatsApp.
           setStatus(first ? 'already_confirmed' : 'success');
-          // Take the buyer to their orders after a short pause.
-          timer = setTimeout(() => navigate(ORDERS_PATH), 4000);
+          return;
+        }
+        if (s.paymentStatus === 'failed') {
+          await load().catch(() => undefined);
+          if (cancelled) return;
+          setErrorMessage('Your payment did not go through. Your order is saved, so you can pay again from My Orders.');
+          setStatus('error');
           return;
         }
         setStatus('pending');
@@ -290,6 +308,18 @@ const PaymentCompletePage = () => {
                 Order Reference
               </p>
               <p className="text-xs font-mono font-bold text-gray-600 break-all">{orderId}</p>
+            </div>
+          )}
+          {order?.shopName && (
+            <div className="text-left">
+              <SendOrderToShop
+                shopName={order.shopName}
+                shopPhone={order.shopPhone}
+                orderNumber={order.orderNumber}
+                items={order.items ?? []}
+                total={order.totalAmount}
+                paid={false}
+              />
             </div>
           )}
           <div className="flex flex-col sm:flex-row gap-3">
@@ -382,6 +412,19 @@ const PaymentCompletePage = () => {
               )}
             </div>
           </div>
+        )}
+
+        {order?.shopName && (
+          <SendOrderToShop
+            shopName={order.shopName}
+            shopPhone={order.shopPhone}
+            orderNumber={order.orderNumber}
+            items={order.items ?? []}
+            total={order.totalAmount}
+            paid
+            deliveryMethod={order.deliveryMethod}
+            address={order.address}
+          />
         )}
 
         {/* CTAs */}

@@ -377,7 +377,7 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
           />
           <div className="flex items-center gap-1">
             {query && (
-              <button
+              <button aria-label="Clear search" title="Clear search"
                 type="button"
                 onClick={clearQuery}
                 className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
@@ -385,7 +385,7 @@ export default function SearchContainer({ isSearchOpen, onClose }: SearchContain
                 <X className="w-4 h-4" />
               </button>
             )}
-            <button
+            <button aria-label="Close search" title="Close search"
               type="button"
               onClick={handleClose}
               className="ml-1 p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors"

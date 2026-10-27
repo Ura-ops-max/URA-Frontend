@@ -353,7 +353,7 @@ export const ImageSearch = () => {
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
             {/* Geo toggle */}
-            <button
+            <button aria-label={state.useGeo ? 'Disable location filter' : 'Enable location filter'}
               onClick={toggleGeo}
               title={state.useGeo ? 'Disable location filter' : 'Enable location filter'}
               className={`p-1.5 rounded-lg transition-colors ${
@@ -366,7 +366,7 @@ export const ImageSearch = () => {
             </button>
             {/* Clear */}
             {state.query && (
-              <button
+              <button aria-label="Clear search" title="Clear search"
                 onClick={() => {
                   setState((s) => ({ ...s, query: '', results: [], hasSearched: false }));
                   inputRef.current?.focus();
@@ -397,7 +397,7 @@ export const ImageSearch = () => {
                 alt="Search preview"
                 className="w-full max-h-48 object-cover"
               />
-              <button
+              <button aria-label="Remove photo" title="Remove photo"
                 onClick={clearImage}
                 className="absolute top-2 right-2 p-1 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors"
               >

@@ -35,6 +35,8 @@ const BusinessInfoForm: React.FC = () => {
 
   // Track if user explicitly wants to delete an existing image
   const [deleteFlags, setDeleteFlags] = useState({ logo: false, cover: false });
+  // Google visibility switches (all optional; Google listing is on by default).
+  const [google, setGoogle] = useState({ showOnGoogle: true, hasPhysicalStore: false, showStreetAddress: false });
 
   // 2. Operating Hours State
   const [hours, setHours] = useState(() =>
@@ -44,6 +46,11 @@ const BusinessInfoForm: React.FC = () => {
   // Sync Data when profile loads
   useEffect(() => {
     if (business) {
+      setGoogle({
+        showOnGoogle: business.showOnGoogle !== false,
+        hasPhysicalStore: business.hasPhysicalStore === true,
+        showStreetAddress: business.showStreetAddress === true,
+      });
       setPreviews({
         businessLogo: business.businessLogo || '',
         businessCover: business.businessCover || '',
@@ -109,6 +116,10 @@ const BusinessInfoForm: React.FC = () => {
       // State/city drive the delivery (Fez) pickup location for this seller.
       state: data.state as string,
       city: data.city as string,
+      area: (data.area as string) ?? '',
+      showOnGoogle: google.showOnGoogle,
+      hasPhysicalStore: google.hasPhysicalStore,
+      showStreetAddress: google.hasPhysicalStore && google.showStreetAddress,
       operatingHours: formattedHours,
     };
 
@@ -334,7 +345,50 @@ const BusinessInfoForm: React.FC = () => {
               defaultValue={business?.address?.city}
             />
           </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label htmlFor="biz-area" className="text-sm font-bold text-gray-700 flex items-center gap-2">
+              <MapPin size={14} className="text-orange-500" /> Area (optional)
+            </label>
+            <input
+              id="biz-area"
+              name="area"
+              type="text"
+              maxLength={80}
+              placeholder="For example Ora East"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none text-base"
+              defaultValue={business?.area ?? ''}
+            />
+            <p className="text-xs text-gray-500">Add your area (for example Ora East) so nearby shoppers find you.</p>
+          </div>
         </div>
+      </div>
+
+      {/* Google: how the shop's public page appears */}
+      <div className="p-5 sm:p-8 space-y-3">
+        <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+          <Globe size={16} /> On Google
+        </h4>
+        <SwitchRow
+          label="Show my shop on Google"
+          hint="Shoppers can find your shop page when they search Google."
+          checked={google.showOnGoogle}
+          onChange={(v) => setGoogle((g) => ({ ...g, showOnGoogle: v }))}
+        />
+        <SwitchRow
+          label="Customers can visit my shop"
+          hint="Turn on only if you have a shop people can walk into."
+          checked={google.hasPhysicalStore}
+          onChange={(v) => setGoogle((g) => ({ ...g, hasPhysicalStore: v, showStreetAddress: v ? g.showStreetAddress : false }))}
+        />
+        {google.hasPhysicalStore && (
+          <SwitchRow
+            label="Show my street address"
+            hint="Off: people see only your area, city and state."
+            checked={google.showStreetAddress}
+            onChange={(v) => setGoogle((g) => ({ ...g, showStreetAddress: v }))}
+          />
+        )}
       </div>
 
       {/* 4. Operating Hours */}
@@ -398,5 +452,36 @@ const BusinessInfoForm: React.FC = () => {
     </form>
   );
 };
+
+/** An on/off switch with its words (44 px tall row). */
+function SwitchRow({
+  label,
+  hint,
+  checked,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className="flex min-h-14 w-full items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 text-left"
+    >
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-bold text-gray-800">{label}</span>
+        <span className="block text-xs text-gray-500">{hint}</span>
+      </span>
+      <span className={`relative h-7 w-12 shrink-0 rounded-full transition ${checked ? 'bg-green-500' : 'bg-gray-300'}`} aria-hidden>
+        <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${checked ? 'left-6' : 'left-1'}`} />
+      </span>
+    </button>
+  );
+}
 
 export default BusinessInfoForm;

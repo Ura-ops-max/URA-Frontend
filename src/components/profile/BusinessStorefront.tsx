@@ -182,7 +182,10 @@ export default function BusinessStorefront({
   const productCount = counts.products ?? 0;
   const today = todayStatus(business.operatingHours);
   const phone: string | undefined = business.contact?.phone;
-  const address: string | undefined = business.address?.fullAddress;
+  // Street only when the shop has a store and chose to show it; otherwise
+  // area, city and state. Never the home address.
+  const address: string | undefined =
+    business.publicLocation?.street ?? business.publicLocation?.text ?? undefined;
 
   const iconBtn =
     'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-gray-600 ring-1 ring-gray-200 transition hover:bg-gray-50 hover:text-gray-900 active:scale-95 disabled:opacity-60';

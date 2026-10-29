@@ -174,6 +174,8 @@ export const baseRoutePaths = [
   // backend's RESERVED_SLUGS list is the actual guard against a business
   // claiming one of those names as its slug.
   { path: '/:businessSlug', element: <BusinessPage /> },
+  // A shop's product: ura.com.ng/<slug>/p/<productId>-<name> (built for Google too).
+  { path: '/:businessSlug/p/:productRef', element: <ProductDetailsPage /> },
 ];
 
 // --- Utility ---

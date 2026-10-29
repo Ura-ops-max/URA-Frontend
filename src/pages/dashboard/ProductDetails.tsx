@@ -27,12 +27,15 @@ import { categoryColor } from '@/lib/category-colors';
 import { EditItemModal } from '@/components/feed/EditItemModal';
 import ProductImage from '@/components/product/ProductImage';
 import { visibleDescription } from '@/lib/product-placeholder';
+import { productIdFromRef } from '@/lib/page-data';
 
 /** True when a media URL points to a video file rather than an image. */
 const isVideoUrl = (u?: string) => !!u && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(u);
 
 const ProductDetailsPage = () => {
-  const { productId } = useParams();
+  // /dashboard/product/:productId, or the public /:businessSlug/p/:productRef.
+  const params = useParams();
+  const productId = params.productId ?? productIdFromRef(params.productRef);
   const navigate = useNavigate();
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const { data, isLoading, error } = useSingleProduct(productId!);

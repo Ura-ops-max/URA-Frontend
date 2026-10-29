@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import API from '@/lib/axios-client';
+import { initialProductData } from '@/lib/page-data';
 
 export const useSingleProduct = (productId: string) => {
   return useQuery({
@@ -11,6 +12,9 @@ export const useSingleProduct = (productId: string) => {
       return response.data;
     },
     enabled: !!productId,
+    // A built product page already has the data: show it now, refresh later.
+    initialData: () => initialProductData(productId),
+    initialDataUpdatedAt: 0,
   });
 };
 

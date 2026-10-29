@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import GoogleReadyBar from '@/components/seo/GoogleReadyBar';
 import GuestWelcomeCard from '@/components/dashboard/GuestWelcomeCard';
 import { AuthPromptModal } from '@/components/shared/AuthPromptModel';
 import { useAuthContext } from '@/context/auth-provider';
@@ -128,6 +129,7 @@ const Dashboard = () => {
       <div className="flex flex-col h-screen overflow-hidden">
         {/* ShareBox stays at the top */}
         <div className="flex-shrink-0 py-4 lg:p-4">
+          <GoogleReadyBar />
           <ShareBox onRequireAuth={isGuest ? askToSignIn : undefined} />
         </div>
 

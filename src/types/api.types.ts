@@ -67,6 +67,16 @@ export type BusinessType = {
   businessName: string;
   /** URL-safe handle for the public page: ura.com.ng/<slug> */
   slug?: string;
+  /** Neighbourhood, e.g. "Ora East" (optional). */
+  area?: string;
+  /** Customers can visit a shop (default false). */
+  hasPhysicalStore?: boolean;
+  /** Show the street address (needs hasPhysicalStore too). */
+  showStreetAddress?: boolean;
+  /** Let Google list the shop page (default true). */
+  showOnGoogle?: boolean;
+  /** What the public sees: area, city, state; street only when allowed. */
+  publicLocation?: { area: string | null; city: string | null; state: string | null; street: string | null; text: string | null };
   about: string;
   category: string;
   businessLogo: string;

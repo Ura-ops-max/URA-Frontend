@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /auth/
+Disallow: /payment-complete
+Disallow: /payments/
+Disallow: /checkout
+Disallow: /cart
+Disallow: /wallet
+Disallow: /orders
+Disallow: /chat
+Disallow: /api/
 
 Sitemap: https://www.ura.com.ng/sitemap.xml

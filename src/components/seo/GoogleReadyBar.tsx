@@ -67,7 +67,12 @@ export default function GoogleReadyBar() {
         <p className="min-w-0 flex-1">
           Google ready.{' '}
           {shop.url && (
-            <a href={shop.url} target="_blank" rel="noopener noreferrer" className="font-bold underline">
+            <a
+              href={shop.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center font-bold underline"
+            >
               View your shop page
             </a>
           )}

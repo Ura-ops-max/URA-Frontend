@@ -20,6 +20,7 @@ const PostDetail = lazy(() => import('@/pages/public/PostDetail'));
 const ProductsPage = lazy(() => import('@/pages/public/Products'));
 const TermsOfService = lazy(() => import('@/pages/public/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('@/pages/public/PrivacyPolicy'));
+const DeleteAccount = lazy(() => import('@/pages/public/DeleteAccount'));
 const FAQ = lazy(() => import('@/pages/public/FAQ'));
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const SettingsPage = lazy(() => import('@/pages/dashboard/Settings'));
@@ -159,6 +160,8 @@ export const baseRoutePaths = [
   { path: BASE_ROUTE.CONTACT, element: <ContactPage /> },
   { path: BASE_ROUTE.TERMS, element: <TermsOfService /> },
   { path: BASE_ROUTE.PRIVACY, element: <PrivacyPolicy /> },
+  // Public: linked from the Google Play listing as the account deletion URL.
+  { path: BASE_ROUTE.DELETE_ACCOUNT, element: <DeleteAccount /> },
   { path: BASE_ROUTE.FAQ, element: <FAQ /> },
   // Public post permalink so shared links resolve (and work for logged-out users).
   { path: '/posts/:id', element: <PostDetail /> },

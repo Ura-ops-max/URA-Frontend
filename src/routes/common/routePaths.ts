@@ -41,6 +41,7 @@ export const BASE_ROUTE = {
   CONTACT: '/contact',
   TERMS: '/terms',
   PRIVACY: '/privacy',
+  DELETE_ACCOUNT: '/delete-account',
   FAQ: '/faq',
   INVITE_URL: '/invite/workspace/:inviteCode/join',
   PAYLUK_PAYMENT_COMPLETE: '/payments/complete',

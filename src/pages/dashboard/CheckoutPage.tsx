@@ -105,11 +105,24 @@ const CheckoutPage = () => {
     });
   }, [user, business, reset]);
 
-  // Live Fez delivery quote for the selected destination state.
+  // Live delivery quote. The server picks the courier for this route: Chowdeck
+  // for a same-city route it serves, otherwise Fez.
   const selectedState = watch('state');
+  const typedCity = watch('city');
+  const typedAddress = watch('fullAddress');
   const [deliveryFee, setDeliveryFee] = useState<number | null>(null);
   const [deliveryLoading, setDeliveryLoading] = useState(false);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
+  const [courierNote, setCourierNote] = useState<string | null>(null);
+  // City and address are typed, so quote once the buyer pauses (not every key).
+  const [quotePlace, setQuotePlace] = useState({ city: '', fullAddress: '' });
+  useEffect(() => {
+    const t = setTimeout(
+      () => setQuotePlace({ city: (typedCity || '').trim(), fullAddress: (typedAddress || '').trim() }),
+      600,
+    );
+    return () => clearTimeout(t);
+  }, [typedCity, typedAddress]);
 
   // The seller is resolved from the product — the backend reads their business
   // profile address to use as the Fez pickup state.
@@ -129,6 +142,7 @@ const CheckoutPage = () => {
     setDeliveryLoading(true);
     setDeliveryError(null);
     setDeliveryFee(null);
+    setCourierNote(null);
 
     // Hard safety net: never let the row hang on "Calculating…" — if the quote
     // hasn't resolved in 15s, show an error instead.
@@ -139,12 +153,20 @@ const CheckoutPage = () => {
       setDeliveryError('Delivery quote timed out. Please try again.');
     }, 15000);
 
-    getDeliveryCost({ state: selectedState, productId: firstProductId })
+    getDeliveryCost({
+      state: selectedState,
+      ...(quotePlace.city ? { city: quotePlace.city } : {}),
+      ...(quotePlace.fullAddress ? { fullAddress: quotePlace.fullAddress } : {}),
+      productId: firstProductId,
+    })
       .then((quote) => {
         if (!active) return;
         const fee = quote?.totalCost ?? quote?.cost;
         if (fee != null && fee > 0) {
           setDeliveryFee(fee);
+          setCourierNote(
+            quote.providerName ? `Delivered by ${quote.providerName}${quote.eta ? ` · ${quote.eta}` : ''}` : null,
+          );
         } else {
           setDeliveryError(`Delivery to ${selectedState} isn't available right now.`);
         }
@@ -163,7 +185,7 @@ const CheckoutPage = () => {
       active = false;
       clearTimeout(timeout);
     };
-  }, [selectedState, firstProductId]);
+  }, [selectedState, quotePlace, firstProductId]);
 
   // Every Payluk payment is an escrow, and Payluk's minimum escrow is ₦1,000.
   const belowMinimum = totalPrice > 0 && totalPrice < MIN_ORDER_AMOUNT;
@@ -538,6 +560,7 @@ const CheckoutPage = () => {
           deliveryFee={deliveryFee}
           deliveryLoading={deliveryLoading}
           deliveryError={deliveryError}
+          courierNote={courierNote}
           businessId={sellerBusinessId}
           onSelect={handleDeliveryChoice}
           onClose={() => setShowDeliveryModal(false)}

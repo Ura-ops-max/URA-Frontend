@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { orderAPI } from '@/lib/api';
-import API from '@/lib/axios-client';
 import {
   paymentsApi,
   paymentErrorMessage,
@@ -22,20 +21,15 @@ import OrderActionButtons from '@/components/orders/OrderActionButtons';
 import WhatsAppButton from '@/components/orders/WhatsAppButton';
 import { sellerBringingMessage, sellerReadyMessage } from '@/lib/whatsapp';
 import SendOrderToShop from '@/components/orders/SendOrderToShop';
+import {
+  COURIER_NAME,
+  DELIVERY_STATUS_LABEL,
+  trackDelivery,
+  type CourierProvider,
+  type DeliveryStatus,
+  type DeliveryTracking,
+} from '@/lib/delivery.service';
 import { NO_ACTIONS, NORMAL_PAYMENT_NOTE, type OrderActions } from '@/lib/order-lists';
-
-/** Best-effort one-line summary of a Fez tracking response. */
-const summariseTracking = (data: any): string => {
-  const d = data?.data ?? data;
-  const candidates = [
-    d?.order?.orderStatus,
-    d?.orderStatus,
-    d?.status,
-    Array.isArray(d?.history) ? d.history[d.history.length - 1]?.status : undefined,
-  ];
-  const hit = candidates.find((c) => typeof c === 'string' && c.trim());
-  return hit ?? 'No update from the courier yet.';
-};
 
 const OrderDetailsPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
@@ -44,7 +38,9 @@ const OrderDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [tracking, setTracking] = useState<string | null>(null);
+  const [tracking, setTracking] = useState<DeliveryTracking | null>(null);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [trackingError, setTrackingError] = useState(false);
   const [dispute, setDispute] = useState<DisputeEntry[] | null>(null);
   // Which buttons apply: decided by the server, same as in the order lists.
   const [actions, setActions] = useState<OrderActions>(NO_ACTIONS);
@@ -71,6 +67,27 @@ const OrderDetailsPage = () => {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Live courier status while the order is on its way with Fez or Chowdeck.
+  const trackingNumber: string | undefined = order?.trackingNumber;
+  const withCourier =
+    order?.fulfilment === 'fez' || order?.fulfilment === 'chowdeck' || (!order?.fulfilment && !!trackingNumber);
+  const onTheWay = order?.status === 'shipped';
+  const loadTracking = useCallback(async () => {
+    if (!trackingNumber) return;
+    setTrackingLoading(true);
+    setTrackingError(false);
+    try {
+      setTracking(await trackDelivery(trackingNumber));
+    } catch {
+      setTrackingError(true);
+    } finally {
+      setTrackingLoading(false);
+    }
+  }, [trackingNumber]);
+  useEffect(() => {
+    if (trackingNumber && withCourier && onTheWay) loadTracking();
+  }, [trackingNumber, withCourier, onTheWay, loadTracking]);
 
   // Show the dispute conversation when there is one.
   const disputeStatus: string | undefined = order?.disputeStatus;
@@ -126,20 +143,19 @@ const OrderDetailsPage = () => {
     { key: 'done', label: 'Completed', done: order.status === 'delivered' },
   ];
 
-  const checkTracking = async () => {
-    setBusy(true);
-    try {
-      const { data } = await API.get(`/delivery/track/${encodeURIComponent(order.trackingNumber)}`);
-      setTracking(summariseTracking(data));
-    } catch {
-      setTracking('Could not reach the courier right now. Try again shortly.');
-    } finally {
-      setBusy(false);
-    }
-  };
+  const courier: CourierProvider | null =
+    order.deliveryProvider ?? (order.fulfilment === 'chowdeck' || order.fulfilment === 'fez' ? order.fulfilment : null);
+  const deliveryLabel: string | null =
+    tracking?.statusLabel ??
+    (order.deliveryStatus ? DELIVERY_STATUS_LABEL[order.deliveryStatus as DeliveryStatus] ?? null : null);
+  const trackingUrl: string | null = tracking?.trackingUrl ?? order.trackingUrl ?? null;
+  const rider = tracking?.rider;
+  // The server only ever sends the PIN to the buyer; check the role too.
+  const deliveryPin: number | undefined = role === 'buyer' ? (tracking?.deliveryPin ?? order.deliveryPin) : undefined;
 
   // Buyer: pay an order that is still unpaid.
   const payNow = async () => {
+    if (busy) return; // a second click while the first payment is starting
     setBusy(true);
     try {
       setPayment(await paymentsApi.start(order._id));
@@ -239,18 +255,7 @@ const OrderDetailsPage = () => {
             onChanged={load}
             onPay={payNow}
           />
-          {order.trackingNumber && (
-            <Button variant="outline" onClick={checkTracking} disabled={busy} className="h-11 w-full sm:h-9 sm:w-auto rounded-xl font-bold">
-              <Truck size={16} className="mr-1" /> Track delivery
-            </Button>
-          )}
         </div>
-        {order.trackingNumber && (
-          <p className="mt-3 text-sm text-gray-600">
-            Tracking number: <span className="font-bold">{order.trackingNumber}</span>
-            {tracking && <span className="block mt-1">Latest update: {tracking}</span>}
-          </p>
-        )}
         {moneyNote && (
           <p className="mt-3 flex items-start gap-1.5 text-xs text-gray-600">
             <ShieldCheck size={14} className="mt-px shrink-0 text-green-600" />
@@ -328,6 +333,69 @@ const OrderDetailsPage = () => {
             {shop?.businessName}
             {shop?.address?.fullAddress ? `, ${shop.address.fullAddress}` : ''}
           </p>
+        )}
+        {isDelivery && (courier || trackingNumber) && (
+          <div className="mt-3 space-y-2 rounded-2xl bg-gray-50 p-4">
+            <p className="flex items-center gap-2 font-bold text-gray-900">
+              <Truck size={16} className="shrink-0 text-orange-500" />
+              <span className="flex-1">{courier ? `Delivered by ${COURIER_NAME[courier]}` : 'With a courier'}</span>
+              {trackingLoading && <Loader2 size={14} className="animate-spin text-orange-500" />}
+            </p>
+            {deliveryLabel ? (
+              <p>
+                Status: <span className="font-bold">{deliveryLabel}</span>
+              </p>
+            ) : trackingError ? (
+              <p className="text-xs text-gray-500">Could not reach the courier right now. Try again shortly.</p>
+            ) : null}
+            {(rider?.name || rider?.phone) && (
+              <p className="flex items-center gap-2">
+                <Phone size={16} className="shrink-0" />
+                Rider: {rider?.name}
+                {rider?.phone && (
+                  <a href={`tel:${rider.phone}`} className="font-bold text-orange-600">
+                    {rider.phone}
+                  </a>
+                )}
+              </p>
+            )}
+            {trackingNumber && (
+              <p className="text-xs text-gray-500">
+                Tracking number: <span className="font-bold">{trackingNumber}</span>
+              </p>
+            )}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {trackingUrl && (
+                <a
+                  href={trackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-9 items-center rounded-xl bg-orange-500 px-4 text-sm font-bold text-white hover:bg-orange-600"
+                >
+                  <Truck size={16} className="mr-1" /> Track live
+                </a>
+              )}
+              {trackingNumber && withCourier && (
+                <Button
+                  variant="outline"
+                  onClick={loadTracking}
+                  disabled={trackingLoading}
+                  className="h-9 rounded-xl font-bold"
+                >
+                  Refresh status
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+        {deliveryPin && (
+          <div className="mt-3 rounded-2xl border border-orange-300 p-4 text-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Delivery PIN</p>
+            <p className="text-3xl font-black tracking-[0.4em] text-gray-900">{deliveryPin}</p>
+            <p className="mt-1 text-xs text-gray-500">
+              Give this PIN to the rider only when you have your items. Don&apos;t share it with anyone else.
+            </p>
+          </div>
         )}
         {order.shippingAddress?.phone && role === 'seller' && (
           <p className="flex items-center gap-2"><Phone size={16} /> {order.shippingAddress.phone}</p>

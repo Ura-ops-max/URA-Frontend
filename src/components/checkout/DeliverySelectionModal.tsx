@@ -7,10 +7,12 @@ type PayMode = 'normal' | 'escrow';
 interface DeliverySelectionModalProps {
   /** Product subtotal (no delivery). */
   productTotal: number;
-  /** Fez delivery fee for the chosen state, or null if unavailable/not loaded. */
+  /** Delivery fee for the route (Fez or Chowdeck), or null if unavailable/not loaded. */
   deliveryFee: number | null;
   deliveryLoading: boolean;
   deliveryError: string | null;
+  /** e.g. "Delivered by Chowdeck · Same day", from the quote. */
+  courierNote?: string | null;
   /** Shop this order is with — used to fetch its checkout ad. */
   businessId?: string;
   /** Called with the buyer's choices: delivery method + payment type. */
@@ -30,6 +32,7 @@ export default function DeliverySelectionModal({
   deliveryFee,
   deliveryLoading,
   deliveryError,
+  courierNote,
   businessId,
   onSelect,
   onClose,
@@ -86,9 +89,12 @@ export default function DeliverySelectionModal({
                     <Loader2 className="h-3 w-3 animate-spin" /> Getting delivery fee…
                   </span>
                 ) : canDeliver ? (
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {formatNaira(productTotal)} + {formatNaira(deliveryFee!)} delivery
-                  </p>
+                  <>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {formatNaira(productTotal)} + {formatNaira(deliveryFee!)} delivery
+                    </p>
+                    {courierNote && <p className="text-xs font-semibold text-orange-600 mt-0.5">{courierNote}</p>}
+                  </>
                 ) : (
                   <p className="text-xs text-amber-600 mt-0.5">
                     {deliveryError || 'Select your state on the previous screen first.'}

@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "044acef2-9193-441d-becf-7232c894ed95"
+      }
+    },
+    "android": {
+      "package": "com.chiefboye.frontend"
+    }
+  }
+}
